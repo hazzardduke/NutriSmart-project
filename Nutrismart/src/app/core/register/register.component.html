@@ -1,0 +1,141 @@
+<!-- src/app/core/register/register.component.html -->
+<div class="register-wrapper">
+  <div class="register-card">
+    <h2>Crear cuenta</h2>
+    <p>Por favor completa el siguiente formulario</p>
+
+    <form #registroForm="ngForm" (ngSubmit)="registrar(registroForm)" novalidate>
+
+      <!-- CÉDULA -->
+      <label for="cedula">Cédula</label>
+      <input
+        type="text"
+        id="cedula"
+        name="cedula"
+        [(ngModel)]="form.cedula"
+        #cedula="ngModel"
+        required
+    
+      />
+      <div *ngIf="cedula.invalid && cedula.touched" class="error">
+        <small *ngIf="cedula.errors?.['required']">La cédula es obligatoria.</small>
+        <small *ngIf="cedula.errors?.['pattern']">Debe tener 9 dígitos numéricos.</small>
+      </div>
+
+      <!-- NOMBRE -->
+      <label for="nombre">Nombre</label>
+      <input
+        type="text"
+        id="nombre"
+        name="nombre"
+        [(ngModel)]="form.nombre"
+        #nombre="ngModel"
+        required
+      />
+      <div *ngIf="nombre.invalid && nombre.touched" class="error">
+        <small>El nombre es obligatorio.</small>
+      </div>
+
+      <!-- APELLIDOS -->
+      <label for="apellidos">Apellidos</label>
+      <input
+        type="text"
+        id="apellidos"
+        name="apellidos"
+        [(ngModel)]="form.apellidos"
+        #apellidos="ngModel"
+        required
+      />
+      <div *ngIf="apellidos.invalid && apellidos.touched" class="error">
+        <small>Los apellidos son obligatorios.</small>
+      </div>
+
+      <!-- DIRECCIÓN -->
+      <label for="direccion">Dirección</label>
+      <input
+        type="text"
+        id="direccion"
+        name="direccion"
+        [(ngModel)]="form.direccion"
+        #direccion="ngModel"
+        required
+      />
+      <div *ngIf="direccion.invalid && direccion.touched" class="error">
+        <small>La dirección es obligatoria.</small>
+      </div>
+
+      <!-- FECHA NACIMIENTO -->
+      <label for="fechaNacimiento">Fecha de nacimiento</label>
+      <input
+        type="date"
+        id="fechaNacimiento"
+        name="fechaNacimiento"
+        [(ngModel)]="form.fechaNacimiento"
+        #fechaNacimiento="ngModel"
+        required
+      />
+      <div *ngIf="fechaNacimiento.invalid && fechaNacimiento.touched" class="error">
+        <small>La fecha de nacimiento es obligatoria.</small>
+      </div>
+
+      <!-- TELÉFONO -->
+      <label for="telefono">Teléfono</label>
+      <input
+        type="text"
+        id="telefono"
+        name="telefono"
+        [(ngModel)]="form.telefono"
+        #telefono="ngModel"
+        required
+     
+      />
+      <div *ngIf="telefono.invalid && telefono.touched" class="error">
+        <small *ngIf="telefono.errors?.['required']">El teléfono es obligatorio.</small>
+        <small *ngIf="telefono.errors?.['pattern']">Debe tener 8 dígitos numéricos.</small>
+      </div>
+
+      <!-- CORREO -->
+      <label for="correo">Correo electrónico</label>
+      <input
+        type="email"
+        id="correo"
+        name="correo"
+        [(ngModel)]="form.correo"
+        #correo="ngModel"
+        required
+        email
+      />
+      <div *ngIf="correo.invalid && correo.touched" class="error">
+        <small *ngIf="correo.errors?.['required']">El correo es obligatorio.</small>
+        <small *ngIf="correo.errors?.['email']">Formato de correo inválido.</small>
+      </div>
+
+      <!-- CONTRASEÑA -->
+      <label for="password">Contraseña</label>
+      <input
+        type="password"
+        id="password"
+        name="password"
+        [(ngModel)]="form.password"
+        #password="ngModel"
+        required
+        minlength="8"
+      />
+      <div *ngIf="password.invalid && password.touched" class="error">
+        <small *ngIf="password.errors?.['required']">La contraseña es obligatoria.</small>
+        <small *ngIf="password.errors?.['minlength']">Mínimo 8 caracteres.</small>
+      </div>
+
+      <button
+        type="submit"
+        class="btn-register"
+        [disabled]="registroForm.invalid"
+      >
+        Registrarse
+      </button>
+    </form>
+
+    <div *ngIf="mensaje" class="mensaje">{{ mensaje }}</div>
+    <div *ngIf="error" class="error">{{ error }}</div>
+  </div>
+</div>
