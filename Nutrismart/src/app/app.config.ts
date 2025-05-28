@@ -1,6 +1,6 @@
 // src/app/app.config.ts
 import { ApplicationConfig, provideZoneChangeDetection } from '@angular/core';
-import { provideRouter }                                from '@angular/router';
+import { provideRouter, withComponentInputBinding }                                from '@angular/router';
 import { provideHttpClient }                            from '@angular/common/http';
 
 import { provideFirebaseApp } from '@angular/fire/app';
@@ -21,7 +21,7 @@ import { firebaseConfig } from '../environments/environment';
 export const appConfig: ApplicationConfig = {
   providers: [
     provideZoneChangeDetection({ eventCoalescing: true }),
-    provideRouter(routes),
+    provideRouter(routes, withComponentInputBinding()),
     provideHttpClient(),
 
     // Inicializa Firebase

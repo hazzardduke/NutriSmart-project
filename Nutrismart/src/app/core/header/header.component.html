@@ -1,0 +1,53 @@
+<header class="header">
+  <div class="header-left">
+    <div class="breadcrumb">
+      <h1>Dashboard</h1>
+      <span class="current-path">Home / Dashboard</span>
+    </div>
+  </div>
+
+  <div class="header-right">
+    <div class="search-box">
+      <i class="fas fa-search"></i>
+      <input type="text" placeholder="Buscar...">
+    </div>
+
+    <div class="notifications">
+      <button class="notification-btn">
+        <i class="fas fa-bell"></i>
+        <span class="notification-badge">3</span>
+      </button>
+    </div>
+    
+    <div class="user-profile" (click)="toggleUserMenu()">
+      <img src="assets/images/logo.jpeg" alt="User Avatar" class="avatar">
+      <div class="user-info">
+        <span class="user-name">John Doe</span>
+        <span class="user-role">Cliente</span>
+      </div>
+      <i class="fas fa-chevron-down"></i>
+    
+      <div class="user-menu" [class.active]="isUserMenuOpen">
+        <a routerLink="/profile" class="menu-item">
+          <i class="fas fa-user"></i>
+          Mi Perfil
+        </a>
+        <a routerLink="/settings" class="menu-item">
+          <i class="fas fa-cog"></i>
+          Configuración
+        </a>
+        <a routerLink="/loyaltycard" class="menu-item">
+          <i class="fas fa-star"></i>
+          Tarjeta de Fidelidad
+        </a>
+        <div class="menu-divider"></div>
+        <a (click)="logout()" class="menu-item logout">
+          <i class="fas fa-sign-out-alt"></i>
+          Cerrar Sesión
+        </a>
+      </div>
+    </div>
+  </div>
+</header>
+
+  

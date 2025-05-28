@@ -1,0 +1,28 @@
+<div class="dashboard-container">
+  <h2>Dashboard de Cliente</h2>
+
+  <div class="card">
+    <h5>Progreso Nutricional</h5>
+    <p>Detalles del progreso...</p>
+  </div>
+
+  <div class="card">
+    <h5>Próximas Citas</h5>
+    <p>Citas programadas en los próximos 7 días: <strong>[Fecha y Hora]</strong></p>
+  </div>
+
+  <div class="card">
+    <h5>Recomendaciones Recientes</h5>
+    <p>Consulta las últimas recomendaciones de tu nutricionista.</p>
+    <a href="#" class="btn btn-outline-primary">Ver detalles</a>
+  </div>
+
+
+  <button class="chatbot-button" (click)="toggleChatbot()">
+    <img src="assets/images/bot-icon.png" alt="Chatbot">
+  </button>
+
+  <!-- <div *ngIf="chatbotVisible" class="chatbot-container">
+    <app-chatbot (closeChatbot)="toggleChatbot()"></app-chatbot>
+  </div> -->
+</div>

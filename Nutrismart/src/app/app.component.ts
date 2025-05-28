@@ -1,12 +1,18 @@
+// src/app/app.component.ts
 import { Component } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import { AuthService } from './services/auth.service';
+import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
+import { SidebarComponent } from './core/sidebar/sidebar.component';
+import { HeaderComponent } from './core/header/header.component';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet],
+  standalone: true,
+  imports: [ CommonModule, RouterModule, SidebarComponent, HeaderComponent  ],
   templateUrl: './app.component.html',
-  styleUrl: './app.component.scss'
+  styleUrls: ['./app.component.scss']
 })
 export class AppComponent {
-  title = 'Nutrismart';
+  constructor(public auth: AuthService) {}
 }

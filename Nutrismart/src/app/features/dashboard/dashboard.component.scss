@@ -1,0 +1,82 @@
+.dashboard-container {
+  padding: 2rem;
+  background-color: #f8f9fa;
+
+  h2 {
+    color: #3e372d;
+    margin-bottom: 1.5rem;
+  }
+
+  .card {
+    background-color: #fff;
+    border: 1px solid #dee2e6;
+    border-radius: 10px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+
+    h5 {
+      color: #3e372d;
+      margin-bottom: 0.5rem;
+    }
+
+    p {
+      color: #6c757d;
+    }
+  }
+
+  .btn-outline-primary {
+    color: #a1c037;
+    border-color: #a1c037;
+    transition: background-color 0.3s ease, color 0.3s ease;
+
+    &:hover {
+      background-color: #a1c037;
+      color: #fff;
+    }
+  }
+
+  .chatbot-button {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    z-index: 1000;
+
+    img {
+      width: 60px;
+      height: 60px;
+      transition: transform 0.3s ease, opacity 0.3s ease;
+
+      &:hover {
+        transform: scale(1.1);
+        opacity: 0.8;
+      }
+    }
+  }
+
+  @media (max-width: 768px) {
+    .chatbot-button {
+      bottom: 15px;
+    }
+
+    .chatbot-button img {
+      width: 50px;
+      height: 50px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .chatbot-button {
+      bottom: 10px;
+      right: 10px;
+    }
+
+    .chatbot-button img {
+      width: 40px;
+      height: 40px;
+    }
+  }
+}

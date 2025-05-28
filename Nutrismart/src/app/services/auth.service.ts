@@ -41,6 +41,10 @@ export class AuthService {
     map(profile => profile ?? null)
   );
 
+  isAuthenticated$: Observable<boolean> = this.user$.pipe(
+    map(user => !!user)
+  );
+
   register(data: Omit<UserProfile,'uid'> & { password: string }): Observable<void> {
     const { password, ...profile } = data;
     return from(createUserWithEmailAndPassword(this.auth, data.correo, password)).pipe(
