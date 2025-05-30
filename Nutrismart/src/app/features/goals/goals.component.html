@@ -1,0 +1,125 @@
+<div class="container p-4">
+  <h1 class="text-2xl font-bold mb-4">Gestión de Objetivos Nutricionales</h1>
+  <hr /><br />
+
+  <!-- Formulario de nuevo objetivo -->
+  <div class="form-section">
+    <form (ngSubmit)="guardarObjetivo()">
+      <div class="objetivo">
+        <h2 class="section-title">Definir Objetivo Nutricional</h2>
+        <div>
+          <label for="tipo">Tipo de Objetivo</label>
+          <select id="tipo" class="input" [(ngModel)]="nuevoObjetivo.tipo" name="tipo" required>
+            <option value="">-- Seleccionar --</option>
+            <option>Pérdida de peso</option>
+            <option>Ganancia muscular</option>
+            <option>Aumentar porcentaje de agua</option>
+            <option>Mantenimiento</option>
+            <option>Reducir porcentaje de grasa</option>
+            <option>Otro</option>
+          </select>
+        </div>
+        <div>
+          <label for="meta">Meta (porcentaje o cantidad)</label>
+          <input id="meta" class="input" [(ngModel)]="nuevoObjetivo.meta" name="meta" required />
+        </div>
+        <div>
+          <label for="fecha">Fecha Estimada</label>
+          <input id="fecha" type="date" class="input" [(ngModel)]="nuevoObjetivo.fecha" name="fecha" required />
+        </div>
+        <div>
+          <label>&nbsp;</label>
+          <button type="submit" class="btn-save">Guardar Objetivo</button>
+        </div>
+        <div *ngIf="mensajeService" class="mensaje">{{ mensajeService }}</div>
+      </div>
+    </form>
+  </div>
+
+  <hr /><br />
+
+  <!-- Tabs -->
+  <div class="form-section">
+    <div class="objetivo">
+      <h2 class="section-title">Mis Objetivos</h2>
+      <div class="tabs">
+        <button [class.active]="tabInterno==='objetivos'" (click)="tabInterno='objetivos'">Objetivos</button>
+        <button [class.active]="tabInterno==='recomendaciones'" (click)="tabInterno='recomendaciones'">Recomendaciones</button>
+      </div>
+
+      <!-- Listado de objetivos -->
+      <div *ngIf="tabInterno==='objetivos'">
+        <div class="objetivo" *ngFor="let obj of objetivos">
+          <h4>{{ obj.tipo }}</h4>
+          <p>{{ obj.meta }}</p>
+          <p><strong>Fecha meta:</strong> {{ obj.fecha }}</p>
+          <p><strong>Progreso:</strong> {{ obj.progreso }}%</p>
+
+          <div class="progress-wrapper">
+            <div class="progress-bar" [style.width.%]="obj.progreso"></div>
+            <div class="thumb" [style.left.%]="obj.progreso"></div>
+            <span class="progress-text">{{ obj.progreso }}%</span>
+          </div>
+          <input type="range"
+                 min="0" max="100"
+                 [value]="obj.progreso"
+                 (input)="actualizarProgreso(obj,$event)"
+                 class="range-hidden" />
+
+          <button class="btn-action" (click)="eliminarObjetivo(obj)">Eliminar</button>
+        </div>
+      </div>
+
+      <!-- Recomendaciones estáticas -->
+      <div *ngIf="tabInterno==='recomendaciones'">
+        <div class="recomendacion" *ngFor="let rec of recomendaciones">
+          <p><strong>{{ rec.fecha }}</strong>: {{ rec.resumen }}</p>
+          <button class="btn btn-sm btn-primary" (click)="abrirModal(rec)">Ver Detalles</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de recomendación -->
+  <div class="modal-bg" *ngIf="selectedRecomendacion">
+    <div class="detalles">
+      <h4>Recomendación del {{ selectedRecomendacion.fecha }}</h4>
+      <p>{{ selectedRecomendacion.comentario }}</p>
+      <button class="btn btn-danger mt-3" (click)="cerrarModal()">Cerrar</button>
+    </div>
+  </div>
+
+  <hr /><br />
+
+  <!-- Planes nutricionales existentes / Exportar PDF -->
+  <div class="objetivo">
+    <h2 class="section-title">Planes Nutricionales Existentes</h2>
+    <table class="plans-table">
+      <thead>
+        <tr>
+          <th>Cliente</th><th>Fecha de Creación</th><th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>John Doe</td>
+          <td>2025-04-04</td>
+          <td>
+            <button class="btn-action" (click)="verDetalles=true">Ver Detalles</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div *ngIf="verDetalles" class="modal-overlay">
+    <div class="modal-content">
+      <span class="close" (click)="verDetalles=false">&times;</span>
+      <h2 class="section-title">Detalles del Plan Nutricional</h2>
+      <div id="pdf-content">
+        <!-- tu tabla de plan aquí -->
+      </div>
+      <button class="btn-export mt-4" (click)="exportarPDF()">Exportar como PDF</button>
+    </div>
+  </div>
+</div>

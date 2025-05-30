@@ -1,0 +1,150 @@
+.citas-container {
+    max-width: 800px;
+    margin: 2rem auto;
+    padding: 2rem;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+    font-family: 'Roboto', sans-serif;
+    text-align: center;
+  
+    .titulo-citas {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #3e372d;
+      font-size: 1.8rem;
+      margin-bottom: 2rem;
+  
+      i {
+        color: #a1c037;
+        margin-right: 0.5rem;
+        font-size: 1.5rem;
+      }
+    }
+  
+    .form-cita {
+      .form-group {
+        margin-bottom: 1.5rem;
+        text-align: left;
+  
+        label {
+          font-weight: 600;
+          color: #3e372d;
+          margin-bottom: 0.5rem;
+          display: block;
+        }
+  
+        input {
+          width: 100%;
+          padding: 0.6rem;
+          border: 1px solid #ccc;
+          border-radius: 6px;
+        }
+      }
+  
+      .horarios {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.7rem;
+        justify-content: center;
+        margin-top: 1rem;
+  
+        .btn-horario {
+          padding: 0.5rem 1rem;
+          border: 1px solid #ccc;
+          border-radius: 8px;
+          background-color: #f7f7f7;
+          color: #3e372d;
+          cursor: pointer;
+          transition: 0.3s ease;
+  
+          &.selected {
+            background-color: #a1c037;
+            color: white;
+            border-color: #a1c037;
+          }
+  
+          &:disabled {
+            background-color: #ccc;
+            color: #888;
+            cursor: not-allowed;
+          }
+  
+          &:hover:not(:disabled):not(.selected) {
+            background-color: #eaeaea;
+          }
+        }
+      }
+  
+      .acciones {
+        display: flex;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 1rem;
+        margin-top: 2rem;
+  
+        .btn-accion {
+          padding: 0.7rem 2rem;
+          font-size: 1rem;
+          border: none;
+          border-radius: 8px;
+          font-weight: 500;
+          color: white;
+          cursor: pointer;
+          transition: 0.3s ease;
+  
+          &.confirm {
+            background-color: #a1c037;
+  
+            &:hover {
+              background-color: #8ca02e;
+            }
+          }
+  
+          &.cancel {
+            background-color: #e74c3c;
+  
+            &:hover {
+              background-color: #c0392b;
+            }
+          }
+        }
+      }
+    }
+  
+    .mensaje {
+      margin-top: 1.5rem;
+      font-weight: 600;
+      color: #3e372d;
+    }
+  
+    .nota {
+      margin-top: 2rem;
+      font-size: 0.95rem;
+      color: #666;
+    }
+  
+    // 📱 Responsive
+    @media (max-width: 600px) {
+      padding: 1.5rem;
+  
+      .titulo-citas {
+        font-size: 1.5rem;
+  
+        i {
+          font-size: 1.3rem;
+        }
+      }
+  
+      .acciones {
+        flex-direction: column;
+        align-items: center;
+      }
+  
+      .btn-horario {
+        width: 100%;
+      }
+    }
+  }
+  

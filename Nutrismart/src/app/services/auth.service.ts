@@ -1,24 +1,18 @@
-// src/app/services/auth.service.ts
-import { Injectable, inject } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import {
   Auth,
-  authState,
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   signOut,
-  User
+  authState,
+  user
 } from '@angular/fire/auth';
-import {
-  Firestore,
-  docData,
-  setDoc,
-  doc
-} from '@angular/fire/firestore';
-import { Observable, of, from } from 'rxjs';
-import { switchMap, map }       from 'rxjs/operators';
+import { Firestore, doc, setDoc } from '@angular/fire/firestore';
+import type { User, UserCredential } from 'firebase/auth';
+import { Observable, from, of } from 'rxjs';
+import { map, switchMap } from 'rxjs/operators';
 
-export interface UserProfile {
-  uid: string;
+export interface NewUserProfile {
   cedula: string;
   nombre: string;
   apellidos: string;
@@ -26,6 +20,7 @@ export interface UserProfile {
   fechaNacimiento: string;
   telefono: string;
   correo: string;
+  role: 'cliente' | 'admin';
 }
 
 @Injectable({ providedIn: 'root' })
@@ -33,35 +28,33 @@ export class AuthService {
   private auth = inject(Auth);
   private firestore = inject(Firestore);
 
-  user$: Observable<UserProfile | null> = authState(this.auth).pipe(
-    switchMap((user: User | null) => {
-      if (!user) return of(null);
-      return docData(doc(this.firestore, `users/${user.uid}`)) as Observable<UserProfile>;
-    }),
-    map(profile => profile ?? null)
+  user$: Observable<User|null> = user(this.auth);
+  isAuthenticated$: Observable<boolean> = authState(this.auth).pipe(map(u => !!u));
+
+  idTokenResult$ = authState(this.auth).pipe(
+    switchMap(u => u ? from(u.getIdTokenResult()) : of(null))
   );
 
-  isAuthenticated$: Observable<boolean> = this.user$.pipe(
-    map(user => !!user)
-  );
-
-  register(data: Omit<UserProfile,'uid'> & { password: string }): Observable<void> {
-    const { password, ...profile } = data;
-    return from(createUserWithEmailAndPassword(this.auth, data.correo, password)).pipe(
-      switchMap(cred =>
-        setDoc(doc(this.firestore, 'users', cred.user.uid), {
-          uid: cred.user.uid,
-          ...profile
-        })
-      )
-    );
+  login(email: string, password: string): Promise<void> {
+    return signInWithEmailAndPassword(this.auth, email, password).then(() => {});
   }
 
-  login(correo: string, password: string): Observable<void> {
-    return from(signInWithEmailAndPassword(this.auth, correo, password)).pipe(map(() => {}));
+  /** Ahora recibe todo el perfil y guarda en Auth **y** Firestore */
+  register(profile: NewUserProfile, plainPassword: string): Promise<void> {
+    return createUserWithEmailAndPassword(this.auth, profile.correo, plainPassword)
+      .then((cred: UserCredential) => {
+        // una vez creado en Auth, guardamos perfil en Firestore
+        const uid = cred.user.uid;
+        return setDoc(doc(this.firestore, 'users', uid), {
+          ...profile,
+          uid,
+          createdAt: new Date()
+        });
+      })
+      .then(() => {});
   }
 
-  logout(): Observable<void> {
-    return from(signOut(this.auth));
+  logout(): Promise<void> {
+    return signOut(this.auth);
   }
 }

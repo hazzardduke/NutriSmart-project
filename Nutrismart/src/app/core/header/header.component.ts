@@ -24,9 +24,10 @@ export class HeaderComponent {
   }
 
   logout() {
-    this.auth.logout().subscribe(() => {
-      this.isUserMenuOpen = false;
-      this.router.navigate(['/login']);
-    });
+    this.auth.logout()
+      .then(() => {
+        // redirige a login o muestra mensaje...
+      })
+      .catch((err: any) => console.error('Error al cerrar sesión', err));
   }
 }

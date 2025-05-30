@@ -1,0 +1,67 @@
+.expediente-container {
+  background-color: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  padding: 1.5rem;
+  margin-top: 2rem;
+
+  h2, h3 { color: #3e372d; }
+}
+
+.profile-picture-section {
+  .profile-picture {
+    width: 120px;
+    height: 120px;
+    object-fit: cover;
+    border-radius: 50%;
+    border: 2px solid #a1c037;
+  }
+  .picture-actions { margin-top: 0.5rem; }
+  .update-message { font-size: 0.9rem; }
+}
+
+.custom-input {
+  border: 2px solid #a1c037 !important;
+  border-radius: 5px !important;
+  font-size: 1rem;
+  padding: 0.5rem !important;
+  &:focus {
+    outline: none;
+    box-shadow: 0 0 5px rgba(161,192,55,0.5);
+  }
+}
+
+.error-message { color: #ff6600; font-size: 0.8rem; }
+
+.custom-btn {
+  background-color: #a1c037 !important;
+  border: none !important;
+  color: #fff !important;
+  transition: background-color 0.3s ease, transform 0.3s ease;
+  padding: 0.5rem 1rem;
+  border-radius: 5px !important;
+  &:hover {
+    background-color: #ff6600 !important;
+    transform: scale(1.03);
+  }
+}
+
+.secondary-btn {
+  background-color: #6c757d !important;
+  &:hover { background-color: #5a6268 !important; }
+}
+
+.save-section { .save-btn { padding: 0.75rem 2rem; font-size: 1rem; } }
+
+@media (max-width: 768px) {
+  .expediente-container { padding: 1rem; margin-top: 1rem; }
+  .profile-picture-section .profile-picture { width: 100px; height: 100px; }
+  .custom-input { font-size: 0.9rem; padding: 0.4rem !important; }
+  .custom-btn { padding: 0.5rem 0.75rem; font-size: 0.9rem; }
+}
+
+.form-group {
+  margin-bottom: 1.5rem;
+  label { display: block; margin-bottom: 0.5rem; }
+  .custom-input { margin-bottom: 0.5rem; }
+}

@@ -1,22 +1,18 @@
+<!-- app.component.html -->
 <ng-container *ngIf="auth.isAuthenticated$ | async; else loginTemplate">
-    <div class="wrapper">
-      <!-- Sidebar -->
-      <nav id="sidebar" class="sidebar">
-        <app-sidebar></app-sidebar>
-      </nav>
-  
-      <!-- Content -->
-      <div id="content" class="content">
-        <app-header></app-header>
-        <main class="main-content">
-          <router-outlet></router-outlet>
-        </main>
-      </div>
+  <div class="wrapper">
+    <nav id="sidebar" class="sidebar">
+      <app-sidebar></app-sidebar>
+    </nav>
+    <div id="content" class="content">
+      <app-header></app-header>
+      <main class="main-content">
+        <router-outlet></router-outlet>
+      </main>
     </div>
-  </ng-container>
-  
-  <ng-template #loginTemplate>
-    <!-- Aquí tus rutas públicas -->
-    <router-outlet></router-outlet>
-  </ng-template>
-  
+  </div>
+</ng-container>
+
+<ng-template #loginTemplate>
+  <router-outlet></router-outlet>
+</ng-template>

@@ -18,6 +18,9 @@ import { getDatabase }     from 'firebase/database';
 import { routes }         from './app.routes';
 import { firebaseConfig } from '../environments/environment';
 
+import { getStorage } from 'firebase/storage';
+import { provideStorage } from '@angular/fire/storage';
+
 export const appConfig: ApplicationConfig = {
   providers: [
     provideZoneChangeDetection({ eventCoalescing: true }),
@@ -33,5 +36,6 @@ export const appConfig: ApplicationConfig = {
     // Si también usas Firestore y RTDB:
     provideFirestore(() => getFirestore()),
     provideDatabase(() => getDatabase()),
+    provideStorage(()   => getStorage()),
   ]
 };

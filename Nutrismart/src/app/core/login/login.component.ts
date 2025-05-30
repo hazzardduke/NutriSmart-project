@@ -26,9 +26,8 @@ export class LoginComponent implements OnInit {
   ) {}
 
   ngOnInit() {
-    // mantener isAuthenticated sincronizado con el user$
     this.sub = this.auth.user$.subscribe(user => {
-      this.isAuthenticated = !!user;
+      if (user) this.router.navigateByUrl('/');
     });
   }
 
@@ -37,26 +36,19 @@ export class LoginComponent implements OnInit {
   }
 
   login(loginForm: NgForm) {
-    this.error = '';
-    if (!loginForm.valid) {
-      this.error = 'Corrige los errores del formulario antes de enviar.';
-      return;
-    }
-    this.auth.login(this.form.correo, this.form.password).subscribe({
-      next: () => {
-        // redirige al home o donde quieras
-        this.router.navigate(['/']);
-      },
-      error: err => {
-        this.error = err.message || 'Error al iniciar sesión.';
-      }
-    });
+    this.auth.login(this.form.correo, this.form.password)
+      .then(() => this.router.navigateByUrl('/'))
+      .catch((err: any) => {
+        console.error('Error login:', err);
+        // muestra feedback...
+      });
   }
 
   logout() {
-    this.auth.logout().subscribe(() => {
-      this.form = { correo: '', password: '' };
-      this.router.navigate(['/login']);
-    });
+    this.auth.logout()
+      .then(() => {
+        // redirige a login o muestra mensaje...
+      })
+      .catch((err: any) => console.error('Error al cerrar sesión', err));
   }
 }

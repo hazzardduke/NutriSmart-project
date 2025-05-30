@@ -1,9 +1,8 @@
-// src/app/core/register/register.component.ts
-import { Component }      from '@angular/core';
-import { CommonModule }   from '@angular/common';
+import { Component }    from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { FormsModule, NgForm } from '@angular/forms';
-import { AuthService }    from '../../services/auth.service';
-import { Router }         from '@angular/router';
+import { Router }       from '@angular/router';
+import { AuthService, NewUserProfile } from '../../services/auth.service';
 
 @Component({
   selector: 'app-register',
@@ -40,16 +39,20 @@ export class RegisterComponent {
       return;
     }
 
-    this.auth
-      .register({ ...this.form, password: this.form.password })
-      .subscribe({
-        next: () => {
-          this.mensaje = '✅ Registro exitoso. Redirigiendo al login...';
-          setTimeout(() => this.router.navigate(['/login']), 1500);
-        },
-        error: err => {
-          this.error = err.message || 'Error al registrar.';
-        }
+    // Preparamos el perfil con rol 'cliente' por defecto
+    const profile: NewUserProfile = {
+      ...this.form,
+      role: 'cliente'
+    };
+
+    this.auth.register(profile, this.form.password)
+      .then(() => {
+        this.mensaje = 'Cuenta creada correctamente.';
+        this.router.navigateByUrl('/');
+      })
+      .catch(err => {
+        console.error('Error registrando:', err);
+        this.error = err.message || 'Ocurrió un error al crear la cuenta.';
       });
   }
 }

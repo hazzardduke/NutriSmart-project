@@ -1,0 +1,65 @@
+<div class="citas-container">
+  <h2 class="titulo-citas">
+    <i class="fas fa-calendar-alt"></i>
+    Gestión de Citas
+  </h2>
+
+  <form (ngSubmit)="programarCita()" class="form-cita">
+    <div class="form-group">
+      <label for="fecha">Fecha</label>
+      <input
+        type="date"
+        id="fecha"
+        class="form-control"
+        [(ngModel)]="fechaSeleccionada"
+        name="fecha"
+        required
+      />
+    </div>
+
+    <div class="form-group">
+      <label>Selecciona un horario</label>
+      <div class="horarios">
+        <button
+          type="button"
+          *ngFor="let h of horarios"
+          [disabled]="!isHorarioDisponible(h)"
+          [class.selected]="h === horaSeleccionada"
+          (click)="horaSeleccionada = h"
+          class="btn-horario"
+        >
+          {{ h }}
+        </button>
+      </div>
+    </div>
+
+    <div class="acciones">
+      <button
+        type="submit"
+        class="btn-accion confirm"
+        [disabled]="!fechaSeleccionada || !horaSeleccionada"
+      >
+        Programar Cita
+      </button>
+      <button
+        *ngIf="canCancel()"
+        type="button"
+        class="btn-accion cancel"
+        (click)="cancelarCita()"
+      >
+        Cancelar Cita
+      </button>
+    </div>
+  </form>
+
+  <div *ngIf="mensaje" class="mensaje">
+    {{ mensaje }}
+  </div>
+
+  <div class="nota">
+    <p>
+      <strong>Nota:</strong>
+      Las citas solo pueden ser modificadas o canceladas con 24 horas de anticipación.
+    </p>
+  </div>
+</div>
