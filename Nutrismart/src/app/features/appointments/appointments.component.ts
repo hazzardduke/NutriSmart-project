@@ -52,7 +52,7 @@ export class AppointmentsComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
-    // 1) Cuando cambie user$, guardamos uid y recargamos “Mis Citas”
+    // 1) Suscríbete a user$ para cargar “mis citas”
     this.subs.add(
       this.auth.user$.subscribe(user => {
         if (user) {
@@ -64,8 +64,8 @@ export class AppointmentsComponent implements OnInit, OnDestroy {
         }
       })
     );
-
-    // 2) Siempre suscribirnos a “todas las citas” (para bloquear slots globales)
+  
+    // 2) Suscríbete a TODAS las citas para calcular disponibilidad global
     this.subs.add(
       this.apptSvc.getAllAppointments()
         .subscribe(list => {
@@ -142,27 +142,25 @@ export class AppointmentsComponent implements OnInit, OnDestroy {
    *   6) Si pasa todo lo anterior, lo habilita.
    */
   public isHorarioDisponible(h: string): boolean {
-    if (!this.fechaSeleccionada) {
-      return false;
-    }
+    if (!this.fechaSeleccionada) return false;
   
-    // 1) Si la fecha es hoy, bloqueamos horas pasadas
+    // 1) Bloquear horas pasadas si la fecha es hoy
     const ahora = new Date();
     const selectedDate = new Date(this.fechaSeleccionada + 'T00:00:00');
     if (this.esHoy(selectedDate)) {
       const ahoraMin = ahora.getHours() * 60 + ahora.getMinutes();
-      const slotMin  = this.horaEnMinutos(h);
+      const slotMin = this.horaEnMinutos(h);
       if (slotMin <= ahoraMin) {
         return false;
       }
     }
   
-    // 2) Construimos ISO del slot candidato:
+    // 2) Construir el ISO string candidate
     const isoCandidato = new Date(
       `${this.fechaSeleccionada}T${this.to24h(h)}:00`
     ).toISOString();
   
-    // 3) Si estoy editando y coincide con mi citaEnEdicion, lo permito:
+    // 3) Si estamos editando y coincide con la cita que ya estoy editando, permitir
     if (
       this.enEdicion &&
       this.citaEnEdicion &&
@@ -171,25 +169,18 @@ export class AppointmentsComponent implements OnInit, OnDestroy {
       return true;
     }
   
-    // 4) Si NO estoy editando y esa cita ya es mía (status confirmed), también permito
-    const citaPropia = this.citasUsuario.find(c =>
-      c.status === 'confirmed' && c.datetime === isoCandidato
-    );
-    if (!this.enEdicion && citaPropia) {
-      return true;
-    }
-  
-    // 5) BLOQUEO si existe cualquier cita con status !== 'canceled'
+    // 4) BLOQUEO: si existe alguna cita en citasTodas con mismo datetime y status != 'canceled'
     const existeConflict = this.citasTodas.some(c =>
-      c.status !== 'canceled' && c.datetime === isoCandidato
+      c.datetime === isoCandidato && c.status !== 'canceled'
     );
     if (existeConflict) {
       return false;
     }
   
-    // 6) Si pasó todo, lo dejo habilitado:
+    // 5) Si pasa las pruebas, LO PERMITO
     return true;
   }
+  
 
   private esHoy(fecha: Date): boolean {
     const hoy = new Date();
@@ -276,16 +267,14 @@ export class AppointmentsComponent implements OnInit, OnDestroy {
   //   Crear o Actualizar cita en Firestore
   // ==================================================================================
   public guardarCita() {
-    if (!this.fechaSeleccionada || !this.horaSeleccionada) {
-      return;
-    }
+    if (!this.fechaSeleccionada || !this.horaSeleccionada) return;
   
     const isoSlot = new Date(
       `${this.fechaSeleccionada}T${this.to24h(this.horaSeleccionada)}:00`
     ).toISOString();
   
     if (this.enEdicion && this.citaEnEdicion?.id) {
-      // MODO EDICIÓN: reprogramar la cita ya “confirmada”
+      // MODO EDICIÓN: reprogramar la cita existente
       this.apptSvc.updateAppointment(this.citaEnEdicion.id, { datetime: isoSlot })
         .then(() => {
           this.mensaje = `✅ Cita reprogramada a ${this.formateaFecha(isoSlot)} – ${this.horaSeleccionada}.`;
@@ -298,7 +287,7 @@ export class AppointmentsComponent implements OnInit, OnDestroy {
         });
     }
     else {
-      // MODO CREACIÓN: creamos la cita y la marcamos ‘confirmed’ de inmediato
+      // MODO CREACIÓN: grabo la cita con estado 'confirmed' de inmediato
       this.apptSvc.createAppointment({
         userId: this.uid,
         datetime: isoSlot,
@@ -316,6 +305,7 @@ export class AppointmentsComponent implements OnInit, OnDestroy {
       });
     }
   }
+  
 
   // ==================================================================================
   //   Cancelar cita desde FORMULARIO (cuando *ngIf="canCancel()")
