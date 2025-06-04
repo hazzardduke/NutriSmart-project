@@ -1,10 +1,12 @@
+<!-- src/app/core/appointments/appointments.component.html -->
 <div class="citas-container">
   <h2 class="titulo-citas">
     <i class="fas fa-calendar-alt"></i>
     Gestión de Citas
   </h2>
 
-  <form (ngSubmit)="programarCita()" class="form-cita">
+  <!-- FORMULARIO PARA CREAR / EDITAR CITA -->
+  <form (ngSubmit)="guardarCita()" class="form-cita">
     <div class="form-group">
       <label for="fecha">Fecha</label>
       <input
@@ -13,6 +15,7 @@
         class="form-control"
         [(ngModel)]="fechaSeleccionada"
         name="fecha"
+        (change)="onFechaChange()"
         required
       />
     </div>
@@ -31,16 +34,22 @@
           {{ h }}
         </button>
       </div>
+      <div *ngIf="fechaSeleccionada && todosHorasPasaron" class="error-hora">
+        Ya pasaron todos los horarios disponibles de esta fecha.
+      </div>
     </div>
 
     <div class="acciones">
+      <!-- El texto del botón cambia según estemos creando o editando -->
       <button
         type="submit"
         class="btn-accion confirm"
         [disabled]="!fechaSeleccionada || !horaSeleccionada"
       >
-        Programar Cita
+        {{ enEdicion ? 'Actualizar Cita' : 'Programar Cita' }}
       </button>
+
+      <!-- Mostrar “Cancelar Cita” sólo si existe en pending para fechaSeleccionada+horaSeleccionada -->
       <button
         *ngIf="canCancel()"
         type="button"
@@ -48,6 +57,16 @@
         (click)="cancelarCita()"
       >
         Cancelar Cita
+      </button>
+
+      <!-- Mostrar “Cancelar edición” si estamos en modo edición -->
+      <button
+        *ngIf="enEdicion"
+        type="button"
+        class="btn-accion cancel"
+        (click)="cancelarEdicion()"
+      >
+        ⟵ Cancelar Edición
       </button>
     </div>
   </form>
@@ -59,7 +78,53 @@
   <div class="nota">
     <p>
       <strong>Nota:</strong>
-      Las citas solo pueden ser modificadas o canceladas con 24 horas de anticipación.
+      Las citas pueden modificarse o cancelarse hasta 24 horas antes del horario programado.
     </p>
+  </div>
+
+  <!-- LISTA DE CITAS EXISTENTES -->
+  <div class="lista-citas" *ngIf="citasUsuario.length > 0">
+    <h3 class="subtitulo">Mis Citas</h3>
+    <table class="tabla-citas">
+      <thead>
+        <tr>
+          <th>Fecha</th>
+          <th>Hora</th>
+          <th>Estado</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let c of citasUsuario">
+          <td>{{ formateaFecha(c.datetime) }}</td>
+          <td>{{ formateaHora(c.datetime) }}</td>
+          <td>
+            <span [ngClass]="{ 'estado-confirmed': c.status === 'confirmed',
+                               'estado-canceled': c.status === 'canceled' }">
+              {{ c.status === 'confirmed' ? 'Confirmada' : 'Cancelada' }}
+            </span>
+          </td>
+          
+          <td>
+            <!-- Botón Editar si está pending y faltan >24h -->
+            <button
+              class="btn-editar"
+              *ngIf="c.status === 'confirmed' && puedeEditar(c)"
+              (click)="editarCita(c)"
+            >
+              Editar
+            </button>
+            <!-- Botón Cancelar si está pending y faltan >24h -->
+            <button
+              class="btn-cancelar"
+              *ngIf="c.status === 'confirmed' && puedeEditar(c)"
+              (click)="cancelarCitaEspecifica(c)"
+            >
+              Cancelar
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
   </div>
 </div>

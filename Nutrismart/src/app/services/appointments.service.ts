@@ -6,40 +6,51 @@ import { Observable } from 'rxjs';
 export interface Appointment {
   id?: string;
   userId: string;
-  datetime: string;
-  status: 'pending' | 'confirmed' | 'canceled';
-  nota?: string;
+  datetime: string; // ISO string
+  status: 'confirmed' | 'canceled';
 }
 
 @Injectable({ providedIn: 'root' })
 export class AppointmentsService {
   private firestore = inject(Firestore);
+  private coll = collection(this.firestore, 'appointments');
 
-  // Obtiene todas las citas de un usuario, ordenadas
-  getUserAppointments(userId: string): Observable<Appointment[]> {
-    const col = collection(this.firestore, 'appointments');
-    const q = query(col,
-      where('userId', '==', userId),
-      orderBy('datetime', 'desc')
-    );
-    return collectionData(q, { idField: 'id' }) as Observable<Appointment[]>;
-  }
+/** Devuelve un Observable<Appointment[]> con todas las citas de Firestore */
+getAllAppointments(): Observable<Appointment[]> {
+  // map each document snapshot to { id, ...data() }
+  return collectionData(this.coll, { idField: 'id' }) as Observable<Appointment[]>;
+}
 
-  // Crea una cita nueva
-  createAppointment(data: Omit<Appointment,'id'>): Promise<void> {
-    const col = collection(this.firestore, 'appointments');
-    return addDoc(col, data).then(() => {});
-  }
+/** Devuelve solo las citas del usuario 'uid' */
+getUserAppointments(uid: string): Observable<Appointment[]> {
+  const q = query(this.coll, where('userId', '==', uid));
+  return collectionData(q, { idField: 'id' }) as Observable<Appointment[]>;
+}
 
-  // Actualiza solo el estado o nota
-  updateAppointment(id: string, changes: Partial<Appointment>): Promise<void> {
-    const ref = doc(this.firestore, `appointments/${id}`);
-    return updateDoc(ref, changes);
-  }
+/** Crea una nueva cita en Firestore */
+createAppointment(data: Omit<Appointment, 'id'>): Promise<void> {
+  // (Firestore no obliga a poner el ID, así que usamos addDoc).
+  // Sin embargo, resolvemos la promesa a void para integrarlo con "then/catch"
+  return addDoc(this.coll, data)
+    .then(() => {})
+    .catch(err => {
+      throw err;
+    });
+}
 
-  // Elimina una cita
-  deleteAppointment(id: string): Promise<void> {
-    const ref = doc(this.firestore, `appointments/${id}`);
-    return deleteDoc(ref);
-  }
+/** Actualiza (por ejemplo, cambia datetime o status) de una cita con 'id' */
+updateAppointment(id: string, datos: Partial<Appointment>): Promise<void> {
+  const refDoc = doc(this.firestore, `appointments/${id}`);
+  return updateDoc(refDoc, datos)
+    .then(() => {})
+    .catch(err => {
+      throw err;
+    });
+}
+
+/** (Opcional) Elimina por completo una cita */
+deleteAppointment(id: string): Promise<void> {
+  const refDoc = doc(this.firestore, `appointments/${id}`);
+  return deleteDoc(refDoc);
+}
 }
