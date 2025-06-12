@@ -15,11 +15,13 @@
         [(ngModel)]="form.cedula"
         #cedula="ngModel"
         required
+        minlength="9"
+        maxlength="9"
     
       />
       <div *ngIf="cedula.invalid && cedula.touched" class="error">
-        <small *ngIf="cedula.errors?.['required']">La cédula es obligatoria.</small>
-        <small *ngIf="cedula.errors?.['pattern']">Debe tener 9 dígitos numéricos.</small>
+        <small *ngIf="cedula.errors?.['required']">La cédula es obligatoria</small>
+        <small *ngIf="cedula.errors?.['minlength']">La cédula debe tener 9 dígitos numéricos</small>
       </div>
 
       <!-- NOMBRE -->
@@ -33,7 +35,7 @@
         required
       />
       <div *ngIf="nombre.invalid && nombre.touched" class="error">
-        <small>El nombre es obligatorio.</small>
+        <small>El nombre es obligatorio</small>
       </div>
 
       <!-- APELLIDOS -->
@@ -47,7 +49,7 @@
         required
       />
       <div *ngIf="apellidos.invalid && apellidos.touched" class="error">
-        <small>Los apellidos son obligatorios.</small>
+        <small>Los apellidos son obligatorios</small>
       </div>
 
       <!-- DIRECCIÓN -->
@@ -61,7 +63,7 @@
         required
       />
       <div *ngIf="direccion.invalid && direccion.touched" class="error">
-        <small>La dirección es obligatoria.</small>
+        <small>La dirección es obligatoria</small>
       </div>
 
       <!-- FECHA NACIMIENTO -->
@@ -75,7 +77,7 @@
         required
       />
       <div *ngIf="fechaNacimiento.invalid && fechaNacimiento.touched" class="error">
-        <small>La fecha de nacimiento es obligatoria.</small>
+        <small>La fecha de nacimiento es obligatoria</small>
       </div>
 
       <!-- TELÉFONO -->
@@ -87,11 +89,13 @@
         [(ngModel)]="form.telefono"
         #telefono="ngModel"
         required
+        minlength="8"
+        maxlength="8"
      
       />
       <div *ngIf="telefono.invalid && telefono.touched" class="error">
-        <small *ngIf="telefono.errors?.['required']">El teléfono es obligatorio.</small>
-        <small *ngIf="telefono.errors?.['pattern']">Debe tener 8 dígitos numéricos.</small>
+        <small *ngIf="telefono.errors?.['required']">El teléfono es obligatorio</small>
+        <small *ngIf="telefono.errors?.['minlength']">Debe tener 8 dígitos numéricos</small>
       </div>
 
       <!-- CORREO -->
@@ -106,8 +110,8 @@
         email
       />
       <div *ngIf="correo.invalid && correo.touched" class="error">
-        <small *ngIf="correo.errors?.['required']">El correo es obligatorio.</small>
-        <small *ngIf="correo.errors?.['email']">Formato de correo inválido.</small>
+        <small *ngIf="correo.errors?.['required']">El correo es obligatorio</small>
+        <small *ngIf="correo.errors?.['email']">Formato de correo inválido</small>
       </div>
 
       <!-- CONTRASEÑA -->
@@ -122,8 +126,8 @@
         minlength="8"
       />
       <div *ngIf="password.invalid && password.touched" class="error">
-        <small *ngIf="password.errors?.['required']">La contraseña es obligatoria.</small>
-        <small *ngIf="password.errors?.['minlength']">Mínimo 8 caracteres.</small>
+        <small *ngIf="password.errors?.['required']">La contraseña es obligatoria</small>
+        <small *ngIf="password.errors?.['minlength']">Mínimo 8 caracteres</small>
       </div>
 
       <button
@@ -137,5 +141,12 @@
 
     <div *ngIf="mensaje" class="mensaje">{{ mensaje }}</div>
     <div *ngIf="error" class="error">{{ error }}</div>
+
+       <div class="register-footer">
+      <small>
+        <a routerLink="/login" class="login-link">Volver al login</a>
+      </small>
+    </div>
+
   </div>
 </div>

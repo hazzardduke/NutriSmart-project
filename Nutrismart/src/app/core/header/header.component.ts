@@ -24,10 +24,14 @@ export class HeaderComponent {
   }
 
   logout() {
-    this.auth.logout()
-      .then(() => {
-        // redirige a login o muestra mensaje...
-      })
-      .catch((err: any) => console.error('Error al cerrar sesión', err));
-  }
+  this.auth.logout()
+    .then(() => {
+      this.isUserMenuOpen = false;     
+      this.router.navigate(['/login']);
+    })
+    .catch(err => console.error('Error al cerrar sesión', err));
+}
+
+
+
 }

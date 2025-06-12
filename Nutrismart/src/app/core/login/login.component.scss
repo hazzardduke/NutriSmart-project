@@ -78,9 +78,17 @@ $gris-texto:    #6b6b6b;
     }
   }
 
+.error small {
+  color: red;
+  text-align: center;
+  font-weight: bold;
+  display: block;
+}
+
   .global-error {
     color: #d9534f;
     font-size: 0.875rem;
+    font-weight: bold;
     text-align: center;
   }
 }
