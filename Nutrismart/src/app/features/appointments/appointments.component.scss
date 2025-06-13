@@ -1,205 +1,220 @@
+/* src/app/features/appointments/appointments.component.scss */
+
 .citas-container {
-    max-width: 800px;
-    margin: 2rem auto;
-    padding: 2rem;
-    background: #fff;
-    border-radius: 12px;
-    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
-    font-family: 'Roboto', sans-serif;
-    text-align: center;
-  
-    .titulo-citas {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: #3e372d;
-      font-size: 1.8rem;
-      margin-bottom: 2rem;
-  
-      i {
-        color: #a1c037;
-        margin-right: 0.5rem;
-        font-size: 1.5rem;
-      }
-    }
-  
-    .form-cita {
-      .form-group {
-        margin-bottom: 1.5rem;
-        text-align: left;
-  
-        label {
-          font-weight: 600;
-          color: #3e372d;
-          margin-bottom: 0.5rem;
-          display: block;
-        }
-  
-        input {
-          width: 100%;
-          padding: 0.6rem;
-          border: 1px solid #ccc;
-          border-radius: 6px;
-        }
-      }
-  
-      .horarios {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 0.7rem;
-        justify-content: center;
-        margin-top: 1rem;
-  
-        .btn-horario {
-          padding: 0.5rem 1rem;
-          border: 1px solid #ccc;
-          border-radius: 8px;
-          background-color: #f7f7f7;
-          color: #3e372d;
-          cursor: pointer;
-          transition: 0.3s ease;
-  
-          &.selected {
-            background-color: #a1c037;
-            color: white;
-            border-color: #a1c037;
-          }
-  
-          &:disabled {
-            background-color: #ccc;
-            color: #888;
-            cursor: not-allowed;
-          }
-  
-          &:hover:not(:disabled):not(.selected) {
-            background-color: #eaeaea;
-          }
-        }
-      }
-  
-      .acciones {
-        display: flex;
-        justify-content: center;
-        flex-wrap: wrap;
-        gap: 1rem;
-        margin-top: 2rem;
-  
-        .btn-accion {
-          padding: 0.7rem 2rem;
-          font-size: 1rem;
-          border: none;
-          border-radius: 8px;
-          font-weight: 500;
-          color: white;
-          cursor: pointer;
-          transition: 0.3s ease;
-  
-          &.confirm {
-            background-color: #a1c037;
-  
-            &:hover {
-              background-color: #8ca02e;
-            }
-          }
-  
-          &.cancel {
-            background-color: #e74c3c;
-  
-            &:hover {
-              background-color: #c0392b;
-            }
-          }
-        }
-      }
-    }
-  
-    .mensaje {
-      margin-top: 1.5rem;
-      font-weight: 600;
-      color: #3e372d;
-    }
-    
-    .nota {
-      margin-top: 2rem;
-      font-size: 0.95rem;
-      color: #666;
-    }
-    
-    .error-hora {
-      margin-top: 0.5rem;
-      color: #e74c3c;
-      font-weight: bold;
-    }
-    
-    /* -----------------------------------------
-       LISTA DE CITAS
-       (Si ya la tenías, solo revisa las clases nuevas)
-       ----------------------------------------- */
-    .lista-citas {
-      margin-top: 2.5rem;
-      text-align: left;
-    
-      .subtitulo {
-        font-size: 1.3rem;
-        color: #3e372d;
-        margin-bottom: 1rem;
-      }
-    
-      .tabla-citas {
-        width: 100%;
-        border-collapse: collapse;
-    
-        thead {
-          background-color: #a1c037;
-          color: white;
-        }
-    
-        th, td {
-          border: 1px solid #ddd;
-          padding: 0.8rem 1rem;
-          text-align: center;
-          font-size: 0.95rem;
-        }
-    
-        tr:nth-child(even) {
-          background-color: #f9f9f9;
-        }
-    
-        .estado-pending {
-          color: #ff9800;
-          font-weight: bold;
-        }
-    
-        .estado-canceled {
-          color: #e74c3c;
-          font-weight: bold;
-        }
-    
-        .btn-editar, .btn-cancelar {
-          padding: 0.4rem 0.8rem;
-          font-size: 0.85rem;
-          border: none;
-          border-radius: 6px;
-          cursor: pointer;
-          margin-right: 0.5rem;
-        }
-    
-        .btn-editar {
-          background-color: #3498db;
-          color: white;
-        }
-        .btn-editar:hover {
-          background-color: #2980b9;
-        }
-    
-        .btn-cancelar {
-          background-color: #e74c3c;
-          color: white;
-        }
-        .btn-cancelar:hover {
-          background-color: #c0392b;
-        }
-      }
-    }
-  }
-  
+  max-width: 800px;
+  margin: 2rem auto;
+  padding: 2rem;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+  font-family: 'Roboto', sans-serif;
+  text-align: center;
+}
+
+.titulo-citas {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #3e372d;
+  font-size: 1.8rem;
+  margin-bottom: 2rem;
+}
+
+.titulo-citas i {
+  color: #a1c037;
+  margin-right: 0.5rem;
+  font-size: 1.5rem;
+}
+
+.form-cita .form-group {
+  margin-bottom: 1.5rem;
+  text-align: left;
+}
+
+.form-cita .form-group label {
+  font-weight: 600;
+  color: #3e372d;
+  margin-bottom: 0.5rem;
+  display: block;
+}
+
+.form-cita .form-group input {
+  width: 100%;
+  padding: 0.6rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+}
+
+.horarios {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.7rem;
+  justify-content: center;
+  margin-top: 1rem;
+}
+
+.btn-horario {
+  padding: 0.5rem 1rem;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  background-color: #f7f7f7;
+  color: #3e372d;
+  cursor: pointer;
+  transition: 0.3s ease;
+}
+
+.btn-horario.selected {
+  background-color: #a1c037;
+  color: white;
+  border-color: #a1c037;
+}
+
+.btn-horario:disabled {
+  background-color: #ccc;
+  color: #888;
+  cursor: not-allowed;
+}
+
+.btn-horario:not(:disabled):not(.selected):hover {
+  background-color: #eaeaea;
+}
+
+.acciones {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.btn-accion {
+  padding: 0.7rem 2rem;
+  font-size: 1rem;
+  border: none;
+  border-radius: 8px;
+  font-weight: 500;
+  color: white;
+  cursor: pointer;
+  transition: 0.3s ease;
+}
+
+.btn-accion.confirm {
+  background-color: #a1c037;
+}
+
+.btn-accion.confirm:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-accion.cancel {
+  background-color: #e74c3c;
+}
+
+.nota {
+  margin-top: 2rem;
+  font-size: 0.95rem;
+  color: #666;
+}
+
+.error-hora {
+  margin-top: 0.5rem;
+  color: #e74c3c;
+  font-weight: bold;
+}
+
+.lista-citas {
+  margin-top: 2.5rem;
+  text-align: left;
+}
+
+.lista-citas .subtitulo {
+  font-size: 1.3rem;
+  color: #3e372d;
+  margin-bottom: 1rem;
+}
+
+.tabla-citas {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.tabla-citas thead {
+  background-color: #a1c037;
+  color: white;
+}
+
+.tabla-citas th,
+.tabla-citas td {
+  border: 1px solid #ddd;
+  padding: 0.8rem 1rem;
+  text-align: center;
+  font-size: 0.95rem;
+}
+
+.tabla-citas tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+.estado-confirmed {
+  color: #3498db;
+  font-weight: bold;
+}
+
+.estado-canceled {
+  color: #e74c3c;
+  font-weight: bold;
+}
+
+.btn-editar,
+.btn-cancelar {
+  padding: 0.4rem 0.8rem;
+  font-size: 0.85rem;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-right: 0.5rem;
+}
+
+.btn-editar {
+  background-color: #3498db;
+  color: white;
+}
+
+.btn-editar:hover {
+  background-color: #2980b9;
+}
+
+.btn-cancelar {
+  background-color: #e74c3c;
+  color: white;
+}
+
+.btn-cancelar:hover {
+  background-color: #c0392b;
+}
+
+.no-citas-hoy {
+  margin: 1rem auto;
+  text-align: center;
+  color: #3e372d;
+  font-weight: 600;
+}
+
+.popup {
+  position: relative;
+  display: inline-block;
+  margin: 1rem auto;
+  background-color: #a1c037;
+  color: #fff;
+  padding: 0.8rem 1.2rem;
+  border-radius: 6px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  font-weight: 600;
+  animation: fadeOut 8s ease-in forwards;
+}
+
+@keyframes fadeOut {
+  0%, 80% { opacity: 1; }
+  100%    { opacity: 0; }
+}
