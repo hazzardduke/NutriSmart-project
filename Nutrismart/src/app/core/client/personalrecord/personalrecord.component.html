@@ -1,196 +1,105 @@
-<div class="expediente-container container">
-  <h2 class="text-center my-4">Expediente Personal</h2>
+<form [formGroup]="profileForm" class="expediente-container container py-4">
 
-  <!-- Foto de perfil -->
-  <div class="profile-picture-section text-center mb-4">
-    <img
-      [src]="photoURL || 'assets/images/logo.jpeg'"
-      alt="Foto de Perfil"
-      class="profile-picture img-fluid"
-    >
-    <div class="picture-actions mt-2">
-      <button type="button" class="btn custom-btn me-2" (click)="fileInput.click()">
-        Actualizar Foto
-      </button>
-      <button type="button" class="btn custom-btn secondary-btn" (click)="removePhoto()">
-        Eliminar Foto
-      </button>
-      <input type="file" #fileInput (change)="onPhotoSelected($event)" hidden>
-    </div>
-    <div *ngIf="updateMessage" class="update-message mt-1">
-      <small class="text-success">{{ updateMessage }}</small>
+  <!-- POPUP -->
+  <div class="popup-overlay" *ngIf="showPopup">
+    <div class="popup-window" [ngClass]="popupType">
+      <p>{{ popupMessage }}</p>
+      <button (click)="closePopup()">OK</button>
     </div>
   </div>
 
-  <!-- Formulario reactivo -->
-  <form [formGroup]="profileForm" (ngSubmit)="saveChanges()">
+  <!-- Navegación -->
+  <div class="section-nav mb-4">
+    <button type="button" class="btn" [class.active]="currentSection==='photo'"        (click)="selectSection('photo')">Foto de Perfil</button>
+    <button type="button" class="btn" [class.active]="currentSection==='personal'"     (click)="selectSection('personal')">Datos Personales</button>
+    <button type="button" class="btn" [class.active]="currentSection==='nutritional'"  (click)="selectSection('nutritional')">Datos Nutricionales</button>
+    <button type="button" class="btn" [class.active]="currentSection==='restrictions'" (click)="selectSection('restrictions')">Restricciones Alimenticias</button>
+  </div>
 
-    <!-- Datos personales -->
-    <div class="personal-info-section mb-4">
-      <h3 class="mb-3">Datos Personales</h3>
-      <div class="row g-3">
-        <div class="col-12 col-md-6">
-          <div class="form-group">
-            <label for="direccion">Dirección:</label>
-            <input
-              id="direccion"
-              type="text"
-              formControlName="direccion"
-              class="form-control custom-input"
-              placeholder="Ingrese su dirección"
-            >
-            <small *ngIf="profileForm.get('direccion')?.invalid && profileForm.get('direccion')?.touched"
-              class="error-message"
-            >Campo requerido</small>
-          </div>
-        </div>
-        <div class="col-12 col-md-6">
-          <div class="form-group">
-            <label for="telefono">Teléfono:</label>
-            <input
-              id="telefono"
-              type="text"
-              formControlName="telefono"
-              class="form-control custom-input"
-              placeholder="Ingrese su teléfono"
-            >
-            <small *ngIf="profileForm.get('telefono')?.invalid && profileForm.get('telefono')?.touched"
-              class="error-message"
-            >
-              Debe tener 8 dígitos
-            </small>
-          </div>
-        </div>
-        <div class="col-12 col-md-6">
-          <div class="form-group">
-            <label for="correo">Correo:</label>
-            <input
-              id="correo"
-              type="email"
-              formControlName="correo"
-              class="form-control custom-input"
-              placeholder="Ingrese su correo"
-            >
-            <small *ngIf="profileForm.get('correo')?.invalid && profileForm.get('correo')?.touched"
-              class="error-message"
-            >
-              Formato inválido
-            </small>
-          </div>
-        </div>
+  <div class="section-content">
+
+    <!-- FOTO -->
+    <div *ngIf="currentSection==='photo'" class="panel photo-panel">
+      <h3>Foto de Perfil</h3>
+      <div class="panel-body text-center">
+        <img [src]="photoURL||'assets/images/logo.jpeg'" class="profile-picture" alt="Foto">
+        <input #fileInput type="file" hidden (change)="onPhotoSelected($event)">
+      </div>
+      <div class="panel-footer photo-actions">
+        <button type="button" class="btn btn-sm btn-primary" (click)="fileInput.click()">Editar Foto</button>
+        <button type="button" class="btn btn-sm btn-success" (click)="savePhoto()">Guardar Foto</button>
+        <button type="button" class="btn btn-sm btn-danger"  (click)="removePhoto()">Eliminar Foto</button>
       </div>
     </div>
 
-    <!-- Datos nutricionales -->
-    <div class="nutritional-info-section mb-4">
-      <h3 class="mb-3">Datos Nutricionales</h3>
-      <div class="row g-3">
-        <div class="col-12 col-md-4">
-          <div class="form-group">
-            <label for="peso">Peso (kg):</label>
-            <input
-              id="peso"
-              type="number"
-              formControlName="peso"
-              class="form-control custom-input"
-              placeholder="Ej. 75"
-            >
-            <small *ngIf="profileForm.get('peso')?.invalid && profileForm.get('peso')?.touched"
-              class="error-message"
-            >Dato requerido</small>
+    <!-- PERSONALES -->
+    <div *ngIf="currentSection==='personal'" class="panel personal-panel">
+      <h3>Datos Personales</h3>
+      <div class="panel-body">
+        <div class="form-group">
+          <label for="direccion">Dirección</label>
+          <input id="direccion" type="text" formControlName="direccion" class="form-control">
+          <div class="invalid-feedback" *ngIf="profileForm.get('direccion')?.invalid && profileForm.get('direccion')?.touched">
+            Campo requerido
           </div>
         </div>
-        <div class="col-12 col-md-4">
-          <div class="form-group">
-            <label for="estatura">Estatura (m):</label>
-            <input
-              id="estatura"
-              type="number"
-              step="0.01"
-              formControlName="estatura"
-              class="form-control custom-input"
-              placeholder="Ej. 1.70"
-            >
-            <small *ngIf="profileForm.get('estatura')?.invalid && profileForm.get('estatura')?.touched"
-              class="error-message"
-            >Dato requerido</small>
+        <div class="form-group">
+          <label for="telefono">Teléfono</label>
+          <input id="telefono" type="text" formControlName="telefono" class="form-control">
+          <div class="invalid-feedback" *ngIf="profileForm.get('telefono')?.invalid && profileForm.get('telefono')?.touched">
+            Debe tener 8 dígitos
           </div>
         </div>
-        <div class="col-12 col-md-4">
-          <div class="form-group">
-            <label for="porcentajeGrasa">% Grasa:</label>
-            <input
-              id="porcentajeGrasa"
-              type="number"
-              step="0.1"
-              formControlName="porcentajeGrasa"
-              class="form-control custom-input"
-              placeholder="Ej. 15.5"
-            >
-            <small *ngIf="profileForm.get('porcentajeGrasa')?.invalid && profileForm.get('porcentajeGrasa')?.touched"
-              class="error-message"
-            >Dato requerido</small>
-          </div>
-        </div>
-        <div class="col-12 col-md-4">
-          <div class="form-group">
-            <label for="porcentajeMusculo">% Músculo:</label>
-            <input
-              id="porcentajeMusculo"
-              type="number"
-              step="0.1"
-              formControlName="porcentajeMusculo"
-              class="form-control custom-input"
-              placeholder="Ej. 40.0"
-            >
-            <small *ngIf="profileForm.get('porcentajeMusculo')?.invalid && profileForm.get('porcentajeMusculo')?.touched"
-              class="error-message"
-            >Dato requerido</small>
-          </div>
-        </div>
-        <div class="col-12 col-md-4">
-          <div class="form-group">
-            <label for="porcentajeAgua">% Agua:</label>
-            <input
-              id="porcentajeAgua"
-              type="number"
-              step="0.1"
-              formControlName="porcentajeAgua"
-              class="form-control custom-input"
-              placeholder="Ej. 50.0"
-            >
-            <small *ngIf="profileForm.get('porcentajeAgua')?.invalid && profileForm.get('porcentajeAgua')?.touched"
-              class="error-message"
-            >Dato requerido</small>
+        <div class="form-group">
+          <label for="correo">Correo</label>
+          <input id="correo" type="email" formControlName="correo" class="form-control">
+          <div class="invalid-feedback" *ngIf="profileForm.get('correo')?.invalid && profileForm.get('correo')?.touched">
+            Formato inválido
           </div>
         </div>
       </div>
-    </div>
-
-    <!-- Restricciones -->
-    <div class="dietary-restrictions-section mb-4">
-      <h3 class="mb-3">Restricciones Alimenticias</h3>
-      <div class="form-group">
-        <label for="restricciones">Descripción:</label>
-        <textarea
-          id="restricciones"
-          formControlName="restricciones"
-          class="form-control custom-input"
-          rows="3"
-          placeholder="Describa sus restricciones alimenticias"
-        ></textarea>
+      <div class="panel-footer text-end">
+        <button type="button" class="btn btn-success" (click)="savePersonal()">Guardar Cambios</button>
       </div>
     </div>
 
-    <!-- Guardar -->
-    <div class="save-section text-center">
-      <button
-        type="submit"
-        class="btn custom-btn save-btn"
-        [disabled]="profileForm.invalid"
-      >
-        Guardar Cambios
-      </button>
+    <!-- NUTRICIONALES -->
+    <div *ngIf="currentSection==='nutritional'" class="panel nutritional-panel">
+      <h3>Datos Nutricionales</h3>
+      <div class="panel-body">
+        <ng-container *ngFor="let fld of nutricionales">
+          <div class="form-group">
+            <label [for]="fld.id">{{ fld.label }}</label>
+            <input [id]="fld.id"
+                   [type]="fld.type"
+                   [step]="fld.step"
+                   formControlName="{{fld.control}}"
+                   class="form-control">
+            <div class="invalid-feedback"
+                 *ngIf="profileForm.get(fld.control)?.invalid && profileForm.get(fld.control)?.touched">
+              Dato requerido
+            </div>
+          </div>
+        </ng-container>
+      </div>
+      <div class="panel-footer text-end">
+        <button type="button" class="btn btn-success" (click)="saveNutritional()">Guardar Cambios</button>
+      </div>
     </div>
-  </form>
-</div>
+
+    <!-- RESTRICCIONES -->
+    <div *ngIf="currentSection==='restrictions'" class="panel restrictions-panel">
+      <h3>Restricciones Alimenticias</h3>
+      <div class="panel-body">
+        <div class="form-group">
+          <label for="restricciones">Descripción</label>
+          <textarea id="restricciones" formControlName="restricciones" class="form-control" rows="4"></textarea>
+        </div>
+      </div>
+      <div class="panel-footer text-end">
+        <button type="button" class="btn btn-success" (click)="saveRestrictions()">Guardar Cambios</button>
+      </div>
+    </div>
+
+  </div>
+</form>
