@@ -1,3 +1,4 @@
+/* src/app/features/personalrecord/personalrecord.component.scss */
 $primary:       #a1c037;
 $primary-dark:  darken($primary, 10%);
 $text-dark:     #3e372d;
@@ -62,46 +63,15 @@ $shadow:        0 3px 15px rgba(0, 0, 0, 0.1);
   .panel-footer {
     padding: 0.75rem 1rem;
     background: #fafafa;
-
-    .btn-success {
-      background: linear-gradient(90deg, $primary, $primary-dark);
-      border: none;
-      align-content: center;
-      color: #fff;
-      padding: 0.6rem 1.8rem;
-      font-size: 1rem;
-      font-weight: 600;
-      border-radius: $border-rad;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12);
-      transition: 
-        background 0.25s ease-in-out,
-        transform 0.15s ease-in-out,
-        box-shadow 0.15s ease-in-out;
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-
-      &:hover {
-        background: linear-gradient(90deg, $primary-dark, $primary);
-        transform: translateY(-2px);
-        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.16);
-      }
-      &:active {
-        transform: translateY(0);
-        box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
-      }
-    }
   }
 }
 
 .personal-panel .panel-footer .btn-success {
   background: linear-gradient(90deg, #3e8e41, #2f6e32);
 }
-
 .nutritional-panel .panel-footer .btn-success {
   background: linear-gradient(90deg, #ffb347, #ffcc33);
 }
-
 .restrictions-panel .panel-footer .btn-success {
   background: linear-gradient(90deg, #ff6b6b, #ff4e4e);
 }
@@ -158,12 +128,6 @@ $shadow:        0 3px 15px rgba(0, 0, 0, 0.1);
       color: #fff;
       &:hover { background: $primary-dark; }
     }
-    &.btn-danger {
-      background: #dc3545;
-      border: none;
-      color: #fff;
-      &:hover { background: darken(#dc3545, 10%); }
-    }
   }
 }
 
@@ -194,15 +158,9 @@ $shadow:        0 3px 15px rgba(0, 0, 0, 0.1);
   text-align: center;
   box-shadow: $shadow;
 
-  p {
-    margin: 0;
-  }
-  &.success p {
-    color: #155724;
-  }
-  &.error p {
-    color: #721c24;
-  }
+  p { margin: 0; }
+  &.success p { color: #155724; }
+  &.error p   { color: #721c24; }
 
   button {
     margin-top: 1rem;
@@ -212,12 +170,6 @@ $shadow:        0 3px 15px rgba(0, 0, 0, 0.1);
     border: none;
     border-radius: $border-rad;
     cursor: pointer;
-    &:hover {
-      background: $primary-dark;
-    }
+    &:hover { background: $primary-dark; }
   }
-}
-.panel-footer {
-  display: flex;
-  justify-content: center;
 }

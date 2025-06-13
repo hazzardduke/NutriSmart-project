@@ -33,9 +33,7 @@
           {{ h }}
         </button>
       </div>
-      <div *ngIf="fechaSeleccionada && todosHorasPasaron" class="error-hora">
-        Ya pasaron todos los horarios disponibles de esta fecha.
-      </div>
+     
     </div>
 
     <div class="acciones">
@@ -67,6 +65,9 @@
   <div *ngIf="citasDeHoy.length === 0" class="no-citas-hoy">
     No hay citas programadas para el día de hoy.
   </div>
+   <div *ngIf="fechaSeleccionada && todosHorasPasaron" class="error-hora">
+        Ya pasaron todos los horarios disponibles de esta fecha.
+      </div>
 
   <div *ngIf="showPopup" class="popup">
     {{ popupMessage }}

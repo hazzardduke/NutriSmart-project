@@ -1,6 +1,7 @@
-
+<!-- src/app/features/personalrecord/personalrecord.component.html -->
 <form [formGroup]="profileForm" class="expediente-container container py-4">
 
+  <!-- Popup -->
   <div class="popup-overlay" *ngIf="showPopup">
     <div class="popup-window" [ngClass]="popupType">
       <p>{{ popupMessage }}</p>
@@ -8,51 +9,47 @@
     </div>
   </div>
 
+  <!-- Navigation -->
   <div class="section-nav mb-4">
-    <button type="button" class="btn" [class.active]="currentSection==='photo'"        (click)="selectSection('photo')">Foto de Perfil</button>
-    <button type="button" class="btn" [class.active]="currentSection==='personal'"     (click)="selectSection('personal')">Datos Personales</button>
-    <button type="button" class="btn" [class.active]="currentSection==='nutritional'"  (click)="selectSection('nutritional')">Datos Nutricionales</button>
+    <button type="button" class="btn" [class.active]="currentSection==='photo'" (click)="selectSection('photo')">Foto de Perfil</button>
+    <button type="button" class="btn" [class.active]="currentSection==='personal'" (click)="selectSection('personal')">Datos Personales</button>
+    <button type="button" class="btn" [class.active]="currentSection==='nutritional'" (click)="selectSection('nutritional')">Datos Nutricionales</button>
     <button type="button" class="btn" [class.active]="currentSection==='restrictions'" (click)="selectSection('restrictions')">Restricciones Alimenticias</button>
   </div>
 
   <div class="section-content">
 
+    <!-- Foto de Perfil -->
     <div *ngIf="currentSection==='photo'" class="panel photo-panel">
       <h3>Foto de Perfil</h3>
       <div class="panel-body text-center">
-        <img [src]="photoURL||'assets/images/logo.jpeg'" class="profile-picture" alt="Foto">
-        <input #fileInput type="file" hidden (change)="onPhotoSelected($event)">
+        <img [src]="photoURL || 'assets/images/logo.jpeg'" class="profile-picture" alt="Foto">
+        <input #fileInput type="file" accept="image/*" hidden (change)="onPhotoSelected($event)">
       </div>
       <div class="panel-footer photo-actions">
         <button type="button" class="btn btn-sm btn-primary" (click)="fileInput.click()">Editar Foto</button>
         <button type="button" class="btn btn-sm btn-success" (click)="savePhoto()">Guardar Foto</button>
-        <button type="button" class="btn btn-sm btn-danger"  (click)="removePhoto()">Eliminar Foto</button>
       </div>
     </div>
 
+    <!-- Datos Personales -->
     <div *ngIf="currentSection==='personal'" class="panel personal-panel">
       <h3>Datos Personales</h3>
       <div class="panel-body">
         <div class="form-group">
           <label for="direccion">Dirección</label>
           <input id="direccion" type="text" formControlName="direccion" class="form-control">
-          <div class="invalid-feedback" *ngIf="profileForm.get('direccion')?.invalid && profileForm.get('direccion')?.touched">
-            Campo requerido
-          </div>
+          <div class="invalid-feedback" *ngIf="profileForm.get('direccion')?.invalid && profileForm.get('direccion')?.touched">Campo requerido</div>
         </div>
         <div class="form-group">
           <label for="telefono">Teléfono</label>
           <input id="telefono" type="text" formControlName="telefono" class="form-control">
-          <div class="invalid-feedback" *ngIf="profileForm.get('telefono')?.invalid && profileForm.get('telefono')?.touched">
-            Debe tener 8 dígitos
-          </div>
+          <div class="invalid-feedback" *ngIf="profileForm.get('telefono')?.invalid && profileForm.get('telefono')?.touched">Debe tener 8 dígitos</div>
         </div>
         <div class="form-group">
           <label for="correo">Correo</label>
           <input id="correo" type="email" formControlName="correo" class="form-control">
-          <div class="invalid-feedback" *ngIf="profileForm.get('correo')?.invalid && profileForm.get('correo')?.touched">
-            Formato inválido
-          </div>
+          <div class="invalid-feedback" *ngIf="profileForm.get('correo')?.invalid && profileForm.get('correo')?.touched">Formato inválido</div>
         </div>
       </div>
       <div class="panel-footer text-end">
@@ -60,21 +57,15 @@
       </div>
     </div>
 
+    <!-- Datos Nutricionales -->
     <div *ngIf="currentSection==='nutritional'" class="panel nutritional-panel">
       <h3>Datos Nutricionales</h3>
       <div class="panel-body">
         <ng-container *ngFor="let fld of nutricionales">
           <div class="form-group">
             <label [for]="fld.id">{{ fld.label }}</label>
-            <input [id]="fld.id"
-                   [type]="fld.type"
-                   [step]="fld.step"
-                   formControlName="{{fld.control}}"
-                   class="form-control">
-            <div class="invalid-feedback"
-                 *ngIf="profileForm.get(fld.control)?.invalid && profileForm.get(fld.control)?.touched">
-              Dato requerido
-            </div>
+            <input [id]="fld.id" [type]="fld.type" [step]="fld.step" formControlName="{{fld.control}}" class="form-control">
+            <div class="invalid-feedback" *ngIf="profileForm.get(fld.control)?.invalid && profileForm.get(fld.control)?.touched">Dato requerido</div>
           </div>
         </ng-container>
       </div>
@@ -83,6 +74,7 @@
       </div>
     </div>
 
+    <!-- Restricciones Alimenticias -->
     <div *ngIf="currentSection==='restrictions'" class="panel restrictions-panel">
       <h3>Restricciones Alimenticias</h3>
       <div class="panel-body">
@@ -98,4 +90,3 @@
 
   </div>
 </form>
-

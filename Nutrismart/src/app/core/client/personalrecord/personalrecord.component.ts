@@ -1,4 +1,6 @@
-import { Component, OnInit, OnDestroy, NgZone, ChangeDetectorRef } from '@angular/core';
+// src/app/core/client/personalrecord/personalrecord.component.ts
+
+import { Component, OnInit, OnDestroy, NgZone, ChangeDetectorRef, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Subscription, firstValueFrom } from 'rxjs';
@@ -13,17 +15,21 @@ import { ProfileService, UserProfileData } from '../../../services/profile.servi
   styleUrls: ['./personalrecord.component.scss']
 })
 export class PersonalrecordComponent implements OnInit, OnDestroy {
+  @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
+
   profileForm: FormGroup;
-  photoURL: string | null = null;
+  photoURL: string | null = null;        // contiene Base64 escalado o URL
   private uid!: string;
   private subs = new Subscription();
-  private pendingFile: File | null = null;
 
   currentSection: 'photo' | 'personal' | 'nutritional' | 'restrictions' = 'photo';
-
   showPopup = false;
   popupMessage = '';
   popupType: 'success' | 'error' = 'success';
+
+  // Máximo ancho/alto para la imagen + calidad JPEG
+  private readonly MAX_DIM = 500;
+  private readonly QUALITY = 0.7;
 
   nutricionales = [
     { id: 'peso', control: 'peso', label: 'Peso (kg)', type: 'number', step: '1' },
@@ -41,15 +47,15 @@ export class PersonalrecordComponent implements OnInit, OnDestroy {
     private cd: ChangeDetectorRef
   ) {
     this.profileForm = this.fb.group({
-      direccion:       ['', Validators.required],
-      telefono:        ['', [Validators.required, Validators.pattern(/^\d{8}$/)]],
-      correo:          ['', [Validators.required, Validators.email]],
-      peso:            ['', Validators.required],
-      estatura:        ['', Validators.required],
+      direccion: ['', Validators.required],
+      telefono: ['', [Validators.required, Validators.pattern(/^\d{8}$/)]],
+      correo: ['', [Validators.required, Validators.email]],
+      peso: ['', Validators.required],
+      estatura: ['', Validators.required],
       porcentajeGrasa: ['', Validators.required],
       porcentajeMusculo: ['', Validators.required],
-      porcentajeAgua:  ['', Validators.required],
-      restricciones:   ['']
+      porcentajeAgua: ['', Validators.required],
+      restricciones: ['']
     });
   }
 
@@ -72,9 +78,9 @@ export class PersonalrecordComponent implements OnInit, OnDestroy {
       this.zone.run(() => {
         this.photoURL = data.fotoURL || null;
         this.profileForm.patchValue({
-          direccion: data.direccion || '',
-          telefono:  data.telefono  || '',
-          correo:    data.correo    || '',
+          direccion:       data.direccion       || '',
+          telefono:        data.telefono        || '',
+          correo:          data.correo          || '',
           peso:            data.peso?.toString()            || '',
           estatura:        data.estatura?.toString()        || '',
           porcentajeGrasa: data.porcentajeGrasa?.toString() || '',
@@ -94,31 +100,53 @@ export class PersonalrecordComponent implements OnInit, OnDestroy {
     this.currentSection = sec;
   }
 
-
   onPhotoSelected(event: Event): void {
     const file = (event.target as HTMLInputElement).files?.[0] || null;
-    this.pendingFile = file;
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      const img = new Image();
+      img.onload = () => {
+        const [w, h] = this.calculateSize(img.width, img.height);
+        const canvas = document.createElement('canvas');
+        canvas.width = w;
+        canvas.height = h;
+        const ctx = canvas.getContext('2d')!;
+        ctx.drawImage(img, 0, 0, w, h);
+        this.zone.run(() => {
+          this.photoURL = canvas.toDataURL('image/jpeg', this.QUALITY);
+          this.cd.detectChanges();
+        });
+      };
+      img.src = reader.result as string;
+    };
+    reader.readAsDataURL(file);
   }
 
-  removePhoto(): void {
-    this.photoURL = null;
-    this.pendingFile = null;
-    this.popup('Foto marcada para eliminar. Guarda los cambios.', 'success');
+  private calculateSize(origW: number, origH: number): [number, number] {
+    let w = origW, h = origH;
+    if (w > h && w > this.MAX_DIM) {
+      h = Math.round(h * (this.MAX_DIM / w));
+      w = this.MAX_DIM;
+    } else if (h >= w && h > this.MAX_DIM) {
+      w = Math.round(w * (this.MAX_DIM / h));
+      h = this.MAX_DIM;
+    }
+    return [w, h];
   }
 
   async savePhoto(): Promise<void> {
+    if (!this.photoURL) {
+      this.popup('Selecciona una imagen primero.', 'error');
+      return;
+    }
     try {
-      let url = this.photoURL || '';
-      if (this.pendingFile) {
-        url = await firstValueFrom(this.profileService.uploadPhoto(this.uid, this.pendingFile));
-      }
-      await this.profileService.updateProfile(this.uid, { fotoURL: url });
-      this.zone.run(() => {
-        this.photoURL = url;
-        this.popup('Foto guardada correctamente.', 'success');
-        this.cd.detectChanges();
-      });
-    } catch {
+      await this.profileService.updateProfile(this.uid, { fotoURL: this.photoURL });
+      this.popup('Foto guardada correctamente.', 'success');
+      this.fileInput.nativeElement.value = '';
+    } catch (err) {
+      console.error('Error guardando foto:', err);
       this.popup('Error al guardar la foto.', 'error');
     }
   }
@@ -150,9 +178,9 @@ export class PersonalrecordComponent implements OnInit, OnDestroy {
       await this.profileService.updateProfile(this.uid, {
         peso: +peso,
         estatura: +estatura,
-        porcentajeGrasa:   +porcentajeGrasa,
+        porcentajeGrasa: +porcentajeGrasa,
         porcentajeMusculo: +porcentajeMusculo,
-        porcentajeAgua:    +porcentajeAgua
+        porcentajeAgua: +porcentajeAgua
       });
       this.popup('Datos nutricionales guardados.', 'success');
     } catch {
