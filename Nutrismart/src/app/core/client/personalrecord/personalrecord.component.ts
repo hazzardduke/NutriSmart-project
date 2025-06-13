@@ -19,15 +19,12 @@ export class PersonalrecordComponent implements OnInit, OnDestroy {
   private subs = new Subscription();
   private pendingFile: File | null = null;
 
-  // Control de qué sección se muestra
   currentSection: 'photo' | 'personal' | 'nutritional' | 'restrictions' = 'photo';
 
-  // Popup de mensajes
   showPopup = false;
   popupMessage = '';
   popupType: 'success' | 'error' = 'success';
 
-  // Meta-data de campos nutricionales
   nutricionales = [
     { id: 'peso', control: 'peso', label: 'Peso (kg)', type: 'number', step: '1' },
     { id: 'estatura', control: 'estatura', label: 'Estatura (m)', type: 'number', step: '0.01' },
@@ -97,7 +94,7 @@ export class PersonalrecordComponent implements OnInit, OnDestroy {
     this.currentSection = sec;
   }
 
-  // --- FOTO ---
+
   onPhotoSelected(event: Event): void {
     const file = (event.target as HTMLInputElement).files?.[0] || null;
     this.pendingFile = file;
@@ -126,7 +123,6 @@ export class PersonalrecordComponent implements OnInit, OnDestroy {
     }
   }
 
-  // --- DATOS PERSONALES ---
   async savePersonal(): Promise<void> {
     const f = this.profileForm;
     if (f.get('direccion')!.invalid || f.get('telefono')!.invalid || f.get('correo')!.invalid) {
@@ -142,7 +138,6 @@ export class PersonalrecordComponent implements OnInit, OnDestroy {
     }
   }
 
-  // --- DATOS NUTRICIONALES ---
   async saveNutritional(): Promise<void> {
     const f = this.profileForm;
     const ctrls = ['peso','estatura','porcentajeGrasa','porcentajeMusculo','porcentajeAgua'];
@@ -165,7 +160,6 @@ export class PersonalrecordComponent implements OnInit, OnDestroy {
     }
   }
 
-  // --- RESTRICCIONES ---
   async saveRestrictions(): Promise<void> {
     try {
       const { restricciones } = this.profileForm.value;
@@ -176,7 +170,6 @@ export class PersonalrecordComponent implements OnInit, OnDestroy {
     }
   }
 
-  // --- POPUP ---
   popup(message: string, type: 'success'|'error') {
     this.zone.run(() => {
       this.popupMessage = message;

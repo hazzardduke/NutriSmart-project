@@ -1,6 +1,8 @@
+Aquí tienes el template sin los comentarios:
+
+```html
 <form [formGroup]="profileForm" class="expediente-container container py-4">
 
-  <!-- POPUP -->
   <div class="popup-overlay" *ngIf="showPopup">
     <div class="popup-window" [ngClass]="popupType">
       <p>{{ popupMessage }}</p>
@@ -8,7 +10,6 @@
     </div>
   </div>
 
-  <!-- Navegación -->
   <div class="section-nav mb-4">
     <button type="button" class="btn" [class.active]="currentSection==='photo'"        (click)="selectSection('photo')">Foto de Perfil</button>
     <button type="button" class="btn" [class.active]="currentSection==='personal'"     (click)="selectSection('personal')">Datos Personales</button>
@@ -18,7 +19,6 @@
 
   <div class="section-content">
 
-    <!-- FOTO -->
     <div *ngIf="currentSection==='photo'" class="panel photo-panel">
       <h3>Foto de Perfil</h3>
       <div class="panel-body text-center">
@@ -32,7 +32,6 @@
       </div>
     </div>
 
-    <!-- PERSONALES -->
     <div *ngIf="currentSection==='personal'" class="panel personal-panel">
       <h3>Datos Personales</h3>
       <div class="panel-body">
@@ -63,7 +62,6 @@
       </div>
     </div>
 
-    <!-- NUTRICIONALES -->
     <div *ngIf="currentSection==='nutritional'" class="panel nutritional-panel">
       <h3>Datos Nutricionales</h3>
       <div class="panel-body">
@@ -87,7 +85,6 @@
       </div>
     </div>
 
-    <!-- RESTRICCIONES -->
     <div *ngIf="currentSection==='restrictions'" class="panel restrictions-panel">
       <h3>Restricciones Alimenticias</h3>
       <div class="panel-body">
@@ -103,3 +100,4 @@
 
   </div>
 </form>
+```
