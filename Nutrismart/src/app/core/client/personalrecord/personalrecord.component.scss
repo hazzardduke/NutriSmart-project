@@ -73,7 +73,7 @@ $shadow:        0 3px 15px rgba(0, 0, 0, 0.1);
       font-weight: 600;
       border-radius: $border-rad;
       box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12);
-      transition:
+      transition: 
         background 0.25s ease-in-out,
         transform 0.15s ease-in-out,
         box-shadow 0.15s ease-in-out;
@@ -186,7 +186,6 @@ $shadow:        0 3px 15px rgba(0, 0, 0, 0.1);
   justify-content: center;
   z-index: 1000;
 }
-
 .popup-window {
   background: #fff;
   padding: 1.5rem;
@@ -218,7 +217,6 @@ $shadow:        0 3px 15px rgba(0, 0, 0, 0.1);
     }
   }
 }
-
 .panel-footer {
   display: flex;
   justify-content: center;
