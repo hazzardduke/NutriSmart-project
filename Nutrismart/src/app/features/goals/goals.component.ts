@@ -6,8 +6,6 @@ import { AuthService }                   from '../../services/auth.service';
 import { GoalsService, Goal }            from '../../services/goals.service';
 import html2pdf from 'html2pdf.js';
 
-
-
 @Component({
   selector: 'app-goals',
   standalone: true,
@@ -19,31 +17,20 @@ export class GoalsComponent implements OnInit, OnDestroy {
   tabInterno: 'objetivos' | 'recomendaciones' = 'objetivos';
   objetivos: Goal[] = [];
   recomendaciones = [
-    {
-      fecha: '2025-03-20',
-      resumen: 'Reducir consumo de carbohidratos refinados.',
-      comentario: 'Procura evitar panes blancos, pastas refinadas y azúcares. Incluye más vegetales fibrosos y proteína magra.'
-    },
-    {
-      fecha: '2025-03-10',
-      resumen: 'Aumentar consumo de agua.',
-      comentario: 'Toma al menos 2.5L diarios, distribuidos durante el día.'
-    }
+    { fecha: '2025-03-20', resumen: 'Reducir consumo de carbohidratos refinados.', comentario: 'Procura evitar panes blancos, pastas refinadas y azúcares. Incluye más vegetales fibrosos y proteína magra.' },
+    { fecha: '2025-03-10', resumen: 'Aumentar consumo de agua.', comentario: 'Toma al menos 2.5L diarios, distribuidos durante el día.' }
   ];
   selectedRecomendacion: any = null;
   verDetalles = false;
+  showPopup = false;
   mensajeService = '';
-  
-  // modelo temporal para template-driven form
-  nuevoObjetivo = { tipo: '', meta: '', fecha: '' };
+  mesesOptions = [1, 2, 3, 4, 5, 6];
+  nuevoObjetivo: { tipo: string; meta: string; meses: number | null } = { tipo: '', meta: '', meses: null };
 
   private uid = '';
   private subs = new Subscription();
 
-  constructor(
-    private auth: AuthService,
-    private goalsSvc: GoalsService
-  ) {}
+  constructor(private auth: AuthService, private goalsSvc: GoalsService) {}
 
   ngOnInit(): void {
     this.subs.add(
@@ -56,52 +43,101 @@ export class GoalsComponent implements OnInit, OnDestroy {
     );
   }
 
-  private loadGoals() {
+  private loadGoals(): void {
     this.subs.add(
       this.goalsSvc.getGoals(this.uid)
         .subscribe(list => this.objetivos = list)
     );
   }
 
-  guardarObjetivo() {
-    if (!this.nuevoObjetivo.tipo || !this.nuevoObjetivo.meta || !this.nuevoObjetivo.fecha) {
+  private addMonths(date: Date, months: number): Date {
+    const y0 = date.getFullYear();
+    const m0 = date.getMonth();
+    const d0 = date.getDate();
+    const total = m0 + months;
+    const y1 = y0 + Math.floor(total / 12);
+    const m1 = total % 12;
+    const lastDay = new Date(y1, m1 + 1, 0).getDate();
+    const d1 = Math.min(d0, lastDay);
+    return new Date(y1, m1, d1);
+  }
+
+  guardarObjetivo(): void {
+    if (!this.nuevoObjetivo.tipo || !this.nuevoObjetivo.meta || this.nuevoObjetivo.meses == null) {
       this.mensajeService = 'Por favor completa todos los campos del objetivo.';
+      this.showPopup = true;
+      this.autoClosePopup();
       return;
     }
-    this.goalsSvc.addGoal(this.uid, {
+    const m = this.nuevoObjetivo.meses;
+    if (isNaN(m) || m < 1 || m > 6) {
+      this.mensajeService = 'Selecciona un número válido de meses (1–6).';
+      this.showPopup = true;
+      this.autoClosePopup();
+      return;
+    }
+    const futura = this.addMonths(new Date(), m);
+    const isoDate = futura.toISOString().split('T')[0];
+    const toSave: Omit<Goal, 'id' | 'createdAt'> = {
       tipo: this.nuevoObjetivo.tipo,
       meta: this.nuevoObjetivo.meta,
-      fecha: this.nuevoObjetivo.fecha,
+      fecha: isoDate,
       progreso: 0
-    }).then(() => {
-      this.nuevoObjetivo = { tipo: '', meta: '', fecha: '' };
-      this.mensajeService = 'Objetivo guardado ✔️';
-      this.loadGoals();
-      this.tabInterno = 'objetivos';
-    }).catch(err => console.error(err));
+    };
+    this.goalsSvc.addGoal(this.uid, toSave)
+      .then((): void => {
+        this.nuevoObjetivo = { tipo: '', meta: '', meses: null };
+        this.mensajeService = 'Objetivo guardado ✔️';
+        this.showPopup = true;
+        this.autoClosePopup();
+        this.loadGoals();
+        this.tabInterno = 'objetivos';
+      })
+      .catch((err: any): void => {
+        console.error(err);
+      });
   }
 
-  actualizarProgreso(goal: Goal, event: any) {
+  private autoClosePopup(): void {
+    setTimeout(() => this.closePopup(), 5000);
+  }
+
+  closePopup(): void {
+    this.showPopup = false;
+  }
+
+  actualizarProgreso(goal: Goal, event: any): void {
     const prog = +event.target.value;
     this.goalsSvc.updateGoal(this.uid, goal.id!, { progreso: prog })
-      .then(() => this.loadGoals());
+      .then((): void => {
+        this.loadGoals();
+      })
+      .catch((err: any): void => {
+        console.error(err);
+      });
   }
 
-  eliminarObjetivo(goal: Goal) {
+  eliminarObjetivo(goal: Goal): void {
     this.goalsSvc.deleteGoal(this.uid, goal.id!)
-      .then(() => this.loadGoals());
+      .then((): void => {
+        this.loadGoals();
+      })
+      .catch((err: any): void => {
+        console.error(err);
+      });
   }
 
-  abrirModal(rec: any) {
+  abrirModal(rec: any): void {
     this.selectedRecomendacion = rec;
   }
-  cerrarModal() {
+
+  cerrarModal(): void {
     this.selectedRecomendacion = null;
   }
 
-  exportarPDF() {
-    const element = document.getElementById('pdf-content');
-    if (!element) return;
+  exportarPDF(): void {
+    const el = document.getElementById('pdf-content');
+    if (!el) return;
     html2pdf().set({
       margin: 0.5,
       filename: 'plan-nutricional.pdf',
@@ -109,13 +145,19 @@ export class GoalsComponent implements OnInit, OnDestroy {
       html2canvas: { scale: 2 },
       jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
     })
-    .from(element)
-    .save()
-    .then(() => this.verDetalles = false)
-    .catch((err: any) => console.error('Error exportando PDF:', err));
+      .from(el)
+      .save()
+      .then((): void => {
+        this.verDetalles = false;
+      })
+      .catch((err: any): void => {
+        console.error(err);
+      });
   }
 
-  ngOnDestroy(): void {
+ngOnDestroy(): void {
     this.subs.unsubscribe();
-  }
-}
+  
+    }
+    }
+

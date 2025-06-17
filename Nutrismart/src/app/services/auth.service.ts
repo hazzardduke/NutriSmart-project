@@ -39,11 +39,11 @@ export class AuthService {
     return signInWithEmailAndPassword(this.auth, email, password).then(() => {});
   }
 
-  /** Ahora recibe todo el perfil y guarda en Auth **y** Firestore */
+
   register(profile: NewUserProfile, plainPassword: string): Promise<void> {
     return createUserWithEmailAndPassword(this.auth, profile.correo, plainPassword)
       .then((cred: UserCredential) => {
-        // una vez creado en Auth, guardamos perfil en Firestore
+
         const uid = cred.user.uid;
         return setDoc(doc(this.firestore, 'users', uid), {
           ...profile,
