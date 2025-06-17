@@ -7,6 +7,7 @@ import { DashboardComponent } from './features/dashboard/dashboard.component';
 import { PersonalrecordComponent } from './core/client/personalrecord/personalrecord.component';
 import { AppointmentsComponent }   from './features/appointments/appointments.component';
 import { GoalsComponent }          from './features/goals/goals.component';
+import { ResetPasswordRequestComponent } from './reset-password-request/reset-password-request.component';
 
 export const routes: Routes = [
   // públicas
@@ -22,9 +23,11 @@ export const routes: Routes = [
       { path: 'profile',    component: PersonalrecordComponent },
       { path: 'appoinments',component: AppointmentsComponent },
       { path: 'goals',      component: GoalsComponent },
+      
+
     ]
   },
-
+  { path: 'reset-password', component: ResetPasswordRequestComponent },
   // wildcard
   { path: '**', redirectTo: 'login' }
 ];

@@ -4,6 +4,7 @@ import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   signOut,
+  sendPasswordResetEmail,
   authState,
   user
 } from '@angular/fire/auth';
@@ -39,6 +40,10 @@ export class AuthService {
     return signInWithEmailAndPassword(this.auth, email, password).then(() => {});
   }
 
+  /** nuevo */
+   sendPasswordReset(email: string): Promise<void> {
+    return sendPasswordResetEmail(this.auth, email);
+  }
 
   register(profile: NewUserProfile, plainPassword: string): Promise<void> {
     return createUserWithEmailAndPassword(this.auth, profile.correo, plainPassword)

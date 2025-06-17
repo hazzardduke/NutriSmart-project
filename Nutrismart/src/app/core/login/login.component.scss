@@ -157,6 +157,20 @@ $gris-texto:    #6b6b6b;
   }
 }
 
+
+.forgot-link {
+  color: $verde-oliva;
+  font-weight: bold;
+  margin-left: 5px;
+  cursor: pointer;
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+    color: lighten($verde-oliva, 10%);
+  }
+}
+
 @media (max-width: 576px) {
   .login-card {
     padding: 1.5rem;
