@@ -17,6 +17,7 @@ export class HeaderComponent implements OnInit {
   photoURL: string | null = null;
   private uid!: string;
   private subs = new Subscription();
+  userName: string = 'Invitado';
 
   constructor(
     private auth: AuthService,
@@ -28,6 +29,7 @@ export class HeaderComponent implements OnInit {
     this.subs.add(
       this.profileService.getProfileObservable().subscribe(profile => {
         this.photoURL = profile?.fotoURL || 'assets/images/logo.jpeg';
+        this.userName = profile?.nombre || 'Invitado';
       })
     );
   
@@ -40,6 +42,7 @@ export class HeaderComponent implements OnInit {
       })
     );
   }
+  
   
 
   toggleUserMenu() {

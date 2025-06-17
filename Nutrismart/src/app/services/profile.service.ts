@@ -5,6 +5,8 @@ import { Observable, from, BehaviorSubject } from 'rxjs';
 import { filter, switchMap, tap } from 'rxjs/operators';
 
 export interface UserProfileData {
+  nombre?: string;
+  apellido?: string;
   direccion?: string;
   telefono?: string;
   correo?: string;
@@ -16,6 +18,7 @@ export interface UserProfileData {
   restricciones?: string;
   fotoURL?: string;
   fechaActualizacion?: string;
+
 }
 
 @Injectable({
