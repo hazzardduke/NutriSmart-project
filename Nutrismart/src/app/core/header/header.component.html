@@ -2,7 +2,6 @@
   <div class="header-left">
     <div class="breadcrumb">
       <h1>Dashboard</h1>
-      <span class="current-path">Home / Dashboard</span>
     </div>
   </div>
 
@@ -20,7 +19,7 @@
     </div>
     
     <div class="user-profile" (click)="toggleUserMenu()">
-      <img src="assets/images/logo.jpeg" alt="User Avatar" class="avatar">
+      <img [src]="photoURL || 'assets/images/logo.jpeg'" alt="User Avatar" class="avatar">
       <div class="user-info">
         <span class="user-name">John Doe</span>
         <span class="user-role">Cliente</span>

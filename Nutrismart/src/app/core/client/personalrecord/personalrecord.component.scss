@@ -68,12 +68,30 @@ $shadow:        0 3px 15px rgba(0, 0, 0, 0.1);
 
 .personal-panel .panel-footer .btn-success {
   background: linear-gradient(90deg, #3e8e41, #2f6e32);
+  font-size: 0.9rem;
+  padding: 0.5rem;
+  border-radius: 0.5rem;
+  transition: background 0.2s;
+  border: none;
+  color: #fff;
 }
 .nutritional-panel .panel-footer .btn-success {
   background: linear-gradient(90deg, #ffb347, #ffcc33);
+  font-size: 0.9rem;
+  padding: 0.5rem;
+  border-radius: 0.5rem;
+  transition: background 0.2s;
+  border: none;
+  color: #fff;
 }
 .restrictions-panel .panel-footer .btn-success {
   background: linear-gradient(90deg, #ff6b6b, #ff4e4e);
+  font-size: 0.9rem;
+  padding: 0.5rem;
+  border-radius: 0.5rem;
+  transition: background 0.2s;
+  border: none;
+  color: #fff;
 }
 
 .form-group {
