@@ -17,20 +17,37 @@ export class GoalsComponent implements OnInit, OnDestroy {
   tabInterno: 'objetivos' | 'recomendaciones' = 'objetivos';
   objetivos: Goal[] = [];
   recomendaciones = [
-    { fecha: '2025-03-20', resumen: 'Reducir consumo de carbohidratos refinados.', comentario: 'Procura evitar panes blancos, pastas refinadas y azúcares. Incluye más vegetales fibrosos y proteína magra.' },
-    { fecha: '2025-03-10', resumen: 'Aumentar consumo de agua.', comentario: 'Toma al menos 2.5L diarios, distribuidos durante el día.' }
+    {
+      fecha: '2025-03-20',
+      resumen: 'Reducir consumo de carbohidratos refinados.',
+      comentario: 'Procura evitar panes blancos, pastas refinadas y azúcares. Incluye más vegetales fibrosos y proteína magra.'
+    },
+    {
+      fecha: '2025-03-10',
+      resumen: 'Aumentar consumo de agua.',
+      comentario: 'Toma al menos 2.5L diarios, distribuidos durante el día.'
+    }
   ];
   selectedRecomendacion: any = null;
   verDetalles = false;
   showPopup = false;
   mensajeService = '';
   mesesOptions = [1, 2, 3, 4, 5, 6];
-  nuevoObjetivo: { tipo: string; meta: string; meses: number | null } = { tipo: '', meta: '', meses: null };
+  nuevoObjetivo: { tipo: string; meta: string; meses: number | null } = {
+    tipo: '',
+    meta: '',
+    meses: null
+  };
+
+  progresoTemp: Record<string, number> = {};
 
   private uid = '';
   private subs = new Subscription();
 
-  constructor(private auth: AuthService, private goalsSvc: GoalsService) {}
+  constructor(
+    private auth: AuthService,
+    private goalsSvc: GoalsService
+  ) {}
 
   ngOnInit(): void {
     this.subs.add(
@@ -46,7 +63,15 @@ export class GoalsComponent implements OnInit, OnDestroy {
   private loadGoals(): void {
     this.subs.add(
       this.goalsSvc.getGoals(this.uid)
-        .subscribe(list => this.objetivos = list)
+        .subscribe(list => {
+          this.objetivos = list;
+          
+          this.objetivos.forEach(g => {
+            if (g.id) {
+              this.progresoTemp[g.id] = g.progreso;
+            }
+          });
+        })
     );
   }
 
@@ -63,12 +88,16 @@ export class GoalsComponent implements OnInit, OnDestroy {
   }
 
   guardarObjetivo(): void {
-    if (!this.nuevoObjetivo.tipo || !this.nuevoObjetivo.meta || this.nuevoObjetivo.meses == null) {
+    if (!this.nuevoObjetivo.tipo ||
+        !this.nuevoObjetivo.meta ||
+        this.nuevoObjetivo.meses == null
+    ) {
       this.mensajeService = 'Por favor completa todos los campos del objetivo.';
       this.showPopup = true;
       this.autoClosePopup();
       return;
     }
+
     const m = this.nuevoObjetivo.meses;
     if (isNaN(m) || m < 1 || m > 6) {
       this.mensajeService = 'Selecciona un número válido de meses (1–6).';
@@ -76,6 +105,7 @@ export class GoalsComponent implements OnInit, OnDestroy {
       this.autoClosePopup();
       return;
     }
+
     const futura = this.addMonths(new Date(), m);
     const isoDate = futura.toISOString().split('T')[0];
     const toSave: Omit<Goal, 'id' | 'createdAt'> = {
@@ -84,47 +114,40 @@ export class GoalsComponent implements OnInit, OnDestroy {
       fecha: isoDate,
       progreso: 0
     };
+
     this.goalsSvc.addGoal(this.uid, toSave)
-      .then((): void => {
+      .then(() => {
         this.nuevoObjetivo = { tipo: '', meta: '', meses: null };
         this.mensajeService = 'Objetivo guardado ✔️';
         this.showPopup = true;
         this.autoClosePopup();
-        this.loadGoals();
         this.tabInterno = 'objetivos';
+        this.loadGoals();
       })
-      .catch((err: any): void => {
-        console.error(err);
-      });
-  }
-
-  private autoClosePopup(): void {
-    setTimeout(() => this.closePopup(), 5000);
+      .catch(err => console.error(err));
   }
 
   closePopup(): void {
     this.showPopup = false;
   }
 
-  actualizarProgreso(goal: Goal, event: any): void {
-    const prog = +event.target.value;
-    this.goalsSvc.updateGoal(this.uid, goal.id!, { progreso: prog })
-      .then((): void => {
-        this.loadGoals();
-      })
-      .catch((err: any): void => {
-        console.error(err);
-      });
+  private autoClosePopup(): void {
+    setTimeout(() => this.closePopup(), 5000);
   }
 
+  actualizarProgreso(goal: Goal): void {
+    const raw = this.progresoTemp[goal.id!] ?? goal.progreso;
+    const prog = Math.max(0, Math.min(100, raw));  
+    this.goalsSvc.updateGoal(this.uid, goal.id!, { progreso: prog })
+      .then(() => this.loadGoals())
+      .catch(err => console.error(err));
+  }
+
+ 
   eliminarObjetivo(goal: Goal): void {
     this.goalsSvc.deleteGoal(this.uid, goal.id!)
-      .then((): void => {
-        this.loadGoals();
-      })
-      .catch((err: any): void => {
-        console.error(err);
-      });
+      .then(() => this.loadGoals())
+      .catch(err => console.error(err));
   }
 
   abrirModal(rec: any): void {
@@ -135,29 +158,26 @@ export class GoalsComponent implements OnInit, OnDestroy {
     this.selectedRecomendacion = null;
   }
 
+
   exportarPDF(): void {
     const el = document.getElementById('pdf-content');
     if (!el) return;
-    html2pdf().set({
-      margin: 0.5,
-      filename: 'plan-nutricional.pdf',
-      image: { type: 'jpeg', quality: 0.98 },
-      html2canvas: { scale: 2 },
-      jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
-    })
+
+    html2pdf()
+      .set({
+        margin: 0.5,
+        filename: 'plan-nutricional.pdf',
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2 },
+        jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
+      })
       .from(el)
       .save()
-      .then((): void => {
-        this.verDetalles = false;
-      })
-      .catch((err: any): void => {
-        console.error(err);
-      });
+      .then(() => this.verDetalles = false)
+      .catch((err: any) => console.error(err));
   }
 
-ngOnDestroy(): void {
+  ngOnDestroy(): void {
     this.subs.unsubscribe();
-  
-    }
-    }
-
+  }
+}

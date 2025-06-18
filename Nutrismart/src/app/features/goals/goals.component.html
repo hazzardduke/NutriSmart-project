@@ -1,6 +1,9 @@
+<!-- goals.component.html -->
 <div class="container p-4">
   <h1 class="text-2xl font-bold mb-4">Gestión de Objetivos Nutricionales</h1>
   <hr /><br />
+
+  <!-- Formulario para crear objetivos -->
   <div class="form-section">
     <form (ngSubmit)="guardarObjetivo()">
       <div class="objetivo">
@@ -35,6 +38,8 @@
       </div>
     </form>
   </div>
+
+  <!-- Popup de mensajes -->
   <div class="popup" *ngIf="showPopup">
     <div class="popup-content">
       {{ mensajeService }}
@@ -42,29 +47,54 @@
     </div>
   </div>
   <hr /><br />
+
+  <!-- Sección de Objetivos / Recomendaciones -->
   <div class="form-section">
     <div class="objetivo">
       <h2 class="section-title">Mis Objetivos</h2>
+
+      <!-- Pestañas -->
       <div class="tabs">
         <button [class.active]="tabInterno==='objetivos'" (click)="tabInterno='objetivos'">Objetivos</button>
         <button [class.active]="tabInterno==='recomendaciones'" (click)="tabInterno='recomendaciones'">Recomendaciones</button>
       </div>
+
+      <!-- Lista de Objetivos -->
       <div *ngIf="tabInterno==='objetivos'">
         <div class="objetivo" *ngFor="let obj of objetivos">
           <h4>{{ obj.tipo }}</h4>
           <p>{{ obj.meta }}</p>
           <p><strong>Fecha meta:</strong> {{ obj.fecha }}</p>
           <p><strong>Progreso:</strong> {{ obj.progreso }}%</p>
+
+          <!-- Input y botón Actualizar encima de la barra -->
+          <div class="progreso-input">
+            <label for="progreso-{{obj.id}}">Progreso (%)</label>
+            <input
+              type="number"
+              id="progreso-{{obj.id}}"
+              name="progreso-{{obj.id}}"
+              min="0"
+              max="100"
+              step="1"
+              [(ngModel)]="progresoTemp[obj.id!]"
+              class="input-progreso" />
+            <button class="btn-action" (click)="actualizarProgreso(obj)">Actualizar</button>
+          </div>
+
+          <!-- Barra de progreso debajo -->
           <div class="progress-wrapper">
             <div class="progress-bar" [style.width.%]="obj.progreso"></div>
             <div class="thumb" [style.left.%]="obj.progreso"></div>
             <span class="progress-text">{{ obj.progreso }}%</span>
           </div>
-          <input type="range" min="0" max="100" [value]="obj.progreso"
-                 (input)="actualizarProgreso(obj, $event)" class="range-hidden" />
+
+          <!-- Botón Completar -->
           <button class="btn-action" (click)="eliminarObjetivo(obj)">Completar</button>
         </div>
       </div>
+
+      <!-- Lista de Recomendaciones -->
       <div *ngIf="tabInterno==='recomendaciones'">
         <div class="recomendacion" *ngFor="let rec of recomendaciones">
           <p><strong>{{ rec.fecha }}</strong>: {{ rec.resumen }}</p>
@@ -73,6 +103,8 @@
       </div>
     </div>
   </div>
+
+  <!-- Modal de Recomendación -->
   <div class="modal-bg" *ngIf="selectedRecomendacion">
     <div class="detalles">
       <h4>Recomendación del {{ selectedRecomendacion.fecha }}</h4>
@@ -81,24 +113,32 @@
     </div>
   </div>
   <hr /><br />
+
+  <!-- Planes Nutricionales Existentes -->
   <div class="objetivo">
     <h2 class="section-title">Planes Nutricionales Existentes</h2>
     <table class="plans-table">
       <thead>
-        <tr><th>Cliente</th><th>Fecha de Creación</th><th>Acciones</th></tr>
+        <tr>
+          <th>Cliente</th>
+          <th>Fecha de Creación</th>
+          <th>Acciones</th>
+        </tr>
       </thead>
       <tbody>
         <tr>
           <td>John Doe</td>
           <td>2025-04-04</td>
-          <td><button class="btn-action" (click)="verDetalles=true">Ver Detalles</button></td>
+          <td><button class="btn-action" (click)="verDetalles = true">Ver Detalles</button></td>
         </tr>
       </tbody>
     </table>
   </div>
+
+  <!-- Modal de Detalles del Plan -->
   <div *ngIf="verDetalles" class="modal-overlay">
     <div class="modal-content">
-      <span class="close" (click)="verDetalles=false">&times;</span>
+      <span class="close" (click)="verDetalles = false">&times;</span>
       <h2 class="section-title">Detalles del Plan Nutricional</h2>
       <div id="pdf-content"></div>
       <button class="btn-export mt-4" (click)="exportarPDF()">Exportar como PDF</button>

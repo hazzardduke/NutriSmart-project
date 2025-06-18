@@ -1,14 +1,28 @@
-$primary-color: #a1c037;
-$primary-hover: #88a134;
-$danger-color: #dc3545;
-$danger-hover: #c82333;
-$white: #fff;
-$gray-light: #f9f9f9;
-$gray-lighter: #f0f0f0;
-$gray-dark: #333;
-$gray-mid: #666;
-$overlay-bg: rgba(0, 0, 0, 0.6);
-$font-ui: 'Segoe UI', sans-serif;
+
+input[type="number"] {
+  -moz-appearance: textfield;  
+  -webkit-appearance: none;    
+  appearance: none;             
+}
+
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;    
+  appearance: none;            
+  margin: 0;
+}
+
+$primary-color:   #a1c037;
+$primary-hover:   #88a134;
+$danger-color:    #dc3545;
+$danger-hover:    #c82333;
+$white:           #fff;
+$gray-light:      #f9f9f9;
+$gray-lighter:    #f0f0f0;
+$gray-dark:       #333;
+$gray-mid:        #666;
+$overlay-bg:      rgba(0, 0, 0, 0.6);
+$font-ui:         'Segoe UI', sans-serif;
 
 .popup {
   position: fixed;
@@ -156,6 +170,7 @@ $font-ui: 'Segoe UI', sans-serif;
     padding: 0.3rem 0.7rem;
     border-radius: 4px;
     cursor: pointer;
+    margin-top: 1rem;
 
     &:hover {
       background: $primary-hover;
@@ -315,6 +330,32 @@ $font-ui: 'Segoe UI', sans-serif;
         position: relative;
         top: -24px;
         z-index: 4;
+      }
+
+      .progreso-input {
+        margin-top: 0.75rem;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;  
+        gap: 0.5rem;
+
+        label {
+          font-weight: bold;
+          color: $gray-dark;
+        }
+
+        .input-progreso {
+          width: 4rem;
+          padding: 0.4rem 0.6rem;
+          border: 1px solid #ccc;
+          border-radius: 4px;
+          font-size: 0.95rem;
+          text-align: right;
+        }
+
+        .btn-action {
+          margin-top: 0;
+        }
       }
     }
   }
