@@ -62,7 +62,7 @@
           </div>
           <input type="range" min="0" max="100" [value]="obj.progreso"
                  (input)="actualizarProgreso(obj, $event)" class="range-hidden" />
-          <button class="btn-action" (click)="eliminarObjetivo(obj)">Eliminar</button>
+          <button class="btn-action" (click)="eliminarObjetivo(obj)">Completar</button>
         </div>
       </div>
       <div *ngIf="tabInterno==='recomendaciones'">
