@@ -15,60 +15,44 @@
 
     <!-- Si NO está autenticado, mostramos el formulario -->
     <form
-      *ngIf="!isAuthenticated"
-      #loginForm="ngForm"
-      (ngSubmit)="login(loginForm)"
-      novalidate
-      class="login-form"
-    >
-      <label for="correo">Correo electrónico</label>
-      <input
-        type="email"
-        id="correo"
-        name="correo"
-        [(ngModel)]="form.correo"
-        #correo="ngModel"
-        required
-        email
-        (input)="clearError()"
-        (ngModelChange)="clearError()"
-      />
-      <div *ngIf="correo.invalid && correo.touched" class="error">
-        <small *ngIf="correo.errors?.['required']">El correo es obligatorio</small>
-        <small *ngIf="correo.errors?.['email']">Formato inválido</small>
-      </div>
-
-      <label for="password">Contraseña</label>
-      <input
-        type="password"
-        id="password"
-        name="password"
-        [(ngModel)]="form.password"
-        #password="ngModel"
-        required
-        minlength="8"
-        (input)="clearError()"
-        (ngModelChange)="clearError()"
-        
-      />
-      <div *ngIf="password.invalid && password.touched" class="error">
-        <small *ngIf="password.errors?.['required']">La contraseña es obligatoria</small>
-        <small *ngIf="password.errors?.['minlength']">Mínimo 8 caracteres.</small>
-      </div>
-
-      <button
-        type="submit"
-        class="btn login-btn"
-        [disabled]="loginForm.invalid"
-      >
-        Iniciar Sesión
-      </button>
-
-     
+    *ngIf="!isAuthenticated"
+    #loginForm="ngForm"
+    (ngSubmit)="login(loginForm)"
+    novalidate
+    class="login-form"
+  >
+    <!-- correo -->
+    <input
+      type="email"
+      name="correo"
+      [(ngModel)]="form.correo"
+      required
+      email
+    />
+  
+    <!-- contraseña -->
+    <input
+      type="password"
+      name="password"
+      [(ngModel)]="form.password"
+      required
+      minlength="8"
+    />
+  
+    <button type="submit" class="btn login-btn" [disabled]="loginForm.invalid">
+      Iniciar Sesión
+    </button>
+  
+      <!-- Mensaje de error -->
       <div *ngIf="error" class="error global-error">
         {{ error }}
       </div>
-    </form>
+      <!-- Mensaje de info (para admin) -->
+      <div *ngIf="infoMessage" class="info global-info center">
+        {{ infoMessage }}
+      </div>
+  </form>
+  
 
     
     <div *ngIf="isAuthenticated" class="login-actions">
