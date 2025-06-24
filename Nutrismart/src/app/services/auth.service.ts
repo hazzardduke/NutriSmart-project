@@ -1,3 +1,4 @@
+// src/app/services/auth.service.ts
 import { inject, Injectable } from '@angular/core';
 import {
   Auth,
@@ -23,7 +24,7 @@ import {
 } from '@angular/fire/firestore';
 import { Observable, from, of } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
-import type { User, UserCredential, Auth as FirebaseAuth, IdTokenResult } from 'firebase/auth';
+import type { User, UserCredential, IdTokenResult } from 'firebase/auth';
 
 export interface NewUserProfile {
   cedula: string;
@@ -44,7 +45,7 @@ export class AuthService {
   user$: Observable<User | null> = user(this.auth);
   isAuthenticated$: Observable<boolean> = authState(this.auth).pipe(map(u => !!u));
 
-  // Para leer custom claims
+  // Para leer custom claims si los tuvieses
   idTokenResult$: Observable<IdTokenResult | null> = this.user$.pipe(
     switchMap(u => u ? from(u.getIdTokenResult()) : of(null))
   );
@@ -59,7 +60,31 @@ export class AuthService {
     return signOut(this.auth);
   }
 
-  /** Enviar magic-link (solo admin) */
+  /** Registrar en Auth y Firestore */
+  async register(profile: NewUserProfile, plainPassword: string): Promise<void> {
+    const cred: UserCredential = await createUserWithEmailAndPassword(
+      this.auth,
+      profile.correo,
+      plainPassword
+    );
+    const uid = cred.user.uid;
+    await setDoc(doc(this.firestore, 'users', uid), {
+      ...profile,
+      createdAt: new Date()
+    });
+    await sendEmailVerification(cred.user);
+  }
+
+  /** Obtener perfil de Firestore por correo */
+  async getUserProfileByEmail(email: string): Promise<NewUserProfile> {
+    const usersRef = collection(this.firestore, 'users');
+    const q = query(usersRef, where('correo', '==', email));
+    const snap = await getDocs(q);
+    if (snap.empty) throw new Error('Usuario no encontrado en perfiles');
+    return snap.docs[0].data() as NewUserProfile;
+  }
+
+  /** Enviar enlace mágico (solo admin) */
   sendSignInLink(email: string): Promise<void> {
     return sendSignInLinkToEmail(this.auth, email, {
       url: window.location.origin + '/login',
@@ -82,27 +107,12 @@ export class AuthService {
     return sendPasswordResetEmail(this.auth, email);
   }
 
-  /** Registrar un usuario en Firebase Auth y en Firestore */
-  async register(profile: NewUserProfile, plainPassword: string): Promise<void> {
-    const cred: UserCredential = await createUserWithEmailAndPassword(
-      this.auth,
-      profile.correo,
-      plainPassword
-    );
-    const uid = cred.user.uid;
-    await setDoc(doc(this.firestore, 'users', uid), {
-      ...profile,
-      createdAt: new Date()
-    });
-    await sendEmailVerification(cred.user);
-  }
-
-  /** Obtener perfil de Firestore por correo */
-  async getUserProfileByEmail(email: string): Promise<NewUserProfile> {
-    const usersRef = collection(this.firestore, 'users');
-    const q = query(usersRef, where('correo', '==', email));
-    const snap = await getDocs(q);
-    if (snap.empty) throw new Error('Usuario no encontrado en perfiles');
-    return snap.docs[0].data() as NewUserProfile;
+  /** Reenviar correo de verificación al usuario autenticado */
+  resendEmailVerification(): Promise<void> {
+    const user = this.auth.currentUser;
+    if (!user) {
+      return Promise.reject('No hay ningún usuario autenticado.');
+    }
+    return sendEmailVerification(user);
   }
 }

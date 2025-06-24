@@ -1,7 +1,8 @@
-/* Variables de color */
-$verde-oliva:   #a1c037;
-$naranja:       #FF6600;
-$gris-texto:    #6b6b6b;
+@use 'sass:color';
+
+$verde-oliva: #a1c037;
+$naranja:     #FF6600;
+$gris-texto:  #6b6b6b;
 
 .verify-wrapper {
   display: flex;
@@ -9,7 +10,6 @@ $gris-texto:    #6b6b6b;
   align-items: center;
   min-height: 100vh;
   background: #f4f4f4;
-  font-family: 'Roboto', sans-serif;
   padding: 1rem;
 }
 
@@ -17,7 +17,7 @@ $gris-texto:    #6b6b6b;
   background: white;
   border-radius: 12px;
   padding: 2rem;
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 8px 16px rgba(0,0,0,0.1);
   max-width: 400px;
   width: 100%;
 
@@ -26,6 +26,7 @@ $gris-texto:    #6b6b6b;
     color: #3e372d;
     text-align: center;
   }
+
   p {
     color: $gris-texto;
     margin-bottom: 1.5rem;
@@ -45,7 +46,7 @@ $gris-texto:    #6b6b6b;
     margin-bottom: 1rem;
 
     &:hover {
-      background: darken($naranja, 10%);
+      background: color.adjust($naranja, $lightness: -10%);
     }
   }
 
@@ -75,7 +76,7 @@ $gris-texto:    #6b6b6b;
 
       &:hover {
         text-decoration: underline;
-        color: lighten($verde-oliva, 10%);
+        color: color.adjust($verde-oliva, $lightness: 10%);
       }
     }
   }

@@ -1,18 +1,28 @@
-<!-- app.component.html -->
-<ng-container *ngIf="auth.isAuthenticated$ | async; else loginTemplate">
-  <div class="wrapper">
-    <nav id="sidebar" class="sidebar">
-      <app-sidebar></app-sidebar>
-    </nav>
-    <div id="content" class="content">
-      <app-header></app-header>
-      <main class="main-content">
-        <router-outlet></router-outlet>
-      </main>
+<ng-container *ngIf="isAuthenticated; else loginTpl">
+
+  <ng-container *ngIf="isVerified; else verifyTpl">
+    <div class="wrapper">
+      <nav id="sidebar" class="sidebar">
+        <app-sidebar></app-sidebar>
+      </nav>
+      <div id="content" class="content">
+        <app-header></app-header>
+        <main class="main-content">
+          <router-outlet></router-outlet>
+        </main>
+      </div>
     </div>
-  </div>
+  </ng-container>
+
 </ng-container>
 
-<ng-template #loginTemplate>
+<ng-template #loginTpl>
   <router-outlet></router-outlet>
+</ng-template>
+
+<ng-template #verifyTpl>
+  <div class="verify-notice">
+    ⚠️ Debes verificar tu correo antes de acceder al sistema.
+  </div>
+  <app-verify-email-request></app-verify-email-request>
 </ng-template>

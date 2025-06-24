@@ -1,20 +1,18 @@
-// src/app/core/login/verify-email-request.component.ts
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router, RouterLink } from '@angular/router';
-import { AuthService } from '../services/auth.service';
-
+import { Router }       from '@angular/router';
+import { AuthService }  from '../services/auth.service';
 
 @Component({
   selector: 'app-verify-email-request',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [ CommonModule ],
   templateUrl: './verify-email-request.component.html',
   styleUrls: ['./verify-email-request.component.scss']
 })
 export class VerifyEmailRequestComponent {
   message = '';
-  error = '';
+  error   = '';
 
   constructor(
     private auth: AuthService,
@@ -23,17 +21,15 @@ export class VerifyEmailRequestComponent {
 
   resend(): void {
     this.message = '';
-    this.error = '';
+    this.error   = '';
     this.auth.resendEmailVerification()
-      .then(() => {
-        this.message = 'Correo de verificación reenviado. Revisa tu bandeja de entrada.';
-      })
-      .catch(() => {
-        this.error = 'No se pudo reenviar el correo. Intenta más tarde.';
-      });
+      .then(() => this.message = 'Correo de verificación reenviado. Revisa tu bandeja de entrada.')
+      .catch(() => this.error = 'No se pudo reenviar el correo. Intenta más tarde.');
   }
 
   goToLogin(): void {
-    this.router.navigateByUrl('/login');
+    this.auth.logout().then(() => {
+      this.router.navigateByUrl('/login');
+    });
   }
 }

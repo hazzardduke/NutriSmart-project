@@ -1,18 +1,8 @@
 body {
-    font-family: 'Roboto', sans-serif;
-    background-color: #f8f9fa;
-  }
-  
-  #wrapper {
-    display: flex;
-    align-items: stretch;
-  }
-  
-  #page-content-wrapper {
-    flex: 1;
-    overflow-x: hidden;
-  }
-  
+  font-family: 'Roboto', sans-serif;
+  background-color: #f8f9fa;
+}
+
 :host {
   display: block;
   height: 100vh;
@@ -51,6 +41,19 @@ body {
   background: #f4f6f9;
 }
 
+/* Banner de verificación */
+.verify-notice {
+  background-color: #fff3cd;
+  border: 1px solid #ffeeba;
+  color: #856404;
+  padding: 1rem;
+  margin: 1rem auto;
+  border-radius: 4px;
+  max-width: 400px;
+  text-align: center;
+  font-weight: 500;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   .sidebar {
@@ -59,15 +62,14 @@ body {
       margin-left: 0;
     }
   }
-  
+
   .content {
     width: 100%;
     margin-left: 0;
   }
-  
+
   .content.active {
     width: calc(100% - 250px);
     margin-left: 250px;
   }
 }
-  
