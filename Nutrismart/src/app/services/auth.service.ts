@@ -2,6 +2,7 @@ import { inject, Injectable } from '@angular/core';
 import {
   Auth,
   createUserWithEmailAndPassword,
+  sendEmailVerification,
   signInWithEmailAndPassword,
   signOut,
   sendPasswordResetEmail,
@@ -40,25 +41,45 @@ export class AuthService {
     return signInWithEmailAndPassword(this.auth, email, password).then(() => {});
   }
 
-  /** nuevo */
+  /** nuevo 16 */
    sendPasswordReset(email: string): Promise<void> {
     return sendPasswordResetEmail(this.auth, email);
   }
 
+
+   /** nuevo 17 */
   register(profile: NewUserProfile, plainPassword: string): Promise<void> {
     return createUserWithEmailAndPassword(this.auth, profile.correo, plainPassword)
       .then((cred: UserCredential) => {
-
         const uid = cred.user.uid;
+   
         return setDoc(doc(this.firestore, 'users', uid), {
           ...profile,
           uid,
           createdAt: new Date()
-        });
+        })
+        .then(() => cred.user);
+      })
+      .then(user => {
+        // esto envia el email de verificacion
+        return sendEmailVerification(user);
       })
       .then(() => {});
   }
 
+
+   /** nuevo 17 para reenviar el email de verificacion en caso de algun
+    * error y que el usuario no tenga que volver a registrarse
+   */
+ resendEmailVerification(): Promise<void> {
+    const u = this.auth.currentUser;
+    if (!u) {
+      return Promise.reject('No hay ningún usuario autenticado.');
+    }
+    return sendEmailVerification(u);
+  }
+
+  
   logout(): Promise<void> {
     return signOut(this.auth);
   }

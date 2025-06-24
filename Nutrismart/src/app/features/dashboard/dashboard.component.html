@@ -1,28 +1,132 @@
 <div class="dashboard-container">
-  <h2>Dashboard de Cliente</h2>
-
-  <div class="card">
-    <h5>Progreso Nutricional</h5>
-    <p>Detalles del progreso...</p>
+  <div class="dashboard-header">
+    <h1 class="dashboard-title">
+      <i class="fa fa-home"></i>
+      Dashboard de Cliente
+    </h1>
   </div>
 
-  <div class="card">
-    <h5>Próximas Citas</h5>
-    <p>Citas programadas en los próximos 7 días: <strong>[Fecha y Hora]</strong></p>
+  <div class="dashboard-grid">
+    <section class="dashboard-card compo-card">
+      <h2 class="card-title">
+        <i class="fa fa-tint"></i>
+        Composición Corporal
+      </h2>
+      <ng-container *ngIf="profile$ | async as p; else noProfile">
+        <p>Agua: {{ p.porcentajeAgua }}%</p>
+        <p>Grasa: {{ p.porcentajeGrasa }}%</p>
+        <p>Músculo: {{ p.porcentajeMusculo }}%</p>
+      </ng-container>
+      <ng-template #noProfile>
+        <p>No hay datos de composición.</p>
+      </ng-template>
+    </section>
+
+    <section class="dashboard-card appointment-card">
+      <h2 class="card-title">
+        <i class="fa fa-calendar-alt"></i>
+        Próximas Citas
+      </h2>
+      <ng-container *ngIf="appointments$ | async as appts; else noAppts">
+        <ul>
+          <li *ngFor="let a of appts">
+            <span class="appointment-date">
+              {{ a.datetime | date:'dd/MM/yyyy' }} a las
+              {{ a.datetime | date:'HH:mm' }}
+            </span>
+            <span class="status-{{ a.status }}">
+              {{ translateStatus(a.status) }}
+            </span>
+          </li>
+        </ul>
+      </ng-container>
+      <ng-template #noAppts>
+        <p>No tienes citas en los próximos 7 días.</p>
+      </ng-template>
+    </section>
+
+    <section class="dashboard-card recs-card">
+      <h2 class="card-title">
+        <i class="fa fa-sticky-note"></i>
+        Recomendaciones Recientes
+      </h2>
+      <ng-container *ngIf="recs$ | async as recs; else noRecs">
+        <ul class="recs-list">
+          <li *ngFor="let r of recs">
+            <span class="text">{{ r.shortText }}</span>
+            <a
+              [routerLink]="['/profile','recommendations', r.id]"
+              class="detail-link"
+            >
+              Ver detalle
+            </a>
+          </li>
+        </ul>
+      </ng-container>
+      <ng-template #noRecs>
+        <p class="no-recs">Aún no tienes recomendaciones.</p>
+      </ng-template>
+    </section>
+
+    <section class="dashboard-card goals-card">
+      <h2 class="card-title">
+        <i class="fa fa-bullseye"></i>
+        Objetivos
+      </h2>
+      <ng-container *ngIf="goals$ | async as goals; else noGoals">
+        <ul class="goals-list">
+          <li *ngFor="let g of goals">
+            <span>{{ g.tipo }}</span>
+            <span class="goal-progress">{{ g.progreso }}%</span>
+          </li>
+        </ul>
+      </ng-container>
+      <ng-template #noGoals>
+        <p>No tienes objetivos.</p>
+      </ng-template>
+    </section>
+
+    <section class="dashboard-card links-card">
+      <h2 class="card-title">
+        <i class="fa fa-link"></i>
+        Accesos Rápidos
+      </h2>
+      <div class="quick-links">
+        <a routerLink="/profile" class="quick-link">
+          <i class="fa fa-id-card"></i> Expediente
+        </a>
+        <a routerLink="/appoinments" class="quick-link">
+          <i class="fa fa-calendar-alt"></i> Citas
+        </a>
+        <a routerLink="/chatbot" class="quick-link">
+          <i class="fa fa-comments"></i> Chatbot
+        </a>
+      </div>
+    </section>
   </div>
-
-  <div class="card">
-    <h5>Recomendaciones Recientes</h5>
-    <p>Consulta las últimas recomendaciones de tu nutricionista.</p>
-    <a href="#" class="btn btn-outline-primary">Ver detalles</a>
-  </div>
-
-
-  <!-- <button class="chatbot-button" (click)="toggleChatbot()">
-    <img src="assets/images/bot-icon.png" alt="Chatbot">
-  </button> -->
-
-  <!-- <div *ngIf="chatbotVisible" class="chatbot-container">
-    <app-chatbot (closeChatbot)="toggleChatbot()"></app-chatbot>
-  </div> -->
 </div>
+
+<footer class="dashboard-footer">
+  <div class="footer-social">
+    <a
+      href="https://www.instagram.com/nutritiontogo?igsh=dHdxb3hjaGc3OXZ4"
+      target="_blank" rel="noopener" aria-label="Instagram"
+    >
+      <i class="fab fa-instagram"></i>
+    </a>
+    <a
+      href="https://www.facebook.com/share/14DNuiXcWy1/?mibextid=wwXIfr"
+      target="_blank" rel="noopener" aria-label="Facebook"
+    >
+      <i class="fab fa-facebook"></i>
+    </a>
+  </div>
+  <div class="footer-contact">
+    <a href="tel:87296097" aria-label="Llamar">
+      <i class="fa fa-phone"></i> 87296097
+    </a>
+    <a href="mailto:info.nutritiontogo&#64;gmail.com" aria-label="Email">
+      <i class="fa fa-envelope"></i> info.nutritiontogo&#64;gmail.com
+    </a>
+  </div>
+</footer>

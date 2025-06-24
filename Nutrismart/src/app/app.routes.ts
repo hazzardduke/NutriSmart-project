@@ -8,11 +8,13 @@ import { PersonalrecordComponent } from './core/client/personalrecord/personalre
 import { AppointmentsComponent }   from './features/appointments/appointments.component';
 import { GoalsComponent }          from './features/goals/goals.component';
 import { ResetPasswordRequestComponent } from './reset-password-request/reset-password-request.component';
+import { VerifyEmailRequestComponent } from './verify-email-request/verify-email-request.component';
 
 export const routes: Routes = [
   // públicas
   { path: 'login',    component: LoginComponent },
   { path: 'register', component: RegisterComponent },
+
 
   // protegidas, sin layout extra (AppComponent ya las envuelve)
   {
@@ -28,6 +30,7 @@ export const routes: Routes = [
     ]
   },
   { path: 'reset-password', component: ResetPasswordRequestComponent },
+  { path: 'verify-email', component: VerifyEmailRequestComponent },
   // wildcard
   { path: '**', redirectTo: 'login' }
 ];
