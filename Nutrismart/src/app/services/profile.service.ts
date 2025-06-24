@@ -18,24 +18,22 @@ export interface UserProfileData {
   restricciones?: string;
   fotoURL?: string;
   fechaActualizacion?: string;
-
+  role?: 'cliente' | 'admin' | 'nutricionista';  // <-- agregado
 }
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable({ providedIn: 'root' })
 export class ProfileService {
   private firestore = inject(Firestore);
   private storage   = inject(Storage);
 
   private profileSubject = new BehaviorSubject<UserProfileData | null>(null);
 
-  // 🔁 Exponer el observable reactivo
+  /** Observable para suscribirse al perfil */
   getProfileObservable(): Observable<UserProfileData | null> {
     return this.profileSubject.asObservable();
   }
 
-  // 🟢 Obtener el perfil y emitirlo automáticamente
+  /** Lee el perfil desde Firestore y emite por el subject */
   getProfile(uid: string): Observable<UserProfileData> {
     const refDoc = doc(this.firestore, `users/${uid}`);
     return docData(refDoc).pipe(
@@ -44,18 +42,17 @@ export class ProfileService {
     );
   }
 
-  // 🟢 Actualizar el perfil y emitir el nuevo valor
+  /** Actualiza campos del perfil y reemite el perfil actualizado */
   async updateProfile(uid: string, data: Partial<UserProfileData>): Promise<void> {
     const refDoc = doc(this.firestore, `users/${uid}`);
     const now = new Date().toISOString();
     await setDoc(refDoc, { ...data, fechaActualizacion: now }, { merge: true });
-
-    // Emitir nueva versión del perfil manualmente después del update
-    const updatedRef = doc(this.firestore, `users/${uid}`);
-    const updatedProfile = await docData(updatedRef).toPromise();
-    this.profileSubject.next(updatedProfile as UserProfileData);
+    // Leer y emitir perfil actualizado
+    const updated = await docData(refDoc).pipe(filter(Boolean)).toPromise();
+    this.profileSubject.next(updated as UserProfileData);
   }
 
+  /** Sube foto y retorna la URL */
   uploadPhoto(uid: string, file: Blob): Observable<string> {
     const storageRef = ref(this.storage, `profiles/${uid}`);
     return from(uploadBytes(storageRef, file)).pipe(

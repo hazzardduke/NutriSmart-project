@@ -1,9 +1,10 @@
-import { Component, OnInit } from '@angular/core';
+// src/app/core/header/header.component.ts
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
-import { AuthService } from '../../services/auth.service';
-import { ProfileService } from '../../services/profile.service';
 import { Subscription } from 'rxjs';
+import { AuthService } from '../../services/auth.service';
+import { ProfileService, UserProfileData } from '../../services/profile.service';
 
 @Component({
   selector: 'app-header',
@@ -12,12 +13,12 @@ import { Subscription } from 'rxjs';
   templateUrl: './header.component.html',
   styleUrls: ['./header.component.scss']
 })
-export class HeaderComponent implements OnInit {
+export class HeaderComponent implements OnInit, OnDestroy {
   isUserMenuOpen = false;
   photoURL: string | null = null;
-  private uid!: string;
+  userName = '';
+  userRole = '';
   private subs = new Subscription();
-  userName: string = 'Invitado';
 
   constructor(
     private auth: AuthService,
@@ -27,34 +28,26 @@ export class HeaderComponent implements OnInit {
 
   ngOnInit(): void {
     this.subs.add(
-      this.profileService.getProfileObservable().subscribe(profile => {
-        this.photoURL = profile?.fotoURL || 'assets/images/logo.jpeg';
-        this.userName = profile?.nombre || 'Invitado';
-      })
-    );
-  
-    this.subs.add(
-      this.auth.user$.subscribe(user => {
-        if (user) {
-          this.uid = user.uid;
-          this.profileService.getProfile(this.uid).subscribe(); // activa la emisión inicial
-        }
+      this.profileService.getProfileObservable().subscribe((p: UserProfileData|null) => {
+        this.photoURL = p?.fotoURL || 'assets/images/logo.jpeg';
+        this.userName = p?.nombre || '';
+        this.userRole = p?.role || '';
       })
     );
   }
-  
-  
 
   toggleUserMenu() {
     this.isUserMenuOpen = !this.isUserMenuOpen;
   }
 
   logout() {
-    this.auth.logout()
-      .then(() => {
-        this.isUserMenuOpen = false;
-        this.router.navigate(['/login']);
-      })
-      .catch(err => console.error('Error al cerrar sesión', err));
+    this.auth.logout().then(() => {
+      this.isUserMenuOpen = false;
+      this.router.navigate(['/login']);
+    });
+  }
+
+  ngOnDestroy() {
+    this.subs.unsubscribe();
   }
 }

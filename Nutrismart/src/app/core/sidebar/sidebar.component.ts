@@ -1,13 +1,24 @@
-import { Component } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
+import { ProfileService, UserProfileData } from '../../services/profile.service';
+
 @Component({
   selector: 'app-sidebar',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [
+    CommonModule,
+    RouterModule    // necesario para routerLink y routerLinkActive
+  ],
   templateUrl: './sidebar.component.html',
-  styleUrl: './sidebar.component.scss'
+  styleUrls: ['./sidebar.component.scss']
 })
-export class SidebarComponent {
+export class SidebarComponent implements OnInit {
+  profile: UserProfileData | null = null;
 
+  constructor(private ps: ProfileService) {}
+
+  ngOnInit() {
+    this.ps.getProfileObservable().subscribe(p => this.profile = p);
+  }
 }

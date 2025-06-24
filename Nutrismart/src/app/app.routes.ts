@@ -1,35 +1,72 @@
 // src/app/app.routes.ts
 import { Routes } from '@angular/router';
-import { LoginComponent }    from './core/login/login.component';
-import { RegisterComponent } from './core/register/register.component';
-import { ResetPasswordRequestComponent } from './reset-password-request/reset-password-request.component';
-import { DashboardComponent } from './features/dashboard/dashboard.component';
-import { PersonalrecordComponent } from './core/client/personalrecord/personalrecord.component';
-import { AppointmentsComponent }   from './features/appointments/appointments.component';
-import { GoalsComponent }          from './features/goals/goals.component';
+
 import { authGuard } from './guards/auth.guard';
-import { VerifyEmailRequestComponent } from './verify-email-request/verify-email-request.component';
+import { roleGuard } from './guards/role.guard';
+
+import { LoginComponent }             from './core/login/login.component';
+import { RegisterComponent }          from './core/register/register.component';
+import { DashboardComponent }         from './features/dashboard/dashboard.component';        // tu dashboard cliente
+import { DashboardAdminComponent }    from './features/dashboard-admin/dashboard-admin.component';
+import { DashboardNutricionistaComponent } from './features/dashboard-nutricionista/dashboard-nutricionista.component';
+
+import { PersonalrecordComponent }    from './core/client/personalrecord/personalrecord.component';
+import { AppointmentsComponent }      from './features/appointments/appointments.component';
+import { GoalsComponent }             from './features/goals/goals.component';
 
 export const routes: Routes = [
   { path: 'login',    component: LoginComponent },
   { path: 'register', component: RegisterComponent },
-  { path: 'reset-password', component: ResetPasswordRequestComponent },
 
-
-  // protegidas, sin layout extra (AppComponent ya las envuelve)
   {
     path: '',
     canActivate: [ authGuard ],
     children: [
-      { path: '',            component: DashboardComponent,    pathMatch: 'full' },
-      { path: 'profile',     component: PersonalrecordComponent },
-      { path: 'appoinments',component: AppointmentsComponent  },
-      { path: 'goals',       component: GoalsComponent         },
+      // Cliente: tu DashboardComponent existente
+      {
+        path: '',
+        component: DashboardComponent,
+        pathMatch: 'full',
+        canActivate: [ roleGuard ],
+        data: { role: 'cliente' }
+      },
+      {
+        path: 'profile',
+        component: PersonalrecordComponent,
+        canActivate: [ roleGuard ],
+        data: { role: 'cliente' }
+      },
+      {
+        path: 'appoinments',
+        component: AppointmentsComponent,
+        canActivate: [ roleGuard ],
+        data: { role: 'cliente' }
+      },
+      {
+        path: 'goals',
+        component: GoalsComponent,
+        canActivate: [ roleGuard ],
+        data: { role: 'cliente' }
+      },
+
+      // Admin
+      {
+        path: 'dashboard-admin',
+        component: DashboardAdminComponent,
+        canActivate: [ roleGuard ],
+        data: { role: 'admin' }
+      },
+
+      // Nutricionista
+      {
+        path: 'dashboard-nutricionista',
+        component: DashboardNutricionistaComponent,
+        canActivate: [ roleGuard ],
+        data: { role: 'nutricionista' }
+      },
     ]
   },
 
-  { path: 'reset-password', component: ResetPasswordRequestComponent },
-  { path: 'verify-email', component: VerifyEmailRequestComponent },
-  // wildcard
+  // fallback
   { path: '**', redirectTo: 'login' }
 ];

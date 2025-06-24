@@ -1,71 +1,59 @@
 <div class="sidebar-content">
-  <!-- Logo -->
   <div class="sidebar-header">
-    <img src="assets/images/logo.jpeg" alt="NutriSmart Logo" class="logo">
+    <img src="assets/images/logo.jpeg" class="logo" alt="Logo NutriSmart">
     <h3>NutriSmart</h3>
   </div>
 
-  <!-- Navigation -->
   <nav class="sidebar-nav">
     <ul class="nav-list">
-      <li class="nav-item">
-        <a routerLink="/" routerLinkActive="active" class="nav-link">
+
+      <!-- Cliente -->
+      <li *ngIf="profile?.role==='cliente'" class="nav-item">
+        <a
+          routerLink="/"
+          routerLinkActive="active"
+          [routerLinkActiveOptions]="{ exact: true }"
+          class="nav-link"
+        >
           <i class="fas fa-home"></i>
           <span>Dashboard</span>
         </a>
       </li>
-      <!-- <li class="nav-item">
-        <a routerLink="/dashboard-admin" routerLinkActive="active" class="nav-link">
-          <i class="fas fa-home"></i>
-          <span>Dashboard Admin</span>
-        </a>
-      </li> -->
-      <li class="nav-item">
+      <li *ngIf="profile?.role==='cliente'" class="nav-item">
         <a routerLink="/profile" routerLinkActive="active" class="nav-link">
           <i class="fas fa-user"></i>
           <span>Perfil</span>
         </a>
       </li>
-      <li class="nav-item">
+      <li *ngIf="profile?.role==='cliente'" class="nav-item">
         <a routerLink="/appoinments" routerLinkActive="active" class="nav-link">
-          <i class="fas fa-calendar-alt me-2"></i>
+          <i class="fas fa-calendar-alt"></i>
           <span>Citas</span>
         </a>
       </li>
-      <li class="nav-item">
+      <li *ngIf="profile?.role==='cliente'" class="nav-item">
         <a routerLink="/goals" routerLinkActive="active" class="nav-link">
           <i class="fas fa-chart-line"></i>
           <span>Progreso</span>
         </a>
       </li>
-   
-      <!-- <li class="nav-item">
-        <a routerLink="/fidelity-management" routerLinkActive="active" class="nav-link">
-          <i class="fas fa-credit-card"></i>
-          <span>Gestión de Tarjetas de Fidelidad</span>
-        
+
+      <!-- Admin -->
+      <li *ngIf="profile?.role==='admin'" class="nav-item">
+        <a routerLink="/dashboard-admin" routerLinkActive="active" class="nav-link">
+          <i class="fas fa-tools"></i>
+          <span>Admin Panel</span>
         </a>
-      </li> -->
-      <!-- <li class="nav-item">
-        <a routerLink="/nutrional-plan" routerLinkActive="active" class="nav-link">
-          <i class="fas fa-utensils"></i>
-          <span> Gestión de Planes Nutricionales</span>
+      </li>
+
+      <!-- Nutricionista -->
+      <li *ngIf="profile?.role==='nutricionista'" class="nav-item">
+        <a routerLink="/dashboard-nutricionista" routerLinkActive="active" class="nav-link">
+          <i class="fas fa-apple-alt"></i>
+          <span>Nutricionista</span>
         </a>
-      </li> -->
-      <!-- <li class="nav-item">
-        <a routerLink="/client-management" routerLinkActive="active" class="nav-link">
-          <i class="fas fa-utensils"></i>
-          <span> Gestión de Clientes</span>
-        </a>
-      </li> -->
-      <!-- <li class="nav-item">
-        <a routerLink="/appoiments-managment" routerLinkActive="active" class="nav-link">
-          <i class="fas fa-calendar-alt me-2"></i>
-          <span>Gestión de Citas</span>
-        </a>
-      </li> -->
+      </li>
+
     </ul>
   </nav>
 </div>
-
-  

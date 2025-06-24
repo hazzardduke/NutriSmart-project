@@ -29,21 +29,21 @@ export class LoginComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     // 1) Si venimos de un magic link pendiente
     if ( this.auth.isSignInLink(window.location.href) ) {
-      let email = window.localStorage.getItem('emailForSignIn')!;
+      let email = window.localStorage.getItem('emailForSignIn') || '';
       if (!email) {
-        email = prompt('Introduce tu correo para completar el link:')!;
+        email = prompt('Introduce tu correo para completar el link:') || '';
       }
       this.auth.completeSignInWithLink(email, window.location.href)
         .then(() => {
           window.localStorage.removeItem('emailForSignIn');
-          // forzamos un reload completo para que AuthState esté ya listo
-          window.location.href = '/';
+          // Forzar recarga para inicializar la app ya autentificada
+          window.location.href = '/dashboard-admin';
         })
         .catch((e: any) => this.error = e.message);
-      return; // no queremos seguir mostrando el formulario
+      return;
     }
 
-    // 2) Sólo observamos authState para ocultar/mostrar el formulario
+    // 2) Observamos el estado de autenticación para mostrar el formulario
     this.sub = this.auth.isAuthenticated$.subscribe(
       logged => this.isAuthenticated = logged
     );
@@ -63,25 +63,31 @@ export class LoginComponent implements OnInit, OnDestroy {
     }
 
     try {
-      // 1) Buscamos perfil en Firestore
-      const profile: NewUserProfile = await this.auth.getUserProfileByEmail(this.form.correo);
+      // Obtenemos el perfil (incluye el role)
+      const profile: NewUserProfile =
+        await this.auth.getUserProfileByEmail(this.form.correo);
 
       if (profile.role === 'admin') {
-        // → magic link para admin
+        // Magic link para admin
         window.localStorage.setItem('emailForSignIn', this.form.correo);
         await this.auth.sendSignInLink(this.form.correo);
-        this.infoMessage =
-          'Eres administrador: te hemos enviado un enlace mágico a tu correo para iniciar sesión.';
+        this.infoMessage = 'Eres admin: revisa tu correo para el enlace mágico.';
+        return;
+      }
+
+      // Login normal (cliente o nutricionista)
+      await this.auth.login(this.form.correo, this.form.password);
+
+      // Redirigimos según el rol
+      if (profile.role === 'nutricionista') {
+        this.router.navigate(['/dashboard-nutricionista']);
       } else {
-        // → login con contraseña para cliente
-        await this.auth.login(this.form.correo, this.form.password);
-        // forzamos reload al home
-        window.location.href = '/';
+        // cliente
+        this.router.navigate(['/']);
       }
     } catch (err: any) {
-      console.error('Fallo login:', err);
       const code = (err as FirebaseError).code;
-      if (code === 'auth/invalid-credential' || code === 'auth/wrong-password') {
+      if (code === 'auth/wrong-password' || code === 'auth/invalid-credential') {
         this.error = 'Contraseña o correo incorrectos.';
       } else if (code === 'auth/user-not-found') {
         this.error = 'Usuario no registrado.';
@@ -95,10 +101,5 @@ export class LoginComponent implements OnInit, OnDestroy {
     this.auth.logout().then(() => {
       this.router.navigateByUrl('/login');
     });
-  }
-
-  clearError(): void {
-    this.error = '';
-    this.infoMessage = '';
   }
 }
