@@ -23,7 +23,7 @@ export const routes: Routes = [
     children: [
       { path: '',            component: DashboardComponent,    pathMatch: 'full' },
       { path: 'profile',     component: PersonalrecordComponent },
-      { path: 'appointments',component: AppointmentsComponent  },
+      { path: 'appoinments',component: AppointmentsComponent  },
       { path: 'goals',       component: GoalsComponent         },
     ]
   },
