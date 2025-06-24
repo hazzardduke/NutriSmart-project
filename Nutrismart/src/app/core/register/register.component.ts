@@ -49,7 +49,7 @@ export class RegisterComponent {
     this.auth.register(profile, this.form.password)
       .then(() => {
         this.mensaje = 'Cuenta creada correctamente.';
-        this.router.navigateByUrl('/');
+        this.router.navigateByUrl('/verify-email'); //corregido para verificar 17
       })
       .catch(err => {
         console.error('Error registrando:', err);

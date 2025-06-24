@@ -1,82 +1,275 @@
 .dashboard-container {
+  max-width: 1000px;
+  margin: 2rem auto;
   padding: 2rem;
-  background-color: #f8f9fa;
+  font-family: 'Roboto', sans-serif;
+}
 
-  h2 {
+.dashboard-header {
+  text-align: center;
+  margin-bottom: 1.5rem;
+
+  .dashboard-title {
+    display: inline-flex;
+    align-items: center;
     color: #3e372d;
-    margin-bottom: 1.5rem;
+    font-size: 1.8rem;
+    font-weight: 600;
+
+    i {
+      color: #a1c037;
+      margin-right: 0.5rem;
+      font-size: 1.5rem;
+    }
   }
+}
 
-  .card {
-    background-color: #fff;
-    border: 1px solid #dee2e6;
-    border-radius: 10px;
-    padding: 1.5rem;
-    margin-bottom: 1.5rem;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 1.5rem;
 
-    h5 {
+  .links-card {
+    @media (min-width: 768px) {
+      grid-column: span 2;
+    }
+  }
+}
+
+.dashboard-card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+  text-align: center;
+
+  .card-title {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #3e372d;
+    font-size: 1.4rem;
+    margin-bottom: 1rem;
+    font-weight: 600;
+
+    i {
+      color: #a1c037;
+      margin-right: 0.5rem;
+      font-size: 1.2rem;
+    }
+  }
+}
+
+.compo-card {
+  p {
+    margin: 0.5rem 0;
+    color: #6b6b6b;
+    font-size: 1rem;
+
+    strong {
       color: #3e372d;
-      margin-bottom: 0.5rem;
-    }
-
-    p {
-      color: #6c757d;
     }
   }
+}
 
-  .btn-outline-primary {
-    color: #a1c037;
-    border-color: #a1c037;
-    transition: background-color 0.3s ease, color 0.3s ease;
+.appointment-card {
+  ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #f7f7f7;
+    border-radius: 8px;
+    padding: 0.8rem 1rem;
+    margin-bottom: 0.8rem;
+    font-size: 0.95rem;
+    color: #3a312a;
+    transition: background 0.2s ease;
 
     &:hover {
-      background-color: #a1c037;
-      color: #fff;
+      background: #eaeaea;
+    }
+
+    .appointment-date {
+      font-weight: 500;
+    }
+
+    .status-confirmed {
+      color: #28a745;
+      font-weight: bold;
+    }
+
+    .status-canceled {
+      color: #e74c3c;
+      font-weight: bold;
     }
   }
+}
 
-  .chatbot-button {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    background: none;
-    border: none;
-    cursor: pointer;
-    z-index: 1000;
+.recs-card {
+  .recs-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
 
-    img {
-      width: 60px;
-      height: 60px;
-      transition: transform 0.3s ease, opacity 0.3s ease;
+    li {
+      display: flex;
+      justify-content: space-between;
+      padding: 0.5rem 0;
+      border-bottom: 1px solid #eee;
+
+      .text {
+        color: #6b6b6b;
+      }
+
+      .detail-link {
+        color: #a1c037;
+        font-weight: 500;
+        text-decoration: none;
+
+        &:hover {
+          text-decoration: underline;
+        }
+      }
+
+      &:last-child {
+        border-bottom: none;
+      }
+    }
+  }
+}
+
+.goals-card {
+  .goals-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+
+    li {
+      display: flex;
+      justify-content: space-between;
+      padding: 0.5rem 0;
+      border-bottom: 1px solid #eee;
+      font-size: 1rem;
+
+      .goal-progress {
+        color: #a1c037;
+        font-weight: bold;
+      }
+
+      &:last-child {
+        border-bottom: none;
+      }
+    }
+  }
+}
+
+.links-card {
+  .quick-links {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+
+    .quick-link {
+      display: flex;
+      align-items: center;
+      padding: 0.6rem 1rem;
+      background: #f7f7f7;
+      color: #3e372d;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: 500;
+      transition: background 0.3s ease;
+
+      i {
+        margin-right: 0.5rem;
+        color: #a1c037;
+      }
 
       &:hover {
-        transform: scale(1.1);
-        opacity: 0.8;
+        background: #eaeaea;
+      }
+    }
+  }
+}
+
+.dashboard-footer {
+  width: 100%;
+  box-sizing: border-box;
+  background-color: #3e372d;
+  color: #fff;
+  text-align: center;
+  padding: 1rem 0;
+
+  .footer-social {
+    margin-bottom: 0.75rem;
+
+    a {
+      color: #fff;
+      margin: 0 0.5rem;
+      font-size: 1.5rem;
+      transition: color 0.2s ease;
+
+      &:hover {
+        color: #a1c037;
       }
     }
   }
 
-  @media (max-width: 768px) {
-    .chatbot-button {
-      bottom: 15px;
-    }
+  .footer-contact {
+    display: flex;
+    justify-content: center;
+    gap: 1.5rem;
+    flex-wrap: wrap;
 
-    .chatbot-button img {
-      width: 50px;
-      height: 50px;
+    a {
+      color: #fff;
+      text-decoration: none;
+      font-size: 0.95rem;
+      display: inline-flex;
+      align-items: center;
+      transition: color 0.2s ease;
+
+      i {
+        margin-right: 0.4rem;
+      }
+
+      &:hover {
+        color: #a1c037;
+      }
+    }
+  }
+}
+
+@media (max-width: 600px) {
+  .dashboard-container {
+    padding: 1rem;
+  }
+
+  .dashboard-header .dashboard-title {
+    font-size: 1.5rem;
+  }
+
+  .dashboard-card {
+    padding: 1rem;
+
+    .card-title {
+      font-size: 1.2rem;
     }
   }
 
-  @media (max-width: 480px) {
-    .chatbot-button {
-      bottom: 10px;
-      right: 10px;
+  .dashboard-footer {
+    .footer-social a {
+      font-size: 1.3rem;
+      margin: 0 0.3rem;
     }
-
-    .chatbot-button img {
-      width: 40px;
-      height: 40px;
+    .footer-contact a {
+      font-size: 0.9rem;
     }
   }
 }

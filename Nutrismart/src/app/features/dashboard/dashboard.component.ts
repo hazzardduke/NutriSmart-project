@@ -1,26 +1,51 @@
-import { Component } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
-import { AuthService } from '../../services/auth.service';
-
+import { Component, OnInit } from '@angular/core';
+import {
+  CommonModule,
+  NgIf,
+  NgForOf,
+  AsyncPipe,
+  DatePipe
+} from '@angular/common';
+import { RouterLink } from '@angular/router';
+import {
+  DashboardClientService,
+  UserProfile,
+  Appointment,
+  Recommendation,
+  Goal
+} from '../../services/dashboard-client.service';
+import { Observable } from 'rxjs';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [
+    CommonModule,
+    NgIf,
+    NgForOf,
+    AsyncPipe,
+    DatePipe,
+    RouterLink
+  ],
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.scss']
 })
-export class DashboardComponent {
-  chatbotVisible = false;
+export class DashboardComponent implements OnInit {
+  profile$!: Observable<UserProfile | null>;
+  appointments$!: Observable<Appointment[]>;
+  recs$!: Observable<Recommendation[]>;
+  goals$!: Observable<Goal[]>;
 
-  constructor(public auth: AuthService) {}
+  constructor(private svc: DashboardClientService) {}
 
-  // logout() {
-  //   this.auth.logout({ logoutParams: { returnTo: window.location.origin } });
-  // }
+  ngOnInit(): void {
+    this.profile$ = this.svc.getUserProfile();
+    this.appointments$ = this.svc.getUpcomingAppointments();
+    this.recs$ = this.svc.getRecentRecommendations();
+    this.goals$ = this.svc.getGoals();
+  }
 
-  toggleChatbot() {
-    this.chatbotVisible = !this.chatbotVisible;
+  translateStatus(s: 'confirmed' | 'canceled'): string {
+    return s === 'confirmed' ? 'Confirmada' : 'Cancelada';
   }
 }

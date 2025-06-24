@@ -1,10 +1,9 @@
-// src/app/guards/auth.guard.ts
 import { inject } from '@angular/core';
 import {
   CanActivateFn,
   Router
 } from '@angular/router';
-import { first, map } from 'rxjs/operators';
+import { map, take, first } from 'rxjs/operators';
 import { AuthService } from '../services/auth.service';
 
 export const authGuard: CanActivateFn = () => {
@@ -12,12 +11,18 @@ export const authGuard: CanActivateFn = () => {
   const router = inject(Router);
 
   return auth.user$.pipe(
-    // Espera la primera emisión (usuario u null)
-    first(),
-    // Si hay usuario, permite; si no, redirige a /login
-    map(u => u
-      ? true
-      : router.parseUrl('/login')
-    )
+    take(1),
+    map(user => {
+      // si esta logueado se va al /login (/)
+      if (!user) {
+        return router.parseUrl('/login');
+      }
+      // si esta logueado pero no ha verificado el email se va a /verify-email
+      if (!user.emailVerified) {
+        return router.parseUrl('/verify-email');
+      }
+      //si está logueado y verificado se permite el acceso
+      return true;
+    })
   );
 };
