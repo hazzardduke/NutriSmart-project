@@ -3,7 +3,7 @@ import { CommonModule }         from '@angular/common';
 import { FormsModule, NgForm }  from '@angular/forms';
 import { Router, RouterLink }   from '@angular/router';
 import type { FirebaseError }   from 'firebase/app';
-import { AuthService } from '../services/auth.service';
+import { AuthService }          from '../services/auth.service';
 
 @Component({
   selector: 'app-reset-password-request',
@@ -23,35 +23,28 @@ export class ResetPasswordRequestComponent {
   ) {}
 
   sendRequest(form: NgForm): void {
-  
-    if (form.invalid) {
-      this.error = 'Por favor ingresa un correo con formato válido.';
-      this.message = '';
-      return;
-    }
-  
     this.error = '';
     this.message = '';
 
-    
+    if (form.invalid) {
+      this.error = 'Por favor ingresa un correo con formato válido.';
+      return;
+    }
+
     this.auth.sendPasswordReset(this.email)
       .then(() => {
-        
         this.message = 'Revisa tu correo para restablecer tu contraseña.';
         setTimeout(() => this.router.navigateByUrl('/login'), 3000);
       })
       .catch((err: unknown) => {
         const fbErr = err as FirebaseError;
-
         switch (fbErr.code) {
           case 'auth/invalid-email':
             this.error = 'Formato de correo inválido.';
             break;
-
           case 'auth/user-not-found':
             this.error = 'El correo no está registrado.';
             break;
-
           default:
             this.error = 'No se pudo enviar el correo. Intenta más tarde.';
         }

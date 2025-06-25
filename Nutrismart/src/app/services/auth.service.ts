@@ -1,4 +1,3 @@
-// src/app/services/auth.service.ts
 import { inject, Injectable } from '@angular/core';
 import {
   Auth,
