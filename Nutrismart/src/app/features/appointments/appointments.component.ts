@@ -14,7 +14,7 @@ import { AppointmentsService, Appointment } from '../../services/appointments.se
 })
 export class AppointmentsComponent implements OnInit, OnDestroy {
   fechaSeleccionada = '';
-  today = ''; // Fecha mínima permitida
+  today = ''; // 🔹 Fecha mínima permitida
   horaSeleccionada = '';
   showPopup = false;
   popupMessage = '';
@@ -239,6 +239,12 @@ export class AppointmentsComponent implements OnInit, OnDestroy {
   }
 
   formateaHora(iso: string): string {
-    return new Date(iso).toLocaleTimeString('en-US', { hour12: true, hour: '2-digit', minute: '2-digit' });
+    const d = new Date(iso);
+    const hours = d.getHours();
+    const minutes = d.getMinutes();
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+    const h = hours % 12 || 12;
+    const m = String(minutes).padStart(2, '0');
+    return `${String(h).padStart(2, '0')}:${m} ${ampm}`;
   }
 }
