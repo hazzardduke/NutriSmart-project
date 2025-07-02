@@ -14,9 +14,11 @@
         class="form-control"
         [(ngModel)]="fechaSeleccionada"
         name="fecha"
+        [min]="today"
         (change)="onFechaChange()"
         required
       />
+
     </div>
 
     <div class="form-group">
