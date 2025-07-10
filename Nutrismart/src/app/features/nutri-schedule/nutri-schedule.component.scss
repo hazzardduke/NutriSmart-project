@@ -149,3 +149,15 @@
 .fc-event .event-btn:hover {
   color: #ddd;
 }
+.event-btn-icon {
+  width: 18px;
+  height: 18px;
+  margin-left: 6px;
+  cursor: pointer;
+  vertical-align: middle;
+  transition: transform 0.2s ease-in-out;
+
+  &:hover {
+    transform: scale(1.15);
+  }
+}

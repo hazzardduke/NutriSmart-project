@@ -140,30 +140,34 @@ export class NutriScheduleComponent implements OnInit, OnDestroy {
     this.calendarOptions = { ...this.calendarOptions, events: eventos };
   }
 
-  private renderEventButtons(arg: any) {
-    const el = arg.el as HTMLElement;
+private renderEventButtons(arg: any) {
+  const el = arg.el as HTMLElement;
 
-    const btnEdit = document.createElement('button');
-    btnEdit.innerText = '✏️';
-    btnEdit.title = 'Editar';
-    btnEdit.classList.add('event-btn');
-    btnEdit.addEventListener('click', (ev) => {
-      ev.stopPropagation();
-      this.startEdit(arg.event.id!);
-    });
+  const btnEdit = document.createElement('img');
+  btnEdit.src = 'assets/icons/edit-icon.png';
+  btnEdit.alt = 'Editar';
+  btnEdit.title = 'Editar';
+  btnEdit.classList.add('event-btn-icon');
+  btnEdit.addEventListener('click', (ev) => {
+    ev.stopPropagation();
+    this.startEdit(arg.event.id!);
+  });
 
-    const btnCancel = document.createElement('button');
-    btnCancel.innerText = '❌';
-    btnCancel.title = 'Cancelar';
-    btnCancel.classList.add('event-btn');
-    btnCancel.addEventListener('click', (ev) => {
-      ev.stopPropagation();
-      this.cancelAppointment(arg.event.id!);
-    });
+  const btnCancel = document.createElement('img');
+ btnCancel.src = 'assets/icons/cancel-icon.png';
 
-    const titleEl = el.querySelector('.fc-event-title');
-    if (titleEl) titleEl.append(btnEdit, btnCancel);
-  }
+  btnCancel.alt = 'Cancelar';
+  btnCancel.title = 'Cancelar';
+  btnCancel.classList.add('event-btn-icon');
+  btnCancel.addEventListener('click', (ev) => {
+    ev.stopPropagation();
+    this.cancelAppointment(arg.event.id!);
+  });
+
+  const titleEl = el.querySelector('.fc-event-title');
+  if (titleEl) titleEl.append(btnEdit, btnCancel);
+}
+
 
   private handleEventClick(arg: any) {
     console.log('Evento clic:', arg.event.id);
