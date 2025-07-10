@@ -15,7 +15,7 @@ import { VerifyEmailRequestComponent }   from './verify-email-request/verify-ema
     RouterModule,
     SidebarComponent,
     HeaderComponent,
-    VerifyEmailRequestComponent
+    VerifyEmailRequestComponent,
   ],
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss']

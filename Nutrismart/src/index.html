@@ -11,6 +11,28 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/@n8n/chat/dist/style.css" rel="stylesheet" />
+<script type="module">
+	import { createChat } from 'https://cdn.jsdelivr.net/npm/@n8n/chat/dist/chat.bundle.es.js';
+
+	createChat({
+		webhookUrl: 'https://bonfire3.app.n8n.cloud/webhook/4c371305-7b71-4264-bf55-189bed634f0f/chat',
+    initialMessages: [
+		'Hola! 👋',
+		'Soy Nutribot. Cómo puedo asistirte hoy?'
+	],
+  defaultLanguage: 'es',
+  i18n: {
+		es: {
+			title: 'Nutribot',
+			subtitle: "Comienza el chat. Estoy acá para ayudarte 24/7.",
+			footer: '',
+			getStarted: 'New Conversation',
+			inputPlaceholder: 'Type your question..',
+		},
+	},
+	});
+</script>
 </head>
 <body>
   <app-root></app-root>
