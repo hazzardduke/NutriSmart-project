@@ -37,6 +37,7 @@ export interface ClientProfile {
   nombre: string;
   apellido: string;
   cedula: string;
+  correo: string;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -83,7 +84,8 @@ export class ProfileService {
           id: u.id,
           nombre: u.nombre,
           apellido: u.apellidos ?? u.apellido ?? '',
-          cedula: u.cedula ?? ''
+          cedula: u.cedula ?? '',
+          correo: u.correo ?? ''
         }))
       )
     );
