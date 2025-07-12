@@ -1,35 +1,32 @@
+// functions/src/index.ts
 import { onCall } from 'firebase-functions/v2/https';
-import * as logger from 'firebase-functions/logger';
-import sgMail from '@sendgrid/mail'; // ✅ Importación correcta
+import * as admin from 'firebase-admin';
+import sgMail from '@sendgrid/mail';
 
-// 🚨 Tu API key aquí
-const SENDGRID_API_KEY = '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';
+admin.initializeApp();
 
-sgMail.setApiKey(SENDGRID_API_KEY); // ✅ Esto ya no lanzará error
+// Lee la API key de SendGrid desde env vars
+// (la tendrás que setear antes de deploy con --set-env-vars o Secrets Manager)
+const SENDGRID_API_KEY = process.env.SENDGRID_API_KEY!;
+sgMail.setApiKey(SENDGRID_API_KEY);
 
-export const sendEmail = onCall(
-  { region: 'us-central1' },
-  async (request) => {
-    const { to, subject, text } = request.data;
+export const sendEmail = onCall(async (req) => {
+  const { to, subject, text } = req.data as {
+    to: string;
+    subject: string;
+    text: string;
+  };
 
-    if (!to || !subject || !text) {
-      throw new Error('Faltan datos: to, subject o text');
-    }
-
-    const msg = {
-      to,
-      from: 'ntg.infocr@gmail.com',
-      subject,
-      text
-    };
-
-    try {
-      await sgMail.send(msg);
-      logger.info('Correo enviado');
-      return { success: true };
-    } catch (error: any) {
-      logger.error('Error al enviar correo:', error.response?.body || error.message);
-      throw new Error('Error al enviar correo');
-    }
+  if (!to || !subject || !text) {
+    // arroja un error “Handshake” con el cliente Callable
+    throw new Error('Faltan datos: to, subject o text');
   }
-);
+
+  try {
+    await sgMail.send({ to, from: 'ntg.infocr@gmail.com', subject, text });
+    return { success: true };
+  } catch (e: any) {
+    console.error('Error SendGrid:', e.response?.body || e.message);
+    throw new Error('Error al enviar correo');
+  }
+});
