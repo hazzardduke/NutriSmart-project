@@ -1,33 +1,17 @@
-<!-- src/app/nutri-schedule/nutri-schedule.component.html -->
 <div class="schedule-container">
   <h2 class="title">Horario del nutricionista</h2>
 
   <ul class="tabs">
-    <li
-      [class.active]="activeTab==='new'"
-      (click)="activeTab='new'"
-    >
-      Nuevas citas
-    </li>
-    <li
-      [class.active]="activeTab==='history'"
-      (click)="activeTab='history'"
-    >
-      Calendario
-    </li>
+    <li [class.active]="activeTab==='new'" (click)="activeTab='new'">Nuevas citas</li>
+    <li [class.active]="activeTab==='history'" (click)="activeTab='history'">Calendario</li>
   </ul>
 
-  <!-- PESTAÑA “NUEVAS CITAS” -->
+  <!-- PESTAÑA NUEVAS CITAS -->
   <section *ngIf="activeTab==='new'">
     <form class="form-schedule" (ngSubmit)="scheduleCita()">
       <div class="form-group">
         <label for="client">Cliente</label>
-        <select
-          id="client"
-          name="client"
-          [(ngModel)]="selectedClientId"
-          required
-        >
+        <select id="client" name="client" [(ngModel)]="selectedClientId" required>
           <option value="" disabled>-- Seleccionar cliente --</option>
           <option *ngFor="let c of clients" [value]="c.id">
             {{ c.nombre }} {{ c.apellido }} ({{ c.cedula }})
@@ -73,10 +57,22 @@
     </form>
   </section>
 
-  <!-- PESTAÑA “CALENDARIO” -->
+  <!-- PESTAÑA CALENDARIO -->
   <section *ngIf="activeTab==='history'" class="history-tab">
     <div class="fullcalendar-wrapper">
       <full-calendar [options]="calendarOptions"></full-calendar>
     </div>
+  </section>
+</div>
 
-    
+<!-- MODAL -->
+<div class="modal-overlay" *ngIf="modalVisible">
+  <div class="modal">
+    <p>{{ modalMessage }}</p>
+    <div class="modal-buttons">
+      <button *ngIf="modalType === 'confirm'" (click)="modalResponse(true)">Sí</button>
+      <button *ngIf="modalType === 'confirm'" (click)="modalResponse(false)">No</button>
+      <button *ngIf="modalType === 'info'" (click)="modalResponse(true)">OK</button>
+    </div>
+  </div>
+</div>

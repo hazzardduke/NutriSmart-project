@@ -1,4 +1,3 @@
-// src/app/features/nutri-schedule/nutri-schedule.component.ts
 import {
   Component,
   OnInit,
@@ -47,16 +46,21 @@ import {
   styleUrls: ['./nutri-schedule.component.scss'],
 })
 export class NutriScheduleComponent implements OnInit, OnDestroy {
-  /** Pestaña activa */
   activeTab: 'new' | 'history' = 'new';
-
-  /* -------- formulario -------- */
   clients: ClientProfile[] = [];
   selectedClientId = '';
   today = '';
   fechaSeleccionada = '';
   horaSeleccionada = '';
   editingId: string | null = null;
+  historyDate = '';
+  citas: Appointment[] = [];
+  private subs = new Subscription();
+
+  modalVisible = false;
+  modalMessage = '';
+  modalType: 'info' | 'confirm' = 'info';
+  private modalCallback: ((result: boolean) => void) | null = null;
 
   horarios: string[] = [
     '08:00 AM',
@@ -69,11 +73,6 @@ export class NutriScheduleComponent implements OnInit, OnDestroy {
     '04:00 PM',
     '05:00 PM',
   ];
-
-  /* -------- calendario -------- */
-  historyDate = '';
-  citas: Appointment[] = [];
-  private subs = new Subscription();
 
   calendarOptions: CalendarOptions = {
     plugins: [timeGridPlugin, interactionPlugin],
@@ -101,7 +100,6 @@ export class NutriScheduleComponent implements OnInit, OnDestroy {
     private emailService: EmailService
   ) {}
 
-  /* ========== ciclo de vida ========== */
   ngOnInit(): void {
     this.today = this.getToday();
     this.fechaSeleccionada = this.today;
@@ -128,7 +126,6 @@ export class NutriScheduleComponent implements OnInit, OnDestroy {
     this.subs.unsubscribe();
   }
 
-  /* ========== calendario ========== */
   private loadCalendarEvents(): void {
     const eventos: EventInput[] = this.citas.map((c) => ({
       id: c.id!,
@@ -140,123 +137,98 @@ export class NutriScheduleComponent implements OnInit, OnDestroy {
     this.calendarOptions = { ...this.calendarOptions, events: eventos };
   }
 
-private renderEventButtons(arg: any) {
-  const el = arg.el as HTMLElement;
+  private renderEventButtons(arg: any) {
+    const el = arg.el as HTMLElement;
 
-  const btnEdit = document.createElement('img');
-  btnEdit.src = 'assets/icons/edit-icon.png';
-  btnEdit.alt = 'Editar';
-  btnEdit.title = 'Editar';
-  btnEdit.classList.add('event-btn-icon');
-  btnEdit.addEventListener('click', (ev) => {
-    ev.stopPropagation();
-    this.startEdit(arg.event.id!);
-  });
+    const btnEdit = document.createElement('img');
+    btnEdit.src = 'assets/icons/edit-icon.png';
+    btnEdit.alt = 'Editar';
+    btnEdit.title = 'Editar';
+    btnEdit.classList.add('event-btn-icon');
+    btnEdit.addEventListener('click', (ev) => {
+      ev.stopPropagation();
+      this.startEdit(arg.event.id!);
+    });
 
-  const btnCancel = document.createElement('img');
- btnCancel.src = 'assets/icons/cancel-icon.png';
+    const btnCancel = document.createElement('img');
+    btnCancel.src = 'assets/icons/cancel-icon.png';
+    btnCancel.alt = 'Cancelar';
+    btnCancel.title = 'Cancelar';
+    btnCancel.classList.add('event-btn-icon');
+    btnCancel.addEventListener('click', (ev) => {
+      ev.stopPropagation();
+      this.cancelAppointment(arg.event.id!);
+    });
 
-  btnCancel.alt = 'Cancelar';
-  btnCancel.title = 'Cancelar';
-  btnCancel.classList.add('event-btn-icon');
-  btnCancel.addEventListener('click', (ev) => {
-    ev.stopPropagation();
-    this.cancelAppointment(arg.event.id!);
-  });
-
-  const titleEl = el.querySelector('.fc-event-title');
-  if (titleEl) titleEl.append(btnEdit, btnCancel);
-}
-
+    const titleEl = el.querySelector('.fc-event-title');
+    if (titleEl) titleEl.append(btnEdit, btnCancel);
+  }
 
   private handleEventClick(arg: any) {
     console.log('Evento clic:', arg.event.id);
   }
 
-  /* ========== CRUD de citas ========== */
-  /** Crea o actualiza cita */
   scheduleCita(): void {
-    if (
-      !this.selectedClientId ||
-      !this.fechaSeleccionada ||
-      !this.horaSeleccionada
-    )
-      return;
+    if (!this.selectedClientId || !this.fechaSeleccionada || !this.horaSeleccionada) return;
 
-    const iso = new Date(
-      `${this.fechaSeleccionada}T${this.to24h(this.horaSeleccionada)}:00`
-    ).toISOString();
+    const iso = new Date(`${this.fechaSeleccionada}T${this.to24h(this.horaSeleccionada)}:00`).toISOString();
     const cliente = this.clients.find((c) => c.id === this.selectedClientId)!;
 
     if (this.editingId) {
-      if (!confirm('¿Seguro que deseas actualizar esta cita?')) return;
+      this.showModal('¿Seguro que deseas actualizar esta cita?', 'confirm').then(confirmado => {
+        if (!confirmado) return;
 
-      this.apptService
-        .updateAppointment(this.editingId, {
+        this.apptService.updateAppointment(this.editingId!, {
           userId: this.selectedClientId,
           datetime: iso,
-        })
-        .then(() => {
-          this.emailService
-            .send(
-              cliente.correo,
-              'Cita actualizada',
-              `Hola ${cliente.nombre}, tu cita fue actualizada para el ${this.formatFullDate(
-                iso
-              )} a las ${this.formateaHora(iso)}.`
-            )
-            .subscribe();
-          alert('Cita actualizada ✅');
-        })
-        .finally(() => this.finishEdit());
+        }).then(() => {
+          this.emailService.send(
+            cliente.correo,
+            'Cita actualizada',
+            `Hola ${cliente.nombre}, tu cita fue actualizada para el ${this.formatFullDate(iso)} a las ${this.formateaHora(iso)}.`
+          ).subscribe();
+
+          this.showModal('Cita actualizada', 'info');
+        }).finally(() => this.finishEdit());
+      });
     } else {
-      this.apptService
-        .createAppointment({
-          userId: this.selectedClientId,
-          datetime: iso,
-          status: 'confirmed',
-        })
-        .then(() => {
-          this.emailService
-            .send(
-              cliente.correo,
-              'Cita confirmada',
-              `Hola ${cliente.nombre}, tu cita fue confirmada para el ${this.formatFullDate(
-                iso
-              )} a las ${this.formateaHora(iso)}.`
-            )
-            .subscribe();
-          alert('Cita creada ✅');
-        })
-        .finally(() => this.finishEdit());
+      this.apptService.createAppointment({
+        userId: this.selectedClientId,
+        datetime: iso,
+        status: 'confirmed',
+      }).then(() => {
+        this.emailService.send(
+          cliente.correo,
+          'Cita confirmada',
+          `Hola ${cliente.nombre}, tu cita fue confirmada para el ${this.formatFullDate(iso)} a las ${this.formateaHora(iso)}.`
+        ).subscribe();
+
+        this.showModal('Cita creada', 'info');
+      }).finally(() => this.finishEdit());
     }
   }
 
-  /** Cancela cita */
   private cancelAppointment(id: string) {
-    if (!confirm('¿Cancelar esta cita?')) return;
-    const appt = this.citas.find((c) => c.id === id);
-    if (!appt) return;
+    this.showModal('¿Cancelar esta cita?', 'confirm').then(confirmado => {
+      if (!confirmado) return;
 
-    this.apptService
-      .updateAppointment(id, { status: 'canceled' })
-      .then(() => {
+      const appt = this.citas.find((c) => c.id === id);
+      if (!appt) return;
+
+      this.apptService.updateAppointment(id, { status: 'canceled' }).then(() => {
         const cliente = this.clients.find((c) => c.id === appt.userId)!;
-        this.emailService
-          .send(
-            cliente.correo,
-            'Cita cancelada',
-            `Hola ${cliente.nombre}, tu cita del ${this.formatFullDate(
-              appt.datetime
-            )} a las ${this.formateaHora(appt.datetime)} fue cancelada.`
-          )
-          .subscribe();
-        alert('Cita cancelada');
+        this.emailService.send(
+          cliente.correo,
+          'Cita cancelada',
+          `Hola ${cliente.nombre}, tu cita del ${this.formatFullDate(appt.datetime)} a las ${this.formateaHora(appt.datetime)} fue cancelada.`
+        ).subscribe();
+
+        this.showModal('Cita cancelada', 'info');
         this.loadCalendarEvents();
       });
+    });
   }
 
-  /* ========== helpers de edición ========== */
   private startEdit(id: string) {
     const appt = this.citas.find((c) => c.id === id);
     if (!appt) return;
@@ -273,9 +245,11 @@ private renderEventButtons(arg: any) {
     const h12 = h24 % 12 || 12;
     this.horaSeleccionada = `${String(h12).padStart(2, '0')}:${m} ${ampm}`;
 
-    if (confirm('¿Ir al formulario para editar esta cita?')) {
-      this.activeTab = 'new';
-    }
+    this.showModal('¿Ir al formulario para editar esta cita?', 'confirm').then(confirmado => {
+      if (confirmado) {
+        this.activeTab = 'new';
+      }
+    });
   }
 
   private finishEdit() {
@@ -286,7 +260,6 @@ private renderEventButtons(arg: any) {
     this.loadCalendarEvents();
   }
 
-  /* ========== callbacks calendario ========== */
   private onDateClick(arg: any): void {
     this.historyDate = arg.dateStr;
   }
@@ -295,12 +268,9 @@ private renderEventButtons(arg: any) {
     return this.citas.filter((c) => c.datetime.startsWith(this.historyDate));
   }
 
-  /* ========== utilidades fechas/horas ========== */
   public getToday(): string {
     const d = new Date();
-    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(
-      d.getDate()
-    ).padStart(2, '0')}`;
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
   }
 
   onDateChange(): void {
@@ -332,19 +302,16 @@ private renderEventButtons(arg: any) {
     );
   }
 
-  /** Verifica si un horario está disponible */
-public isHorarioDisponible(h: string): boolean {
-  const sel = new Date(`${this.fechaSeleccionada}T00:00:00`);
-  const now = new Date();
-  const mn  = now.getHours() * 60 + now.getMinutes();
+  public isHorarioDisponible(h: string): boolean {
+    const sel = new Date(`${this.fechaSeleccionada}T00:00:00`);
+    const now = new Date();
+    const mn = now.getHours() * 60 + now.getMinutes();
 
-  // Evitar seleccionar horas pasadas si la cita es hoy
-  if (this.esHoy(sel) && this.horaEnMinutos(h) <= mn) return false;
+    if (this.esHoy(sel) && this.horaEnMinutos(h) <= mn) return false;
 
-  const iso = new Date(`${this.fechaSeleccionada}T${this.to24h(h)}:00`).toISOString();
-  return !this.citas.some(c => c.datetime === iso);
-}
-
+    const iso = new Date(`${this.fechaSeleccionada}T${this.to24h(h)}:00`).toISOString();
+    return !this.citas.some(c => c.datetime === iso);
+  }
 
   formateaHora(iso: string): string {
     const d = new Date(iso);
@@ -367,5 +334,22 @@ public isHorarioDisponible(h: string): boolean {
   getClientName(uid: string): string {
     const c = this.clients.find((x) => x.id === uid);
     return c ? `${c.nombre} ${c.apellido}` : uid;
+  }
+
+  showModal(message: string, type: 'info' | 'confirm'): Promise<boolean> {
+    this.modalMessage = message;
+    this.modalType = type;
+    this.modalVisible = true;
+    return new Promise(resolve => {
+      this.modalCallback = resolve;
+    });
+  }
+
+  modalResponse(result: boolean): void {
+    this.modalVisible = false;
+    if (this.modalCallback) {
+      this.modalCallback(result);
+      this.modalCallback = null;
+    }
   }
 }
