@@ -1,0 +1,31 @@
+<div class="loyalty-wrapper" *ngIf="card$ | async as card; else noCard">
+  <h2>Tu Tarjeta de Fidelidad</h2>
+
+  <div class="stars">
+    <ng-container *ngFor="let _ of stars; let i = index">
+      <i class="fa"
+         [ngClass]=" i < card.stamps ? 'filled fa-star' : 'empty fa-star' ">
+      </i>
+    </ng-container>
+  </div>
+
+  <p>Sellos: {{ card.stamps }} / 7</p>
+
+  <button (click)="addStamp()" class="btn add-btn">
+    Añadir Sello
+  </button>
+  <button (click)="redeem()"
+          class="btn redeem-btn"
+          [disabled]="card.stamps < 7">
+    Canjear Recompensa
+  </button>
+</div>
+
+<ng-template #noCard>
+  <div class="loyalty-wrapper">
+    <p>No tienes tarjeta aún. Se creará al recibir tu primer sello.</p>
+    <button (click)="addStamp()" class="btn add-btn">
+      Crear tarjeta y añadir sello
+    </button>
+  </div>
+</ng-template>

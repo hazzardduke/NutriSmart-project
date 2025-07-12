@@ -14,6 +14,7 @@ import { PersonalrecordComponent }    from './core/client/personalrecord/persona
 import { AppointmentsComponent }      from './features/appointments/appointments.component';
 import { GoalsComponent }             from './features/goals/goals.component';
 import { ResetPasswordRequestComponent } from './reset-password-request/reset-password-request.component';
+import { LoyaltyCardClientComponent } from './loyalty-card-client/loyalty-card-client.component';
 
 export const routes: Routes = [
   { path: 'login',    component: LoginComponent },
@@ -47,6 +48,12 @@ export const routes: Routes = [
       {
         path: 'goals',
         component: GoalsComponent,
+        canActivate: [ roleGuard ],
+        data: { role: 'cliente' }
+      },
+       {
+        path: 'loyaltycard',
+        component: LoyaltyCardClientComponent,
         canActivate: [ roleGuard ],
         data: { role: 'cliente' }
       },
