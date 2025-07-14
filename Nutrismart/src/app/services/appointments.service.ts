@@ -7,7 +7,7 @@ export interface Appointment {
   id?: string;
   userId: string;
   datetime: string; // ISO string
-  status: 'confirmed' | 'canceled';
+  status: 'confirmed' | 'canceled'| 'completed' ;
 }
 
 @Injectable({ providedIn: 'root' })

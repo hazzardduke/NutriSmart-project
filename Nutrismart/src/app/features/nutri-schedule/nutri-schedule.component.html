@@ -1,13 +1,15 @@
+<!-- src/app/features/nutri-schedule/nutri-schedule.component.html -->
 <div class="schedule-container">
   <h2 class="title">Horario del nutricionista</h2>
 
   <ul class="tabs">
-    <li [class.active]="activeTab==='new'" (click)="activeTab='new'">Nuevas citas</li>
-    <li [class.active]="activeTab==='history'" (click)="activeTab='history'">Calendario</li>
+    <li [class.active]="activeTab==='new'"      (click)="activeTab='new'">Nuevas citas</li>
+    <li [class.active]="activeTab==='calendar'" (click)="activeTab='calendar'">Calendario</li>
+    <li [class.active]="activeTab==='history'"  (click)="activeTab='history'">Histórico</li>
   </ul>
 
-  <!-- PESTAÑA NUEVAS CITAS -->
-  <section *ngIf="activeTab==='new'">
+  <!-- NUEVAS CITAS -->
+  <section *ngIf="activeTab==='new'" class="new-tab">
     <form class="form-schedule" (ngSubmit)="scheduleCita()">
       <div class="form-group">
         <label for="client">Cliente</label>
@@ -57,11 +59,51 @@
     </form>
   </section>
 
-  <!-- PESTAÑA CALENDARIO -->
-  <section *ngIf="activeTab==='history'" class="history-tab">
+  <!-- CALENDARIO -->
+  <section *ngIf="activeTab==='calendar'" class="calendar-tab">
     <div class="fullcalendar-wrapper">
       <full-calendar [options]="calendarOptions"></full-calendar>
     </div>
+  </section>
+
+  <!-- HISTÓRICO -->
+  <section *ngIf="activeTab==='history'" class="history-list-tab">
+    <div class="history-filter">
+      <label for="filterDate">Filtrar por fecha:</label>
+      <input
+        type="date"
+        id="filterDate"
+        [(ngModel)]="filterDate"
+        [min]="allCitas.length ? allCitas[0].datetime.substr(0,10) : today"
+        [max]="today"
+      />
+      <button *ngIf="filterDate" (click)="filterDate=''" class="clear-btn">✕</button>
+    </div>
+
+    <table class="history-table">
+      <thead>
+        <tr>
+          <th>Cliente</th>
+          <th>Fecha</th>
+          <th>Hora</th>
+          <th>Estado</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let c of filteredHistoryAppointments">
+          <td>{{ getClientName(c.userId) }}</td>
+          <td>{{ formatFullDate(c.datetime) }}</td>
+          <td>{{ formateaHora(c.datetime) }}</td>
+          <td
+            [ngClass]="c.status === 'canceled' ? 'cancelada' : 'completada'">
+            {{ c.status === 'canceled' ? 'Cancelada' : 'Completada' }}
+          </td>
+        </tr>
+        <tr *ngIf="filteredHistoryAppointments.length === 0">
+          <td colspan="4" class="no-data">No hay registros.</td>
+        </tr>
+      </tbody>
+    </table>
   </section>
 </div>
 
@@ -70,9 +112,9 @@
   <div class="modal">
     <p>{{ modalMessage }}</p>
     <div class="modal-buttons">
-      <button *ngIf="modalType === 'confirm'" (click)="modalResponse(true)">Sí</button>
-      <button *ngIf="modalType === 'confirm'" (click)="modalResponse(false)">No</button>
-      <button *ngIf="modalType === 'info'" (click)="modalResponse(true)">OK</button>
+      <button *ngIf="modalType==='confirm'" (click)="modalResponse(true)">Sí</button>
+      <button *ngIf="modalType==='confirm'" (click)="modalResponse(false)">No</button>
+      <button *ngIf="modalType==='info'"    (click)="modalResponse(true)">OK</button>
     </div>
   </div>
 </div>
