@@ -69,15 +69,17 @@
   <!-- HISTÓRICO -->
   <section *ngIf="activeTab==='history'" class="history-list-tab">
     <div class="history-filter">
-      <label for="filterDate">Filtrar por fecha:</label>
-      <input
-        type="date"
-        id="filterDate"
-        [(ngModel)]="filterDate"
-        [min]="allCitas.length ? allCitas[0].datetime.substr(0,10) : today"
-        [max]="today"
-      />
-      <button *ngIf="filterDate" (click)="filterDate=''" class="clear-btn">✕</button>
+      <label for="historyClient">Filtrar por cliente:</label>
+      <select
+        id="historyClient"
+        [(ngModel)]="historyClientId"
+        class="form-control"
+      >
+        <option value="">-- Todos los clientes --</option>
+        <option *ngFor="let c of clients" [value]="c.id">
+          {{ c.nombre }} {{ c.apellido }}
+        </option>
+      </select>
     </div>
 
     <table class="history-table">
@@ -90,24 +92,27 @@
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let c of filteredHistoryAppointments">
+        <tr *ngFor="let c of filteredHistoryAppointments"
+            [ngClass]="{
+              'row-confirmada': c.status === 'confirmed',
+              'row-cancelada':  c.status === 'canceled'
+            }">
           <td>{{ getClientName(c.userId) }}</td>
           <td>{{ formatFullDate(c.datetime) }}</td>
           <td>{{ formateaHora(c.datetime) }}</td>
-          <td
-            [ngClass]="c.status === 'canceled' ? 'cancelada' : 'completada'">
+          <td [ngClass]="c.status === 'canceled' ? 'cancelada' : 'completada'">
             {{ c.status === 'canceled' ? 'Cancelada' : 'Completada' }}
           </td>
         </tr>
         <tr *ngIf="filteredHistoryAppointments.length === 0">
-          <td colspan="4" class="no-data">No hay registros.</td>
+          <td colspan="4" class="no-data">No hay registros para este cliente.</td>
         </tr>
       </tbody>
     </table>
   </section>
 </div>
 
-<!-- MODAL -->
+<!-- MODAL OVERLAY -->
 <div class="modal-overlay" *ngIf="modalVisible">
   <div class="modal">
     <p>{{ modalMessage }}</p>

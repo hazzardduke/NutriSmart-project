@@ -39,13 +39,11 @@
   .form-schedule {
     .form-group {
       margin-bottom: 1rem;
-
       label {
         display: block;
         font-weight: 600;
         margin-bottom: 0.3rem;
       }
-
       select,
       input {
         width: 100%;
@@ -55,38 +53,32 @@
         font-size: 1rem;
       }
     }
-
     .horarios {
       display: flex;
       flex-wrap: wrap;
       gap: 0.5rem;
       margin-top: 0.5rem;
-
       button {
         padding: 0.5rem 1rem;
         border: 1px solid #ccc;
         border-radius: 6px;
         background: #f7f7f7;
         cursor: pointer;
-
         &.selected {
           background: #a1c037;
           color: #fff;
           border-color: #a1c037;
         }
-
         &:disabled {
           background: #eee;
           color: #999;
           cursor: not-allowed;
         }
-
         &:not(:disabled):hover:not(.selected) {
           background: #eaeaea;
         }
       }
     }
-
     .btn-schedule {
       display: block;
       margin: 1.5rem auto 0;
@@ -97,7 +89,6 @@
       border-radius: 8px;
       font-size: 1rem;
       cursor: pointer;
-
       &:disabled {
         opacity: 0.5;
         cursor: not-allowed;
@@ -109,12 +100,9 @@
   .calendar-tab {
     .fullcalendar-wrapper {
       margin-bottom: 1.5rem;
-
-
       .fc {
         width: 100% !important;
         box-shadow: none;
-        
         border: none;
       }
     }
@@ -129,22 +117,14 @@
     display: flex;
     align-items: center;
     margin-bottom: 1rem;
-
     label {
       margin-right: 0.5rem;
       font-weight: 600;
     }
-    input {
+    .form-control {
       padding: 0.4rem;
       border: 1px solid #ccc;
       border-radius: 4px;
-    }
-    .clear-btn {
-      margin-left: 0.5rem;
-      background: transparent;
-      border: none;
-      font-size: 1rem;
-      cursor: pointer;
     }
   }
 
@@ -161,8 +141,9 @@
       border-right: 1px solid #a1c037;
       border-bottom: 1px solid #eee;
     }
-    th:last-child, td:last-child { border-right: none; }
-
+    th:last-child, td:last-child {
+      border-right: none;
+    }
     th {
       background: #a1c037;
       color: #fff;
@@ -171,6 +152,17 @@
     tbody tr:hover {
       background: #f7fff3;
     }
+    tbody tr.row-cancelada:hover {
+      background-color: #ffe6e6;
+    }
+
+   
+    tr.row-cancelada {
+      background-color: #ffe6e6;  
+     
+      
+    }
+     
 
     .no-data {
       text-align: center;
@@ -234,7 +226,7 @@
     transition: background 0.2s;
 
     &:hover {
-      background-color: #a1c037;
+      background-color: #8fa32f;
     }
   }
 }

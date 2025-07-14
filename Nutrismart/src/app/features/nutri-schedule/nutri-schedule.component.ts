@@ -40,36 +40,33 @@ import { CalendarOptions, EventInput } from '@fullcalendar/core';
   styleUrls: ['./nutri-schedule.component.scss']
 })
 export class NutriScheduleComponent implements OnInit, OnDestroy {
+  // ── Tabs & Filters ─────────────────────────────────────────
   activeTab: 'new' | 'calendar' | 'history' = 'new';
+  historyClientId = '';  // Filtrar histórico por cliente
+
+  // ── Data & Selection ───────────────────────────────────────
   clients: ClientProfile[] = [];
   selectedClientId = '';
-  today = '';
-  fechaSeleccionada = '';
-  horaSeleccionada = '';
   editingId: string | null = null;
-
-  filterDate = '';
   allCitas: Appointment[] = [];
   citas: Appointment[] = [];
   canceledCitas: Appointment[] = [];
   completedCitas: Appointment[] = [];
 
-  private subs = new Subscription();
-
-  modalVisible = false;
-  modalMessage = '';
-  modalType: 'info' | 'confirm' = 'info';
-  private modalCallback: ((result: boolean) => void) | null = null;
-
+  // ── Scheduling Form ────────────────────────────────────────
+  today = '';
+  fechaSeleccionada = '';
+  horaSeleccionada = '';
   horarios = [
     '08:00 AM','09:00 AM','10:00 AM','11:00 AM',
-    '01:00 PM','02:00 PM','03:00 PM','04:00 PM','05:00 PM',
+    '01:00 PM','02:00 PM','03:00 PM','04:00 PM','05:00 PM'
   ];
 
+  // ── Calendar Config ────────────────────────────────────────
   calendarOptions: CalendarOptions = {
-    plugins: [timeGridPlugin, interactionPlugin],
+    plugins: [ timeGridPlugin, interactionPlugin ],
     locale: 'es',
-    locales: [esLocale],
+    locales: [ esLocale ],
     initialView: 'timeGridDay',
     headerToolbar: { left: 'prev,next today', center: 'title', right: '' },
     timeZone: 'local',
@@ -80,11 +77,19 @@ export class NutriScheduleComponent implements OnInit, OnDestroy {
     slotDuration: '00:30:00',
     slotLabelFormat: { hour: 'numeric', minute: '2-digit', hour12: true },
     eventTimeFormat: { hour: 'numeric', minute: '2-digit', hour12: true },
-    eventDidMount: this.renderEventButtons.bind(this),
-    eventClick: this.handleEventClick.bind(this),
     events: [],
     dateClick: this.onDateClick.bind(this),
+    eventDidMount: this.renderEventButtons.bind(this),
+    eventClick: this.handleEventClick.bind(this)
   };
+
+  // ── Modal ──────────────────────────────────────────────────
+  modalVisible = false;
+  modalMessage = '';
+  modalType: 'info' | 'confirm' = 'info';
+  private modalCallback: ((ok: boolean) => void) | null = null;
+
+  private subs = new Subscription();
 
   constructor(
     private profileService: ProfileService,
@@ -92,30 +97,33 @@ export class NutriScheduleComponent implements OnInit, OnDestroy {
     private emailService: EmailService
   ) {}
 
+  // ── Lifecycle ──────────────────────────────────────────────
   ngOnInit(): void {
     this.today = this.getToday();
     this.fechaSeleccionada = this.today;
-    this.calendarOptions = { ...this.calendarOptions, validRange: { start: this.today } };
+    this.calendarOptions.validRange = { start: this.today };
 
     this.subs.add(
-      this.profileService.getClients().subscribe(list => this.clients = list)
+      this.profileService.getClients()
+        .subscribe(list => this.clients = list)
     );
 
     this.subs.add(
-      this.apptService.getAllAppointments().subscribe(apps => {
-        const now = Date.now();
-        apps.forEach(c => {
-          const startMs = new Date(c.datetime).getTime();
-          if (c.status === 'confirmed' && startMs + 3600000 < now) {
-            this.apptService.updateAppointment(c.id!, { status: 'completed' });
-          }
-        });
-        this.allCitas       = apps;
-        this.citas          = apps.filter(c => c.status === 'confirmed');
-        this.canceledCitas  = apps.filter(c => c.status === 'canceled');
-        this.completedCitas = apps.filter(c => c.status === 'completed');
-        this.loadCalendarEvents();
-      })
+      this.apptService.getAllAppointments()
+        .subscribe(apps => {
+          const now = Date.now();
+          apps.forEach(c => {
+            const startMs = new Date(c.datetime).getTime();
+            if (c.status === 'confirmed' && startMs + 3600000 < now) {
+              this.apptService.updateAppointment(c.id!, { status: 'completed' });
+            }
+          });
+          this.allCitas       = apps;
+          this.citas          = apps.filter(c => c.status === 'confirmed');
+          this.canceledCitas  = apps.filter(c => c.status === 'canceled');
+          this.completedCitas = apps.filter(c => c.status === 'completed');
+          this.loadCalendarEvents();
+        })
     );
   }
 
@@ -123,9 +131,10 @@ export class NutriScheduleComponent implements OnInit, OnDestroy {
     this.subs.unsubscribe();
   }
 
+  // ── Calendar ───────────────────────────────────────────────
   private loadCalendarEvents(): void {
     const eventos: EventInput[] = this.allCitas
-      .filter(c => c.status === 'confirmed' || c.status === 'completed')
+      .filter(c => c.status !== 'canceled')
       .map(c => ({
         id: c.id!,
         title: this.getClientName(c.userId),
@@ -133,37 +142,42 @@ export class NutriScheduleComponent implements OnInit, OnDestroy {
         end: new Date(new Date(c.datetime).getTime() + 3600000),
         extendedProps: { status: c.status }
       }));
-    this.calendarOptions = { ...this.calendarOptions, events: eventos };
+    this.calendarOptions.events = eventos;
   }
 
-  private renderEventButtons(arg: any) {
+  private renderEventButtons(arg: any): void {
     if (arg.event.extendedProps.status === 'completed') return;
     const el = arg.el as HTMLElement;
+    const edit = document.createElement('img');
+    edit.src = 'assets/icons/edit-icon.png';
+    edit.alt = 'Editar'; edit.title = 'Editar';
+    edit.classList.add('event-btn-icon');
+    edit.addEventListener('click', ev => {
+      ev.stopPropagation(); this.startEdit(arg.event.id!);
+    });
 
-    const btnEdit = document.createElement('img');
-    btnEdit.src = 'assets/icons/edit-icon.png';
-    btnEdit.alt = 'Editar';
-    btnEdit.title = 'Editar';
-    btnEdit.classList.add('event-btn-icon');
-    btnEdit.addEventListener('click', ev => { ev.stopPropagation(); this.startEdit(arg.event.id!); });
+    const cancel = document.createElement('img');
+    cancel.src = 'assets/icons/cancel-icon.png';
+    cancel.alt = 'Cancelar'; cancel.title = 'Cancelar';
+    cancel.classList.add('event-btn-icon');
+    cancel.addEventListener('click', ev => {
+      ev.stopPropagation(); this.cancelAppointment(arg.event.id!);
+    });
 
-    const btnCancel = document.createElement('img');
-    btnCancel.src = 'assets/icons/cancel-icon.png';
-    btnCancel.alt = 'Cancelar';
-    btnCancel.title = 'Cancelar';
-    btnCancel.classList.add('event-btn-icon');
-    btnCancel.addEventListener('click', ev => { ev.stopPropagation(); this.cancelAppointment(arg.event.id!); });
-
-    el.querySelector('.fc-event-title')?.append(btnEdit, btnCancel);
+    el.querySelector('.fc-event-title')?.append(edit, cancel);
   }
 
-  private handleEventClick(_: any) {}
+  private handleEventClick(_: any): void {}
 
+  // ── Scheduling Form ────────────────────────────────────────
   scheduleCita(): void {
     if (!this.selectedClientId || !this.fechaSeleccionada || !this.horaSeleccionada) return;
-    const iso = new Date(`${this.fechaSeleccionada}T${this.to24h(this.horaSeleccionada)}:00`).toISOString();
-    const cliente = this.clients.find(c => c.id === this.selectedClientId)!;
 
+    const iso = new Date(
+      `${this.fechaSeleccionada}T${this.to24h(this.horaSeleccionada)}:00`
+    ).toISOString();
+
+    const cliente = this.clients.find(c => c.id === this.selectedClientId)!;
     const mailData: CitaMailData = {
       nombre: cliente.nombre,
       fecha: this.formatFullDate(iso),
@@ -172,21 +186,18 @@ export class NutriScheduleComponent implements OnInit, OnDestroy {
       urlCita: `https://nutrismart.com/citas/${this.editingId ?? ''}`
     };
 
-    if (this.editingId) {
-      this.showModal('¿Actualizar cita?', 'confirm').then(ok => {
-        if (!ok) return;
-        this.apptService.updateAppointment(this.editingId!, { userId: this.selectedClientId, datetime: iso })
+    const action = this.editingId
+      ? this.apptService.updateAppointment(this.editingId, { userId: this.selectedClientId, datetime: iso })
           .then(() => this.emailService.sendCitaActualizada(cliente.correo, mailData))
-          .then(() => { this.showModal('La cita ha sido Actualizada','info'); this.finishEdit(); });
-      });
-    } else {
-      this.apptService.createAppointment({ userId: this.selectedClientId, datetime: iso, status: 'confirmed' })
-        .then(() => this.emailService.sendCitaConfirmada(cliente.correo, mailData))
-        .then(() => { this.showModal('La cita ha sido Creada','info'); this.finishEdit(); });
-    }
+          .then(() => this.showModal('Cita actualizada', 'info'))
+      : this.apptService.createAppointment({ userId: this.selectedClientId, datetime: iso, status: 'confirmed' })
+          .then(() => this.emailService.sendCitaConfirmada(cliente.correo, mailData))
+          .then(() => this.showModal('Cita creada', 'info'));
+
+    action.finally(() => this.finishEdit());
   }
 
-  private cancelAppointment(id: string) {
+  private cancelAppointment(id: string): void {
     this.showModal('¿Cancelar cita?', 'confirm').then(ok => {
       if (!ok) return;
       const appt = this.allCitas.find(c => c.id === id)!;
@@ -199,23 +210,28 @@ export class NutriScheduleComponent implements OnInit, OnDestroy {
       };
       this.apptService.updateAppointment(id, { status: 'canceled' })
         .then(() => this.emailService.sendCitaCancelada(cliente.correo, mailData))
-        .then(() => { this.showModal('La cita ha sido Cancelada','info'); this.loadCalendarEvents(); });
+        .then(() => this.showModal('Cita cancelada', 'info'))
+        .then(() => this.loadCalendarEvents());
     });
   }
 
-  private startEdit(id: string) {
+  private startEdit(id: string): void {
     const appt = this.citas.find(c => c.id === id)!;
     this.editingId = id;
     this.selectedClientId = appt.userId;
-    [this.fechaSeleccionada] = appt.datetime.split('T');
+    [ this.fechaSeleccionada ] = appt.datetime.split('T');
     const d = new Date(appt.datetime),
-          h24 = d.getHours(), m = String(d.getMinutes()).padStart(2,'0'),
-          ampm = h24 >= 12 ? 'PM' : 'AM', h12 = h24 % 12 || 12;
+          h24 = d.getHours(),
+          m   = String(d.getMinutes()).padStart(2,'0'),
+          ampm= h24 >= 12 ? 'PM' : 'AM',
+          h12 = h24 % 12 || 12;
     this.horaSeleccionada = `${String(h12).padStart(2,'0')}:${m} ${ampm}`;
-    this.showModal('¿Editar cita?', 'confirm').then(ok => { if (ok) this.activeTab = 'new'; });
+    this.showModal('Editar cita', 'confirm').then(ok => {
+      if (ok) this.activeTab = 'new';
+    });
   }
 
-  private finishEdit() {
+  private finishEdit(): void {
     this.editingId = null;
     this.selectedClientId = '';
     this.fechaSeleccionada = this.today;
@@ -223,28 +239,22 @@ export class NutriScheduleComponent implements OnInit, OnDestroy {
     this.loadCalendarEvents();
   }
 
-  onDateClick(_: any) { this.activeTab = 'history'; }
-
+  // ── Histórico ──────────────────────────────────────────────
   public get filteredHistoryAppointments(): Appointment[] {
     return this.allCitas
       .filter(c => c.status === 'canceled' || c.status === 'completed')
-      .filter(c => !this.filterDate || c.datetime.startsWith(this.filterDate))
-      .sort((a,b) => new Date(a.datetime).getTime() - new Date(b.datetime).getTime());
+      .filter(c => !this.historyClientId || c.userId === this.historyClientId)
+      .sort((a, b) => new Date(b.datetime).getTime() - new Date(a.datetime).getTime());
   }
 
+  // ── Utilities ──────────────────────────────────────────────
   public getToday(): string {
     const d = new Date();
     return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
   }
 
-  onDateChange(): void { this.horaSeleccionada = ''; }
-
-  private to24h(h12: string): string {
-    const [t, mer] = h12.split(' ');
-    let [h, m] = t.split(':').map(n => +n);
-    if (mer==='PM' && h<12) h+=12;
-    if (mer==='AM' && h===12) h=0;
-    return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
+  onDateClick(_: any): void {
+    this.activeTab = 'history';
   }
 
   public isHorarioDisponible(h: string): boolean {
@@ -258,44 +268,63 @@ export class NutriScheduleComponent implements OnInit, OnDestroy {
     return !this.allCitas.some(c => c.datetime === iso && c.status === 'confirmed');
   }
 
+  private to24h(h12: string): string {
+    const [t, mer] = h12.split(' ');
+    let [h, m] = t.split(':').map(n => +n);
+    if (mer === 'PM' && h < 12) h += 12;
+    if (mer === 'AM' && h === 12) h = 0;
+    return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
+  }
+
   private horaEnMinutos(h12: string): number {
     const [t, mer] = h12.split(' ');
     let [h, m] = t.split(':').map(n => +n);
-    if (mer==='PM' && h<12) h+=12;
-    if (mer==='AM' && h===12) h=0;
-    return h*60 + m;
+    if (mer === 'PM' && h < 12) h += 12;
+    if (mer === 'AM' && h === 12) h = 0;
+    return h * 60 + m;
   }
 
   private esHoy(d: Date): boolean {
     const n = new Date();
-    return d.getFullYear()===n.getFullYear() && d.getMonth()===n.getMonth() && d.getDate()===n.getDate();
+    return d.getFullYear() === n.getFullYear()
+        && d.getMonth() === n.getMonth()
+        && d.getDate() === n.getDate();
   }
 
   formateaHora(iso: string): string {
     const d = new Date(iso);
     const h24 = d.getHours(), min = String(d.getMinutes()).padStart(2,'0');
-    const ampm = h24>=12?'PM':'AM', h12 = h24%12||12;
+    const ampm = h24 >= 12 ? 'PM' : 'AM', h12 = h24 % 12 || 12;
     return `${String(h12).padStart(2,'0')}:${min} ${ampm}`;
   }
 
   formatFullDate(iso: string): string {
-    return new Date(iso).toLocaleDateString('es-ES', { day:'numeric', month:'long', year:'numeric' });
+    return new Date(iso).toLocaleDateString('es-ES', {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric'
+    });
   }
 
   getClientName(uid: string): string {
-    const c = this.clients.find(x => x.id===uid);
+    const c = this.clients.find(x => x.id === uid);
     return c ? `${c.nombre} ${c.apellido}` : uid;
   }
+  public onDateChange(): void {
+    this.horaSeleccionada = '';
+  }
 
-  showModal(message: string, type: 'info'|'confirm'): Promise<boolean> {
+  // ── Modal Helpers ──────────────────────────────────────────
+  showModal(message: string, type: 'info' | 'confirm'): Promise<boolean> {
     this.modalMessage = message;
-    this.modalType    = type;
+    this.modalType = type;
     this.modalVisible = true;
     return new Promise(resolve => this.modalCallback = resolve);
   }
 
   modalResponse(result: boolean): void {
     this.modalVisible = false;
-    if (this.modalCallback) { this.modalCallback(result); this.modalCallback = null; }
+    this.modalCallback?.(result);
+    this.modalCallback = null;
   }
 }
