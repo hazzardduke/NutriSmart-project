@@ -1,24 +1,56 @@
+// src/app/services/email.service.ts
 import { Injectable } from '@angular/core';
-import { getFunctions, httpsCallable } from 'firebase/functions';
-import { FirebaseApp } from '@angular/fire/app';
-import { from, Observable } from 'rxjs';
+import { Functions, httpsCallable } from '@angular/fire/functions';
+
+export interface CitaMailData {
+  nombre: string;
+  fecha: string;
+  hora: string;
+  ubicacion: string;
+  urlCita?: string;
+}
 
 @Injectable({ providedIn: 'root' })
 export class EmailService {
-  private sendEmailFn: ReturnType<typeof httpsCallable>;
+  private readonly fnName = 'sendEmail';
 
-  constructor(app: FirebaseApp) {
-    const functions = getFunctions(app, 'us-central1');        // región donde desplegaste la función
-    this.sendEmailFn = httpsCallable(functions, 'sendEmail');  // nombre exacto de la Cloud Function
+  // Tus tres Dynamic Templates en SendGrid:
+  private readonly tplConfirmada  = 'd-81cccf19099247e385e6908bd814eae6';
+  private readonly tplActualizada = 'd-33a9c51a1404451690492df5b1beb1a1';
+  private readonly tplCancelada   = 'd-6d0602792de94d58843adc88d002cd55';
+
+  constructor(private functions: Functions) {}
+
+  private callSendEmail(payload: {
+    to: string;
+    templateId: string;
+    dynamic_template_data: Record<string, any>;
+  }) {
+    const fn = httpsCallable(this.functions, this.fnName);
+    return fn(payload);
   }
 
-  /**
-   * Dispara el correo vía Cloud Function.
-   * @param to     correo del destinatario
-   * @param subject asunto del correo
-   * @param text    cuerpo en texto plano (se puede personalizar con HTML en la función)
-   */
-  send(to: string, subject: string, text: string): Observable<any> {
-    return from(this.sendEmailFn({ to, subject, text }));
+  sendCitaConfirmada(dest: string, data: CitaMailData) {
+    return this.callSendEmail({
+      to: dest,
+      templateId: this.tplConfirmada,
+      dynamic_template_data: data
+    });
+  }
+
+  sendCitaActualizada(dest: string, data: CitaMailData) {
+    return this.callSendEmail({
+      to: dest,
+      templateId: this.tplActualizada,
+      dynamic_template_data: data
+    });
+  }
+
+  sendCitaCancelada(dest: string, data: CitaMailData) {
+    return this.callSendEmail({
+      to: dest,
+      templateId: this.tplCancelada,
+      dynamic_template_data: data
+    });
   }
 }

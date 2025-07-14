@@ -1,25 +1,28 @@
 // src/app/app.config.ts
 import { ApplicationConfig, provideZoneChangeDetection } from '@angular/core';
-import { provideRouter, withComponentInputBinding }                                from '@angular/router';
-import { provideHttpClient }                            from '@angular/common/http';
+import { provideRouter, withComponentInputBinding } from '@angular/router';
+import { provideHttpClient } from '@angular/common/http';
 
 import { provideFirebaseApp } from '@angular/fire/app';
-import { initializeApp }        from 'firebase/app';
+import { initializeApp } from 'firebase/app';
 
-import { provideAuth }    from '@angular/fire/auth';
-import { getAuth }        from 'firebase/auth';
+import { provideAuth } from '@angular/fire/auth';
+import { getAuth } from 'firebase/auth';
 
 import { provideFirestore } from '@angular/fire/firestore';
-import { getFirestore }     from 'firebase/firestore';
+import { getFirestore } from 'firebase/firestore';
 
 import { provideDatabase } from '@angular/fire/database';
-import { getDatabase }     from 'firebase/database';
+import { getDatabase } from 'firebase/database';
 
-import { routes }         from './app.routes';
-import { firebaseConfig } from '../environments/environment';
-
-import { getStorage } from 'firebase/storage';
 import { provideStorage } from '@angular/fire/storage';
+import { getStorage } from 'firebase/storage';
+
+import { provideFunctions } from '@angular/fire/functions';
+import { getFunctions } from 'firebase/functions';
+
+import { routes } from './app.routes';
+import { firebaseConfig } from '../environments/environment';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -30,12 +33,15 @@ export const appConfig: ApplicationConfig = {
     // Inicializa Firebase
     provideFirebaseApp(() => initializeApp(firebaseConfig)),
 
-    // ** ¡IMPORTANTE! ** Provee Auth
+    // Provee Auth
     provideAuth(() => getAuth()),
 
-    // Si también usas Firestore y RTDB:
+    // Provee Firestore, Realtime Database y Storage
     provideFirestore(() => getFirestore()),
     provideDatabase(() => getDatabase()),
-    provideStorage(()   => getStorage()),
+    provideStorage(() => getStorage()),
+
+    // Provee Functions para EmailService
+    provideFunctions(() => getFunctions()),
   ]
 };
