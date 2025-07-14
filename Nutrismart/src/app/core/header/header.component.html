@@ -30,7 +30,7 @@
       <i class="fas fa-chevron-down"></i>
 
       <div class="user-menu" [class.active]="isUserMenuOpen">
-        <a routerLink="/" class="menu-item"><i class="fas fa-home"></i>Inicio</a>
+       
 
         <!-- Cliente -->
         <ng-container *ngIf="userRole==='cliente'">
@@ -47,6 +47,9 @@
         <!-- Nutricionista -->
         <ng-container *ngIf="userRole==='nutricionista'">
           <a routerLink="/dashboard-nutricionista" class="menu-item"><i class="fas fa-apple-alt"></i>Nutricionista</a>
+        </ng-container>
+        <ng-container *ngIf="userRole==='nutricionista'">
+          <a routerLink="/nutri-schedule" class="menu-item"><i class="fas fa-calendar-check"></i>Citas</a>
         </ng-container>
 
         <div class="menu-divider"></div>

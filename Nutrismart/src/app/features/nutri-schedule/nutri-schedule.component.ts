@@ -115,9 +115,13 @@ export class NutriScheduleComponent implements OnInit, OnDestroy {
       this.apptService.getAllAppointments()
         .subscribe(apps => {
           const now = Date.now();
-          // Marcar como completed las confirmadas pasadas
+    
           apps.forEach(c => {
-            if (c.status === 'confirmed' && new Date(c.datetime).getTime() < now) {
+            const startMs = new Date(c.datetime).getTime();
+            if (
+              c.status === 'confirmed' &&
+              startMs + 60 * 60 * 1000 < now
+            ) {
               this.apptService.updateAppointment(c.id!, { status: 'completed' });
             }
           });
@@ -135,41 +139,57 @@ export class NutriScheduleComponent implements OnInit, OnDestroy {
     this.subs.unsubscribe();
   }
 
-  /** Carga eventos confirmados en el calendario */
+  /** Carga eventos confirmados + completados en el calendario */
   private loadCalendarEvents(): void {
-    const eventos: EventInput[] = this.citas.map(c => ({
-      id:    c.id!,
-      title: this.getClientName(c.userId),
-      start: new Date(c.datetime),
-      end:   new Date(new Date(c.datetime).getTime() + 60 * 60000),
-    }));
+    const eventos: EventInput[] = this.allCitas
+      .filter(c => c.status === 'confirmed' || c.status === 'completed')
+      .map(c => ({
+        id: c.id!,
+        title: this.getClientName(c.userId),
+        start: new Date(c.datetime),
+        end: new Date(new Date(c.datetime).getTime() + 60 * 60000),
+        extendedProps: { status: c.status }
+      }));
     this.calendarOptions = { ...this.calendarOptions, events: eventos };
   }
 
-  /** Botones de editar/cancelar */
+  /** Botones sólo si es confirmed */
   private renderEventButtons(arg: any) {
+    if (arg.event.extendedProps.status === 'completed') {
+      return;
+    }
     const el = arg.el as HTMLElement;
-    ['edit','cancel'].forEach(type => {
-      const img = document.createElement('img');
-      img.src = `assets/icons/${type}-icon.png`;
-      img.alt = type;
-      img.title = type === 'edit' ? 'Editar' : 'Cancelar';
-      img.classList.add('event-btn-icon');
-      img.addEventListener('click', ev => {
-        ev.stopPropagation();
-        type === 'edit'
-          ? this.startEdit(arg.event.id!)
-          : this.cancelAppointment(arg.event.id!);
-      });
-      el.querySelector('.fc-event-title')?.append(img);
+
+    const btnEdit = document.createElement('img');
+    btnEdit.src = 'assets/icons/edit-icon.png';
+    btnEdit.alt = 'Editar';
+    btnEdit.title = 'Editar';
+    btnEdit.classList.add('event-btn-icon');
+    btnEdit.addEventListener('click', ev => {
+      ev.stopPropagation();
+      this.startEdit(arg.event.id!);
     });
+
+    const btnCancel = document.createElement('img');
+    btnCancel.src = 'assets/icons/cancel-icon.png';
+    btnCancel.alt = 'Cancelar';
+    btnCancel.title = 'Cancelar';
+    btnCancel.classList.add('event-btn-icon');
+    btnCancel.addEventListener('click', ev => {
+      ev.stopPropagation();
+      this.cancelAppointment(arg.event.id!);
+    });
+
+    el.querySelector('.fc-event-title')?.append(btnEdit, btnCancel);
   }
 
   private handleEventClick(_: any) {}
 
   /** Crear/actualizar cita */
   scheduleCita(): void {
-    if (!this.selectedClientId || !this.fechaSeleccionada || !this.horaSeleccionada) return;
+    if (!this.selectedClientId || !this.fechaSeleccionada || !this.horaSeleccionada) {
+      return;
+    }
     const iso = new Date(`${this.fechaSeleccionada}T${this.to24h(this.horaSeleccionada)}:00`).toISOString();
     const cliente = this.clients.find(c => c.id === this.selectedClientId)!;
     const finish = () => this.finishEdit();
@@ -197,6 +217,7 @@ export class NutriScheduleComponent implements OnInit, OnDestroy {
     }
   }
 
+  /** Cancela una cita */
   private cancelAppointment(id: string) {
     this.showModal('¿Cancelar cita?', 'confirm')
       .then(ok => {
@@ -216,6 +237,7 @@ export class NutriScheduleComponent implements OnInit, OnDestroy {
       });
   }
 
+  /** Prepara la edición */
   private startEdit(id: string) {
     const appt = this.citas.find(c => c.id === id)!;
     this.editingId = id;
@@ -243,7 +265,7 @@ export class NutriScheduleComponent implements OnInit, OnDestroy {
     this.activeTab = 'history';
   }
 
-  /** Histórico ordenado y filtrado */
+  /** Histórico */
   public get filteredHistoryAppointments(): Appointment[] {
     return this.allCitas
       .filter(c => c.status === 'canceled' || c.status === 'completed')
@@ -286,27 +308,24 @@ export class NutriScheduleComponent implements OnInit, OnDestroy {
   public isHorarioDisponible(h: string): boolean {
     const sel = new Date(`${this.fechaSeleccionada}T00:00:00`);
     const now = new Date();
-    if (this.esHoy(sel) && this.horaEnMinutos(h) <= now.getHours()*60 + now.getMinutes())
+    if (this.esHoy(sel) && this.horaEnMinutos(h) <= now.getHours()*60 + now.getMinutes()) {
       return false;
+    }
     const iso = new Date(`${this.fechaSeleccionada}T${this.to24h(h)}:00`).toISOString();
     return !this.citas.some(c => c.datetime === iso);
   }
 
   formateaHora(iso: string): string {
     const d = new Date(iso);
-    const h24 = d.getHours();
-    const min = String(d.getMinutes()).padStart(2,'0');
-    const ampm = h24 >= 12 ? 'PM' : 'AM';
-    const h12 = h24 % 12 || 12;
+    const h24 = d.getHours(), min = String(d.getMinutes()).padStart(2,'0');
+    const ampm = h24 >= 12 ? 'PM' : 'AM', h12 = h24 % 12 || 12;
     return `${String(h12).padStart(2,'0')}:${min} ${ampm}`;
   }
 
   formatFullDate(iso: string): string {
     const d = new Date(iso);
     return d.toLocaleDateString('es-ES', {
-      day:   'numeric',
-      month: 'long',
-      year:  'numeric',
+      day: 'numeric', month: 'long', year: 'numeric',
     });
   }
 
