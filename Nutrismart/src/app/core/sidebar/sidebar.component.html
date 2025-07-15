@@ -53,6 +53,12 @@
           <span>Nutricionista</span>
         </a>
       </li>
+      <li *ngIf="profile?.role==='nutricionista'" class="nav-item">
+        <a routerLink="/nutri-schedule" routerLinkActive="active" class="nav-link">
+          <i class="fas fa-calendar-check"></i>
+          <span>Citas</span>
+        </a>
+      </li>
 
     </ul>
   </nav>

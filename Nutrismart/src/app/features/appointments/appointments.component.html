@@ -1,8 +1,7 @@
-
+<!-- src/app/features/appointments/appointments.component.html -->
 <div class="citas-container">
   <h2 class="titulo-citas">
-    <i class="fas fa-calendar-alt"></i>
-    Gestión de Citas
+    <i class="fas fa-calendar-alt"></i> Gestión de Citas
   </h2>
 
   <form (ngSubmit)="guardarCita()" class="form-cita">
@@ -11,9 +10,9 @@
       <input
         type="date"
         id="fecha"
-        class="form-control"
         [(ngModel)]="fechaSeleccionada"
         name="fecha"
+        [min]="today"
         (change)="onFechaChange()"
         required
       />
@@ -23,17 +22,16 @@
       <label>Selecciona un horario</label>
       <div class="horarios">
         <button
-          type="button"
           *ngFor="let h of horarios"
-          [disabled]="!isHorarioDisponible(h)"
-          [class.selected]="h === horaSeleccionada"
-          (click)="horaSeleccionada = h"
+          type="button"
           class="btn-horario"
+          [class.selected]="h === horaSeleccionada"
+          [disabled]="!isHorarioDisponible(h)"
+          (click)="horaSeleccionada = h"
         >
           {{ h }}
         </button>
       </div>
-     
     </div>
 
     <div class="acciones">
@@ -56,24 +54,12 @@
   </form>
 
   <div class="nota">
-    <p>
-      <strong>Nota:</strong>
-      Las citas pueden modificarse o cancelarse hasta 24 horas antes del horario programado.
-    </p>
+    <strong>Nota:</strong> Puede editar o cancelar hasta 24 h antes.
   </div>
 
-  <div *ngIf="citasDeHoy.length === 0" class="no-citas-hoy">
-    No hay citas programadas para el día de hoy.
-  </div>
-   <div *ngIf="fechaSeleccionada && todosHorasPasaron" class="error-hora">
-        Ya pasaron todos los horarios disponibles de esta fecha.
-      </div>
+  <div *ngIf="showPopup" class="popup">{{ popupMessage }}</div>
 
-  <div *ngIf="showPopup" class="popup">
-    {{ popupMessage }}
-  </div>
-
-  <div class="lista-citas" *ngIf="citasUsuario.length > 0">
+  <div *ngIf="citasUsuario.length > 0" class="lista-citas">
     <h3 class="subtitulo">Mis Citas</h3>
     <table class="tabla-citas">
       <thead>
@@ -92,23 +78,26 @@
             <span
               [ngClass]="{
                 'estado-confirmed': c.status === 'confirmed',
+                'estado-completed': c.status === 'completed',
                 'estado-canceled': c.status === 'canceled'
               }"
             >
-              {{ c.status === 'confirmed' ? 'Confirmada' : 'Cancelada' }}
+              {{ c.status === 'confirmed' ? 'Confirmada'
+                 : c.status === 'completed' ? 'Completada'
+                 : 'Cancelada' }}
             </span>
           </td>
           <td>
             <button
+              *ngIf="c.status === 'confirmed' && puedeCancelar(c)"
               class="btn-editar"
-              *ngIf="c.status === 'confirmed'"
               (click)="editarCita(c)"
             >
               Editar
             </button>
             <button
+              *ngIf="c.status === 'confirmed' && puedeCancelar(c)"
               class="btn-cancelar"
-              *ngIf="c.status === 'confirmed'"
               (click)="cancelarCitaEspecifica(c)"
             >
               Cancelar
