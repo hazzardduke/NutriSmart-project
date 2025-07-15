@@ -149,7 +149,7 @@ export class NutriScheduleComponent implements OnInit, OnDestroy {
     if (arg.event.extendedProps.status === 'completed') return;
     const el = arg.el as HTMLElement;
     const edit = document.createElement('img');
-    edit.src = 'assets/icons/edit-icon.png';
+    edit.src = '/assets/images/edit-icon.png';
     edit.alt = 'Editar'; edit.title = 'Editar';
     edit.classList.add('event-btn-icon');
     edit.addEventListener('click', ev => {
@@ -157,7 +157,7 @@ export class NutriScheduleComponent implements OnInit, OnDestroy {
     });
 
     const cancel = document.createElement('img');
-    cancel.src = 'assets/icons/cancel-icon.png';
+    cancel.src = '/assets/images/cancel-icon.png';
     cancel.alt = 'Cancelar'; cancel.title = 'Cancelar';
     cancel.classList.add('event-btn-icon');
     cancel.addEventListener('click', ev => {
