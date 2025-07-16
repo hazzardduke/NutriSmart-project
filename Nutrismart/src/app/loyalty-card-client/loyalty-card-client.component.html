@@ -1,0 +1,34 @@
+<div class="loyalty-wrapper" *ngIf="card$ | async as card; else noCard">
+  <div class="card-header">
+    <h2 class="company-name">Nutrition To Go</h2>
+    <h3 class="card-title">Tarjeta NutriFidelidad</h3>
+  </div>
+
+  <div class="stamps">
+    <div
+      class="stamp"
+      *ngFor="let _ of stars; let i = index"
+      [class.filled]="i < card.stamps"
+    >
+      <!-- Aquí cargamos tu SVG de hoja -->
+      <img src="assets/images/hoja.png" alt="hoja" class="leaf-icon" />
+    </div>
+  </div>
+
+  <p class="footer-text">¡Acumula 7 sellos y canjea una cita nutricional gratis!</p>
+
+  <button
+    class="btn redeem-btn"
+    [disabled]="card.stamps < 7"
+    (click)="redeem()"
+  >
+    Canjear Recompensa
+  </button>
+</div>
+
+<ng-template #noCard>
+  <div class="loyalty-wrapper">
+    <p>No tienes tarjeta aún. Se creará al recibir tu primer sello.</p>
+    <button class="btn add-btn" (click)="createCard()">Crear Tarjeta</button>
+  </div>
+</ng-template>

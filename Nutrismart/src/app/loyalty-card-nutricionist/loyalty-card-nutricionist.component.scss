@@ -1,0 +1,144 @@
+/* src/app/features/loyalty-card-nutricionist/loyalty-card-nutricionist.component.scss */
+.nutri-wrapper {
+  max-width: 600px;
+  margin: 3rem auto;
+  padding: 2rem;
+  background-color: #fafafa;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  font-family: 'Roboto', sans-serif;
+  color: #333;
+}
+
+/* Título */
+.nutri-wrapper h2 {
+  margin-bottom: 1.5rem;
+  color: #2a2a2a;
+  font-size: 1.8rem;
+  text-align: center;
+}
+
+/* Pestañas */
+.nutri-wrapper .tabs {
+  display: flex;
+  justify-content: center;
+  list-style: none;
+  padding: 0;
+  margin-bottom: 2rem;
+  border-bottom: 2px solid #e0e0e0;
+}
+
+.nutri-wrapper .tabs li {
+  margin: 0 1rem;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  font-weight: 500;
+  color: #555;
+  transition: color 0.2s ease, border-bottom 0.2s ease;
+}
+
+.nutri-wrapper .tabs li.active {
+  color: #4caf50;
+  border-bottom: 3px solid #4caf50;
+}
+
+/* FORMULARIO: Gestionar sellos */
+.manage-tab .form-group {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.manage-tab .input-group {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-grow: 1;
+}
+
+.manage-tab .cliente-select {
+  flex-grow: 1;
+  max-width: 300px;
+  padding: 0.6rem;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  background-color: #fff;
+  transition: border-color 0.2s ease;
+}
+
+.manage-tab .cliente-select:focus {
+  outline: none;
+  border-color: #4caf50;
+}
+
+.manage-tab .btn.add-stamp {
+  white-space: nowrap;
+  padding: 0.6rem 1.6rem;
+  background-color: #4caf50;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+.manage-tab .btn.add-stamp:disabled {
+  background-color: #a5d6a7;
+  cursor: not-allowed;
+}
+
+.manage-tab .btn.add-stamp:not(:disabled):hover {
+  background-color: #43a047;
+  transform: translateY(-1px);
+}
+
+/* Tabla de resumen */
+.nutri-wrapper .summary-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1rem;
+}
+
+.nutri-wrapper .summary-table th,
+.nutri-wrapper .summary-table td {
+  padding: 0.75rem 1rem;
+  text-align: left;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.nutri-wrapper .summary-table th {
+  background-color: #f1f8e9;
+  color: #33691e;
+  font-weight: 600;
+}
+
+.nutri-wrapper .summary-table tbody tr:hover {
+  background-color: #f9fbe7;
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+  .nutri-wrapper {
+    padding: 1rem;
+  }
+  .nutri-wrapper h2 {
+    font-size: 1.5rem;
+  }
+  .nutri-wrapper .tabs li {
+    margin: 0 0.5rem;
+    padding: 0.4rem 0.8rem;
+    font-size: 0.9rem;
+  }
+  .manage-tab .form-group {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .manage-tab .btn.add-stamp {
+    width: 100%;
+  }
+}
