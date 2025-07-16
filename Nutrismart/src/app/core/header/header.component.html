@@ -49,6 +49,9 @@
         <ng-container *ngIf="userRole==='nutricionista'">
           <a routerLink="/dashboard-nutricionista" class="menu-item"><i class="fas fa-apple-alt"></i>Nutricionista</a>
         </ng-container>
+         <ng-container *ngIf="userRole==='nutricionista'">
+          <a routerLink="/loyalty-card-nutricionist"  class="menu-item"><i class="fas fa-star"></i>Tarjeta de Fidelidad</a>
+        </ng-container>
 
         <div class="menu-divider"></div>
         <a (click)="logout()" class="menu-item logout"><i class="fas fa-sign-out-alt"></i>Cerrar Sesión</a>

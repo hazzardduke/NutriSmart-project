@@ -1,60 +1,109 @@
-.loyalty-wrapper {
-  max-width: 600px;
-  margin: 3rem auto;
-  padding: 2rem;
-  background: #fff;
-  border-radius: 12px;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.1);
-  text-align: center;
-  font-family: 'Roboto', sans-serif;
+$primary-color:    #66bb6a;
+$empty-border:     #000000;
+$card-bg:          #ffffff;
+$text-color:       #2e3a2f;
+$redeem-color:     #ff6600;
 
-  h2 {
-    margin-bottom: 1rem;
-    color: #3e372d;
-    font-size: 1.6rem;
+.loyalty-wrapper {
+  max-width: 500px;       // más ancho
+  margin: 4rem auto;      // más espacio arriba/abajo
+  padding: 2.5rem;        // padding aumentado
+  background: url('/assets/images/fondoloyaltycliente.png') no-repeat center center,
+  $card-bg;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  font-family: 'Roboto', sans-serif;
+  color: $text-color;
+  text-align: center;
+
+  .card-header {
+    margin-bottom: 2rem;
+
+    .company-name {
+      font-size: 1.1rem;   // un poco más grande
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: darken($text-color, 20%);
+    }
+
+    .card-title {
+      font-size: 2rem;     // agrandado
+      margin-top: 0.4rem;
+    }
   }
 
-  .stars {
-    margin: 1rem 0;
-    i {
-      font-size: 2.2rem;
-      margin: 0 0.3rem;
-      &.filled {
-        color: #f1c40f;
+  .stamps {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.25rem;          // gap aumentado
+    justify-items: center;
+    margin: 2rem 0;
+
+    .stamp {
+      width: 90px;         // círculo más grande
+      height: 90px;
+      border: 3px solid $empty-border;
+      border-radius: 50%;
+      background: transparent;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s, border 0.2s;
+
+      .leaf-icon {
+        width: 45px;       // icono más grande
+        height: 45px;
       }
-      &.empty {
-        color: rgba(0,0,0,0.2);
+
+      &.filled {
+        background: $primary-color;
+        border: none;
+      }
+
+      &:hover {
+        cursor: pointer;
       }
     }
   }
 
-  p {
-    margin-bottom: 1.5rem;
-    color: #6b6b6b;
+  .footer-text {
+    font-size: 1.1rem;
+    font-weight: 500;
+    margin-bottom: 2rem;
   }
 
   .btn {
-    padding: 0.6rem 1.4rem;
+    padding: 1rem 1.6rem;  // botones más grandes
     border: none;
-    border-radius: 8px;
-    font-size: 1rem;
-    font-weight: 500;
-    cursor: pointer;
-    transition: background 0.3s ease;
-    &.add-btn {
-      background: #a1c037;
-      color: #fff;
-      &:hover { background: darken(#a1c037, 5%); }
+    border-radius: 6px;
+    font-size: 1.2rem;
+    font-weight: 600;
+    transition: background 0.2s;
+  }
+
+  .redeem-btn {
+    background: $redeem-color;   // naranja
+    color: #fff;
+
+    &:disabled {
+      background: lighten($redeem-color, 30%);
+      cursor: not-allowed;
     }
-    &.redeem-btn {
-      background: #f39c12;
+
+    &:not(:disabled):hover {
+      background: darken($redeem-color, 10%);
+    }
+  }
+
+  .add-btn {
+    background: transparent;
+    color: $primary-color;
+    border: 2px solid $primary-color;
+
+    &:hover {
+      background: $primary-color;
       color: #fff;
-      margin-left: 0.5rem;
-      &:hover { background: darken(#f39c12, 5%); }
-      &:disabled {
-        background: rgba(243,156,18,0.5);
-        cursor: not-allowed;
-      }
     }
   }
 }

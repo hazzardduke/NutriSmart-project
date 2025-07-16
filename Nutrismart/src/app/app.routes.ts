@@ -1,4 +1,3 @@
-// src/app/app.routes.ts
 import { Routes } from '@angular/router';
 
 import { authGuard } from './guards/auth.guard';
@@ -15,6 +14,8 @@ import { AppointmentsComponent }      from './features/appointments/appointments
 import { GoalsComponent }             from './features/goals/goals.component';
 import { ResetPasswordRequestComponent } from './reset-password-request/reset-password-request.component';
 import { LoyaltyCardClientComponent } from './loyalty-card-client/loyalty-card-client.component';
+import { LoyaltyCardNutricionistComponent } from './loyalty-card-nutricionist/loyalty-card-nutricionist.component';
+
 
 export const routes: Routes = [
   { path: 'login',    component: LoginComponent },
@@ -70,6 +71,12 @@ export const routes: Routes = [
       {
         path: 'dashboard-nutricionista',
         component: DashboardNutricionistaComponent,
+        canActivate: [ roleGuard ],
+        data: { role: 'nutricionista' }
+      },
+       {
+        path: 'loyalty-card-nutricionist',
+        component: LoyaltyCardNutricionistComponent,
         canActivate: [ roleGuard ],
         data: { role: 'nutricionista' }
       },

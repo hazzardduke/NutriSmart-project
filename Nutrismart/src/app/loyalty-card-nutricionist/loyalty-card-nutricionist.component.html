@@ -1,0 +1,69 @@
+<!-- src/app/features/loyalty-card-nutricionist/loyalty-card-nutricionist.component.html -->
+<div class="nutri-wrapper">
+  <h2>Administrar Tarjetas de Fidelidad</h2>
+
+  <!-- PESTAÑAS -->
+  <ul class="tabs">
+    <li
+      [class.active]="activeTab==='manage'"
+      (click)="switchTab('manage')"
+    >
+      Gestionar sellos
+    </li>
+    <li
+      [class.active]="activeTab==='overview'"
+      (click)="switchTab('overview')"
+    >
+      Resumen de sellos
+    </li>
+  </ul>
+
+  <!-- TAB 1: GESTIONAR -->
+  <section *ngIf="activeTab==='manage'" class="manage-tab">
+    <div class="form-group">
+      <label for="cliente-select">Seleccione Cliente:</label>
+      <div class="input-group">
+        <select
+          id="cliente-select"
+          [(ngModel)]="selectedId"
+          class="cliente-select"
+        >
+          <option value="">— ninguno —</option>
+          <option
+            *ngFor="let c of clients$ | async"
+            [value]="c.uid"
+          >
+            {{ c.nombre }} ({{ c.correo }})
+          </option>
+        </select>
+        <button
+          (click)="addStamp()"
+          [disabled]="!selectedId"
+          class="btn add-stamp"
+        >
+          Añadir Sello
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- TAB 2: RESUMEN -->
+  <section *ngIf="activeTab==='overview'" class="overview-tab">
+    <table class="summary-table">
+      <thead>
+        <tr>
+          <th>Cliente</th>
+          <th>Correo</th>
+          <th>Sellos</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let c of overview$ | async">
+          <td>{{ c.nombre }}</td>
+          <td>{{ c.correo }}</td>
+          <td>{{ c.stamps }} / 7</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+</div>

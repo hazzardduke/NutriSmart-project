@@ -1,8 +1,8 @@
-import { Component, OnInit }   from '@angular/core';
-import { CommonModule }         from '@angular/common';
-import { RouterLink }           from '@angular/router';
-import { LoyaltyCardService, LoyaltyCard } from '../services/loyalty-card.service';
-import { Observable }           from 'rxjs';
+import { Component, OnInit }      from '@angular/core';
+import { CommonModule }            from '@angular/common';
+import { RouterLink }              from '@angular/router';
+import { LoyaltyCardService }      from '../services/loyalty-card.service';
+import { Observable }              from 'rxjs';
 
 @Component({
   selector: 'app-loyalty-card-client',
@@ -12,24 +12,24 @@ import { Observable }           from 'rxjs';
   styleUrls: ['./loyalty-card-client.component.scss']
 })
 export class LoyaltyCardClientComponent implements OnInit {
-  card$!: Observable<LoyaltyCard|null>;
+  card$!: Observable<any|null>;
+  stars = Array(7);
 
   constructor(private svc: LoyaltyCardService) {}
-  stars = Array(7); 
 
   ngOnInit() {
     this.card$ = this.svc.getMyCard();
   }
 
-  redeem() {
-    
-    console.log('Comando de canje ejecutado');
-  }
-
-  addStamp() {
-    this.svc.addStamp()
-      .then(() => {/* opcional: mostrar un toast */})
+  createCard() {
+    this.svc.createCard()
+      .then(() => this.card$ = this.svc.getMyCard())
       .catch(err => console.error(err));
   }
 
+  redeem() {
+    this.svc.redeem()
+      .then(() => this.card$ = this.svc.getMyCard())
+      .catch(err => alert(err.message));
+  }
 }

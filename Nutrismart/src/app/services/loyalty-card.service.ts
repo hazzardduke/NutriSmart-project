@@ -1,4 +1,3 @@
-// src/app/services/loyalty-card.service.ts
 import { Injectable, inject } from '@angular/core';
 import {
   Firestore,
@@ -14,7 +13,7 @@ import {
 } from '@angular/fire/firestore';
 import { AuthService } from './auth.service';
 import { switchMap, map, take } from 'rxjs/operators';
-import { of, from, Observable } from 'rxjs';
+import { of, from, Observable, firstValueFrom } from 'rxjs';
 
 export interface LoyaltyCard {
   id: string;
@@ -43,36 +42,22 @@ export class LoyaltyCardService {
   }
 
   /** agregar un sello y crear la tarjeta si no existe*/
- addStamp(): Promise<void> {
-    return this.auth.user$.pipe(
-      switchMap(async u => {
-        if (!u) throw new Error('No autenticado');
-        const path   = `users/${u.uid}/loyaltyCards`;
-        const colRef = collection(this.fs, path);
-        const snap   = await getDocs(colRef);
+  async createCard(): Promise<void> {
+    const user = await firstValueFrom(this.auth.user$);
+    if (!user) throw new Error('No autenticado');
 
-        if (!snap.empty) {
-          // Incrementa pero reinicia a 0 tras 7
-          const cardDoc = snap.docs[0];
-          const data    = cardDoc.data() as LoyaltyCard;
-          const ref     = doc(this.fs, `${path}/${cardDoc.id}`);
-          const next    = (data.stamps + 1) % 8; // 0..7
-          await updateDoc(ref, {
-            stamps:    next,
-            updatedAt: serverTimestamp()
-          });
-        } else {
-          // Crea con 1 sello
-          const ref = doc(this.fs, `${path}/${u.uid}`);
-          await setDoc(ref, {
-            userId:    u.uid,
-            stamps:    1,
-            createdAt: serverTimestamp(),
-            updatedAt: serverTimestamp()
-          });
-        }
-      })
-    ).toPromise().then(() => {});
+    const ref = doc(this.fs, `users/${user.uid}/loyaltyCards/${user.uid}`);
+    
+    await setDoc(
+      ref,
+      {
+        userId:    user.uid,
+        stamps:    0,
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp()
+      },
+      { merge: true }  
+    );
   }
 
   /** canjear recompensa opcioncional */
