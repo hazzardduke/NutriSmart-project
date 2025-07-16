@@ -106,4 +106,25 @@ $redeem-color:     #ff6600;
       color: #fff;
     }
   }
+
+.reedem-success {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  max-width: 90%;
+  width: auto;
+  background: #fffbea;
+  border-left: 4px solid #ff6600;
+  color: #333;
+  padding: 1rem 1.25rem;
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  font-size: 1rem;
+  text-align: center;
+  z-index: 1000;
+}
+
+
+
 }

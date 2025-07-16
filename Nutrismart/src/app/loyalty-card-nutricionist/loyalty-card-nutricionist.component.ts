@@ -27,6 +27,9 @@ export class LoyaltyCardNutricionistComponent implements OnInit {
   
   activeTab: 'manage' | 'overview' = 'manage';
 
+  successMessage = '';
+  private clearMsgTimeout?: any;
+
   constructor(private svc: LoyaltyCardNutricionistService) {}
 
   ngOnInit() {
@@ -38,13 +41,27 @@ export class LoyaltyCardNutricionistComponent implements OnInit {
     this.activeTab = tab;
   }
 
+
+
   addStamp() {
     if (!this.selectedId) return;
     this.svc.addStampTo(this.selectedId)
-      .then(() => alert('Sello agregado correctamente'))
+      .then(() => {
+        this.showInfo('✅ Sello agregado correctamente');
+      })
       .catch(err => {
         console.error(err);
-        alert('Error al añadir sello');
+        this.showInfo('⚠️ Error al añadir sello');
       });
   }
+
+   private showInfo(msg: string) {
+    if (this.clearMsgTimeout) clearTimeout(this.clearMsgTimeout);
+
+    this.successMessage = msg;
+    this.clearMsgTimeout = setTimeout(() => {
+      this.successMessage = '';
+    }, 3000);
+  }
+
 }

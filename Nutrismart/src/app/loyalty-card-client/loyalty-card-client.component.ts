@@ -15,6 +15,10 @@ export class LoyaltyCardClientComponent implements OnInit {
   card$!: Observable<any|null>;
   stars = Array(7);
 
+  // PARA EL MENSAJE DE RECOMPENSA
+  successMessage = '';
+  private reedemTimeout?: any;
+
   constructor(private svc: LoyaltyCardService) {}
 
   ngOnInit() {
@@ -27,9 +31,27 @@ export class LoyaltyCardClientComponent implements OnInit {
       .catch(err => console.error(err));
   }
 
-  redeem() {
+    redeem() {
     this.svc.redeem()
-      .then(() => this.card$ = this.svc.getMyCard())
+      .then(() => {
+      
+        this.card$ = this.svc.getMyCard();
+        
+        this.showReedemMsg(
+          '🎉 ¡Felicidades, llegaste a los 7 sellos! Tu próxima cita nutricional será gratis.'
+        );
+      })
       .catch(err => alert(err.message));
   }
+
+  private showReedemMsg(msg: string) {
+    if (this.reedemTimeout) {
+      clearTimeout(this.reedemTimeout);
+    }
+    this.successMessage = msg;
+    this.reedemTimeout = setTimeout(() => {
+      this.successMessage = '';
+    }, 6000);
+  }
+
 }

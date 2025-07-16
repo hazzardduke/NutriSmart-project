@@ -141,4 +141,17 @@
   .manage-tab .btn.add-stamp {
     width: 100%;
   }
+
+.info-message {
+  background: #e8f5e9;
+  border: 1px solid #66bb6a;
+  color: #2e3a2f;
+  padding: 0.75rem 1rem;
+  border-radius: 4px;
+  margin-bottom: 1rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+}
+
 }

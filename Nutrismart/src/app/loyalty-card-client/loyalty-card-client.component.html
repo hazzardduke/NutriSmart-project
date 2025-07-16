@@ -24,7 +24,12 @@
   >
     Canjear Recompensa
   </button>
+
+    <div *ngIf="successMessage" class="reedem-success" role="alert">
+    {{ successMessage }}
+    </div>
 </div>
+
 
 <ng-template #noCard>
   <div class="loyalty-wrapper">
