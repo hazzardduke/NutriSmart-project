@@ -1,11 +1,11 @@
-// src/app/features/appointments/appointments.component.ts
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { CommonModule, NgIf }             from '@angular/common';
-import { FormsModule }                    from '@angular/forms';
-import { Subscription }                   from 'rxjs';
-import { AuthService }                    from '../../services/auth.service';
+import { CommonModule, NgIf } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { Subscription } from 'rxjs';
+import { AuthService } from '../../services/auth.service';
 import { AppointmentsService, Appointment } from '../../services/appointments.service';
-import { EmailService, CitaMailData }     from '../../services/email.service';
+import { EmailService } from '../../services/email.service';
+import { ProfileService, UserProfileData } from '../../services/profile.service';
 
 @Component({
   selector: 'app-appointments',
@@ -16,28 +16,30 @@ import { EmailService, CitaMailData }     from '../../services/email.service';
 })
 export class AppointmentsComponent implements OnInit, OnDestroy {
   fechaSeleccionada = '';
-  today            = '';
+  today = '';
   horaSeleccionada = '';
-  showPopup        = false;
-  popupMessage     = '';
-  citasTodas       : Appointment[] = [];
-  citasUsuario     : Appointment[] = [];
-  private uid        = '';
-  private userEmail  = '';
-  private subs       = new Subscription();
-  horarios         = [
-    '08:00 AM','09:00 AM','10:00 AM',
-    '11:00 AM','01:00 PM','02:00 PM',
-    '03:00 PM','04:00 PM','05:00 PM'
+  showPopup = false;
+  popupMessage = '';
+  citasTodas: Appointment[] = [];
+  citasUsuario: Appointment[] = [];
+  private uid = '';
+  private userEmail = '';
+  private userName = '';
+  private subs = new Subscription();
+  horarios = [
+    '08:00 AM', '09:00 AM', '10:00 AM',
+    '11:00 AM', '01:00 PM', '02:00 PM',
+    '03:00 PM', '04:00 PM', '05:00 PM'
   ];
   enEdicion = false;
   citaEnEdicion?: Appointment;
   todosHorasPasaron = false;
 
   constructor(
-    private authService   : AuthService,
-    private apptService   : AppointmentsService,
-    private emailService  : EmailService
+    private authService: AuthService,
+    private apptService: AppointmentsService,
+    private emailService: EmailService,
+    private profileService: ProfileService
   ) {}
 
   ngOnInit(): void {
@@ -64,6 +66,13 @@ export class AppointmentsComponent implements OnInit, OnDestroy {
         if (user) {
           this.uid = user.uid;
           this.userEmail = user.email ?? '';
+
+          this.subs.add(
+            this.profileService.getProfile(user.uid).subscribe(profile => {
+              this.userName = profile?.nombre ?? this.userEmail;
+            })
+          );
+
           this.loadCitasDeUsuario();
         } else {
           this.citasUsuario = [];
@@ -78,7 +87,7 @@ export class AppointmentsComponent implements OnInit, OnDestroy {
 
   getToday(): string {
     const d = new Date();
-    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
   }
 
   private loadCitasDeUsuario(): void {
@@ -88,8 +97,8 @@ export class AppointmentsComponent implements OnInit, OnDestroy {
     }
     this.subs.add(
       this.apptService.getUserAppointments(this.uid).subscribe(listUsr => {
-        const order = { confirmed:0, completed:1, canceled:2 };
-        this.citasUsuario = listUsr.sort((a,b) => {
+        const order = { confirmed: 0, completed: 1, canceled: 2 };
+        this.citasUsuario = listUsr.sort((a, b) => {
           if (order[a.status] !== order[b.status]) {
             return order[a.status] - order[b.status];
           }
@@ -114,12 +123,12 @@ export class AppointmentsComponent implements OnInit, OnDestroy {
       return;
     }
     const ahora = new Date();
-    const sel   = new Date(`${this.fechaSeleccionada}T00:00:00`);
+    const sel = new Date(`${this.fechaSeleccionada}T00:00:00`);
     const inicioHoy = new Date(ahora.toISOString().split('T')[0] + 'T00:00:00');
     if (sel > ahora) this.todosHorasPasaron = false;
     else if (sel < inicioHoy) this.todosHorasPasaron = true;
     else {
-      const mn = ahora.getHours()*60 + ahora.getMinutes();
+      const mn = ahora.getHours() * 60 + ahora.getMinutes();
       this.todosHorasPasaron = !this.horarios.some(h => this.horaEnMinutos(h) > mn);
     }
   }
@@ -127,26 +136,26 @@ export class AppointmentsComponent implements OnInit, OnDestroy {
   public isHorarioDisponible(h: string): boolean {
     if (!this.fechaSeleccionada) return false;
     const ahora = new Date();
-    const sel   = new Date(`${this.fechaSeleccionada}T00:00:00`);
-    const mn    = ahora.getHours()*60 + ahora.getMinutes();
-    if (sel.toDateString()===ahora.toDateString() && this.horaEnMinutos(h) <= mn) {
+    const sel = new Date(`${this.fechaSeleccionada}T00:00:00`);
+    const mn = ahora.getHours() * 60 + ahora.getMinutes();
+    if (sel.toDateString() === ahora.toDateString() && this.horaEnMinutos(h) <= mn) {
       return false;
     }
     const iso = new Date(`${this.fechaSeleccionada}T${this.to24h(h)}:00`).toISOString();
     if (this.enEdicion && this.citaEnEdicion?.datetime === iso) return true;
-    return !this.citasTodas.some(c => c.datetime===iso && c.status!=='canceled');
+    return !this.citasTodas.some(c => c.datetime === iso && c.status !== 'canceled');
   }
 
   private horaEnMinutos(h12: string): number {
     const [t, mer] = h12.split(' ');
     let [h, m] = t.split(':').map(v => +v);
-    if (mer==='PM' && h<12) h+=12;
-    if (mer==='AM' && h===12) h=0;
-    return h*60 + m;
+    if (mer === 'PM' && h < 12) h += 12;
+    if (mer === 'AM' && h === 12) h = 0;
+    return h * 60 + m;
   }
 
   public puedeCancelar(c: Appointment): boolean {
-    return new Date(c.datetime).getTime() - Date.now() >= 24*3600000;
+    return new Date(c.datetime).getTime() - Date.now() >= 24 * 3600000;
   }
 
   editarCita(c: Appointment): void {
@@ -170,7 +179,7 @@ export class AppointmentsComponent implements OnInit, OnDestroy {
     }
     this.apptService.updateAppointment(c.id!, { status: 'canceled' })
       .then(() => this.emailService.sendCitaCancelada(this.userEmail, {
-        nombre: this.userEmail,
+        nombre: this.userName,
         fecha: this.formateaFecha(c.datetime),
         hora: this.formateaHora(c.datetime),
         ubicacion: 'Clínica NutriSmart'
@@ -199,7 +208,7 @@ export class AppointmentsComponent implements OnInit, OnDestroy {
     if (this.enEdicion && this.citaEnEdicion?.id) {
       this.apptService.updateAppointment(this.citaEnEdicion.id, { datetime: iso })
         .then(() => this.emailService.sendCitaActualizada(this.userEmail, {
-          nombre: this.userEmail,
+          nombre: this.userName,
           fecha: this.formatFullDate(iso),
           hora: this.formateaHora(iso),
           ubicacion: 'Clínica NutriSmart'
@@ -209,7 +218,7 @@ export class AppointmentsComponent implements OnInit, OnDestroy {
     } else {
       this.apptService.createAppointment({ userId: this.uid, datetime: iso, status: 'confirmed' })
         .then(() => this.emailService.sendCitaConfirmada(this.userEmail, {
-          nombre: this.userEmail,
+          nombre: this.userName,
           fecha: this.formatFullDate(iso),
           hora: this.formateaHora(iso),
           ubicacion: 'Clínica NutriSmart'
@@ -236,24 +245,24 @@ export class AppointmentsComponent implements OnInit, OnDestroy {
   private to24h(h12: string): string {
     const [t, mer] = h12.split(' ');
     let [h, m] = t.split(':').map(v => +v);
-    if (mer==='PM' && h<12) h+=12;
-    if (mer==='AM' && h===12) h=0;
-    return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
+    if (mer === 'PM' && h < 12) h += 12;
+    if (mer === 'AM' && h === 12) h = 0;
+    return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
   }
 
   formateaFecha(iso: string): string {
     const d = new Date(iso);
-    return `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
+    return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`;
   }
 
   formateaHora(iso: string): string {
     const d = new Date(iso);
     const h = d.getHours(), m = d.getMinutes();
-    const ampm = h>=12?'PM':'AM', h12 = h%12||12;
-    return `${String(h12).padStart(2,'0')}:${String(m).padStart(2,'0')} ${ampm}`;
+    const ampm = h >= 12 ? 'PM' : 'AM', h12 = h % 12 || 12;
+    return `${String(h12).padStart(2, '0')}:${String(m).padStart(2, '0')} ${ampm}`;
   }
 
   formatFullDate(iso: string): string {
-    return new Date(iso).toLocaleDateString('es-ES', { day:'numeric', month:'long', year:'numeric' });
+    return new Date(iso).toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' });
   }
 }

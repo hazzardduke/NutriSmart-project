@@ -1,13 +1,12 @@
 import { Component, OnInit }      from '@angular/core';
 import { CommonModule }            from '@angular/common';
-import { RouterLink }              from '@angular/router';
 import { LoyaltyCardService }      from '../services/loyalty-card.service';
 import { Observable }              from 'rxjs';
 
 @Component({
   selector: 'app-loyalty-card-client',
   standalone: true,
-  imports: [ CommonModule, RouterLink ],
+  imports: [ CommonModule ],
   templateUrl: './loyalty-card-client.component.html',
   styleUrls: ['./loyalty-card-client.component.scss']
 })

@@ -74,7 +74,7 @@ export class ProfileService {
     );
   }
 
-  /** Clientes con role==='cliente', renombrando y añadiendo cédula */
+ 
   getClients(): Observable<ClientProfile[]> {
     const usersColl = collection(this.firestore, 'users');
     const q = query(usersColl, where('role', '==', 'cliente'));
