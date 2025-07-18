@@ -1,56 +1,54 @@
-import { Component, OnInit }      from '@angular/core';
-import { CommonModule }            from '@angular/common';
-import { LoyaltyCardService }      from '../services/loyalty-card.service';
-import { Observable }              from 'rxjs';
+import { Component, OnInit } from '@angular/core';
+import { CommonModule }       from '@angular/common';
+import { Observable }         from 'rxjs';
+import {
+  LoyaltyCardService,
+  LoyaltyCard,
+  RedeemEntry
+} from '../services/loyalty-card.service';
 
 @Component({
   selector: 'app-loyalty-card-client',
   standalone: true,
   imports: [ CommonModule ],
   templateUrl: './loyalty-card-client.component.html',
-  styleUrls: ['./loyalty-card-client.component.scss']
+  styleUrls: [ './loyalty-card-client.component.scss' ]
 })
 export class LoyaltyCardClientComponent implements OnInit {
-  card$!: Observable<any|null>;
+  card$!: Observable<LoyaltyCard | null>;
+  history$!: Observable<RedeemEntry[]>;
   stars = Array(7);
 
-  // PARA EL MENSAJE DE RECOMPENSA
+  activeTab: 'card' | 'history' = 'card';
   successMessage = '';
-  private reedemTimeout?: any;
+  private redeemTimeout?: any;
 
-  constructor(private svc: LoyaltyCardService) {}
+  constructor(private loyaltySvc: LoyaltyCardService) {}
 
-  ngOnInit() {
-    this.card$ = this.svc.getMyCard();
+  ngOnInit(): void {
+    this.card$    = this.loyaltySvc.getMyCard();
+    this.history$ = this.loyaltySvc.getRedeemHistory();
   }
 
-  createCard() {
-    this.svc.createCard()
-      .then(() => this.card$ = this.svc.getMyCard())
-      .catch(err => console.error(err));
+  createCard(): void {
+    this.loyaltySvc.createCard()
+      .then(() => this.card$ = this.loyaltySvc.getMyCard())
+      .catch((err: any) => console.error(err));
   }
 
-    redeem() {
-    this.svc.redeem()
+  redeem(): void {
+    this.loyaltySvc.redeem()
       .then(() => {
-      
-        this.card$ = this.svc.getMyCard();
-        
-        this.showReedemMsg(
-          '🎉 ¡Felicidades, llegaste a los 7 sellos! Tu próxima cita nutricional será gratis.'
-        );
+        this.card$    = this.loyaltySvc.getMyCard();
+        this.history$ = this.loyaltySvc.getRedeemHistory();
+        this.showRedeemMsg('🎉 ¡Felicidades! Tu próxima cita nutricional será GRATIS.');
       })
-      .catch(err => alert(err.message));
+      .catch((err: any) => alert(err.message));
   }
 
-  private showReedemMsg(msg: string) {
-    if (this.reedemTimeout) {
-      clearTimeout(this.reedemTimeout);
-    }
+  private showRedeemMsg(msg: string): void {
+    if (this.redeemTimeout) clearTimeout(this.redeemTimeout);
     this.successMessage = msg;
-    this.reedemTimeout = setTimeout(() => {
-      this.successMessage = '';
-    }, 6000);
+    this.redeemTimeout = setTimeout(() => this.successMessage = '', 6000);
   }
-
 }
