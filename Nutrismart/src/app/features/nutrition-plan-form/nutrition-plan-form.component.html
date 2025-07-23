@@ -78,8 +78,7 @@
             </tbody>
           </table>
         </div>
-
-        <button class="btn-submit" (click)="onExportTablaYRecomendaciones()">
+        <button type="button" class="btn-submit" (click)="onExportTablaYRecomendaciones()">
           Guardar Plan & Descargar PDF
         </button>
       </form>
@@ -97,65 +96,86 @@
         </select>
       </div>
 
-      <table class="history-table">
-        <thead>
-          <tr>
-            <th>Cliente</th>
-            <th>Fecha Plan</th>
-            <th>Creado</th>
-            <th>Acciones</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let p of filteredPlans$ | async">
-            <td>{{ p.client.name }}</td>
-            <td>{{ p.client.date }}</td>
-            <td>{{ p.createdAt?.toDate() | date:'short' }}</td>
-            <td class="actions">
-              <button (click)="showTable(p)">Ver Tabla</button>
-              <button (click)="downloadPdf(p)">Descargar PDF</button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-
-      <div *ngIf="viewPlan" class="plan-preview">
-        <h3>Plan de {{ viewPlan.client.name }} – {{ viewPlan.client.date }}</h3>
-        <div class="table-wrapper">
-          <table class="table">
+      <!-- 1. Guardamos el async en 'plans' -->
+      <ng-container *ngIf="filteredPlans$ | async as plans">
+        <!-- 2. Solo mostramos la tabla si plans.length > 0 -->
+        <ng-container *ngIf="plans.length > 0; else noPlans">
+          <table class="history-table">
             <thead>
               <tr>
-                <th>Alimentos</th>
-                <th>Porciones</th>
-                <th>Desayuno</th>
-                <th>Mer#1</th>
-                <th>Almu</th>
-                <th>Mer#2</th>
-                <th>Cena</th>
+                <th>Cliente</th>
+                <th>Fecha</th>
+                <th>Creado</th>
+                <th>Acciones</th>
               </tr>
             </thead>
             <tbody>
-              <tr *ngFor="let cat of categories">
-                <td>{{ cat }}</td>
-                <td>
-                  {{
-                    viewPlan.portions[cat]['desayuno']
-                    + viewPlan.portions[cat]['merienda1']
-                    + viewPlan.portions[cat]['almuerzo']
-                    + viewPlan.portions[cat]['merienda2']
-                    + viewPlan.portions[cat]['cena']
-                  }}
+              <tr *ngFor="let p of plans">
+                <!-- ahora solo mostramos el nombre -->
+                <td>{{ p.client.name }}</td>
+                <td>{{ p.client.date }}</td>
+                <td>{{ p.createdAt?.toDate() | date:'short' }}</td>
+                <td class="actions">
+                  <button class="btn-action" (click)="openModal(p)">Mostrar Tabla</button>
+                  <button class="btn-action" (click)="downloadPdf(p)">Descargar PDF</button>
                 </td>
-                <td>{{ viewPlan.portions[cat]['desayuno'] }}</td>
-                <td>{{ viewPlan.portions[cat]['merienda1'] }}</td>
-                <td>{{ viewPlan.portions[cat]['almuerzo'] }}</td>
-                <td>{{ viewPlan.portions[cat]['merienda2'] }}</td>
-                <td>{{ viewPlan.portions[cat]['cena'] }}</td>
               </tr>
             </tbody>
           </table>
-        </div>
-      </div>
+        </ng-container>
+      </ng-container>
+
+      <ng-template #noPlans>
+        <div class="no-plans">No hay planes para el cliente seleccionado</div>
+      </ng-template>
     </section>
+  </div>
+</div>
+
+<!-- Modal -->
+<div class="modal-overlay" *ngIf="modalPlan as mp">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>
+        Plan de {{ mp.client.name }}
+        – {{ mp.client.cedula }}
+        – {{ mp.client.date }}
+      </h3>
+      <button class="close-btn" (click)="closeModal()">×</button>
+    </div>
+    <div class="table-wrapper">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Alimentos</th>
+            <th>Porciones</th>
+            <th>Desayuno</th>
+            <th>Mer#1</th>
+            <th>Almu</th>
+            <th>Mer#2</th>
+            <th>Cena</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let cat of categories">
+            <td>{{ cat }}</td>
+            <td>
+              {{
+                mp.portions[cat].desayuno
+                + mp.portions[cat].merienda1
+                + mp.portions[cat].almuerzo
+                + mp.portions[cat].merienda2
+                + mp.portions[cat].cena
+              }}
+            </td>
+            <td>{{ mp.portions[cat].desayuno }}</td>
+            <td>{{ mp.portions[cat].merienda1 }}</td>
+            <td>{{ mp.portions[cat].almuerzo }}</td>
+            <td>{{ mp.portions[cat].merienda2 }}</td>
+            <td>{{ mp.portions[cat].cena }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
   </div>
 </div>

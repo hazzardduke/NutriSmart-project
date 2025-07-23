@@ -1,5 +1,7 @@
 // src/app/features/nutrition-plan-form/nutrition-plan-form.component.ts
+
 import { Component, OnInit } from '@angular/core';
+import Swal from 'sweetalert2';
 import { CommonModule } from '@angular/common';
 import {
   ReactiveFormsModule,
@@ -26,7 +28,7 @@ import { ProfileService, ClientProfile } from '../../services/profile.service';
 export interface SavedPlan {
   id: string;
   clientId: string;
-  client: { name: string; date: string };
+  client: { name: string; cedula: string; date: string };
   createdAt: any;
   portions: {
     [cat: string]: {
@@ -57,7 +59,8 @@ export class NutritionPlanFormComponent implements OnInit {
   plans$!: Observable<SavedPlan[]>;
   filterControl = new FormControl('');
   filteredPlans$!: Observable<SavedPlan[]>;
-  viewPlan?: SavedPlan;
+
+  modalPlan: SavedPlan | null = null;
 
   constructor(
     private fb: FormBuilder,
@@ -72,7 +75,6 @@ export class NutritionPlanFormComponent implements OnInit {
 
     const colRef = collection(this.afs, 'nutritionPlans');
     const q      = query(colRef, orderBy('createdAt','desc'));
-    // quitamos el genérico de collectionData y luego hacemos un cast
     this.plans$ = collectionData(q, { idField: 'id' }) as Observable<SavedPlan[]>;
 
     this.filteredPlans$ = combineLatest([
@@ -87,12 +89,12 @@ export class NutritionPlanFormComponent implements OnInit {
 
   setTab(tab: 'create' | 'history'): void {
     this.currentTab = tab;
-    this.viewPlan = undefined;
+    this.modalPlan = null;
   }
 
   onClientSelect(sel: HTMLSelectElement): void {
     const id = sel.value;
-    this.selectedClient = this.clients.find(c => c.id === id) || undefined;
+    this.selectedClient = this.clients.find(c => c.id === id);
     if (!this.selectedClient) {
       this.portionsForm = this.fb.group({});
       return;
@@ -120,13 +122,15 @@ export class NutritionPlanFormComponent implements OnInit {
   async onExportTablaYRecomendaciones(): Promise<void> {
     if (!this.selectedClient) return;
     const client = this.selectedClient;
-    const name   = `${client.nombre} ${client.apellido}`;
+    const name   = `${client.nombre}_${client.apellido}`.replace(/\s+/g, '_');
+    const cedula = client.cedula;
     const now    = new Date();
     const dd     = String(now.getDate()).padStart(2,'0');
     const mm     = String(now.getMonth()+1).padStart(2,'0');
     const yyyy   = now.getFullYear();
     const date   = `${dd}-${mm}-${yyyy}`;
 
+    // Construir datos de porciones
     const raw = this.portionsForm.value as Record<string, any>;
     const portionsData: SavedPlan['portions'] = {};
     this.categories.forEach(cat => {
@@ -140,40 +144,68 @@ export class NutritionPlanFormComponent implements OnInit {
       };
     });
 
+    // Guardar en Firestore
     const docRef = await addDoc(collection(this.afs, 'nutritionPlans'), {
       clientId:  client.id,
-      client:    { name, date },
+      client:    { name: `${client.nombre} ${client.apellido}`, cedula, date },
       portions:  portionsData,
       createdAt: serverTimestamp()
     });
 
+    // Nombre de archivo: Nombre_Apellido_Cedula_Fecha.pdf
+    const filename = `${name}_${cedula}_${date}.pdf`;
+
+    // Generar y descargar PDF
     await this.mergeSvc.fillAndInsertTable(
       'assets/Recomendaciones.pdf',
-      name,
+      `${client.nombre} ${client.apellido}`,
       date,
       this.buildTableDocDef(portionsData),
-      `plan_${docRef.id}_${date}.pdf`
+      filename
     );
-  }
 
-  showTable(plan: SavedPlan): void {
-    this.viewPlan = plan;
+    // Mostrar SweetAlert
+    await Swal.fire({
+      icon: 'success',
+      title: '¡Plan guardado y PDF descargado!',
+      showConfirmButton: false,
+      timer: 1500,
+      background: '#fff',
+      iconColor: '#a1c037',
+      confirmButtonColor: '#a1c037'
+    });
+
+    // Limpiar y cambiar a Histórico
+    this.selectedClient = undefined;
+    this.portionsForm.reset();
+    this.setTab('history');
   }
 
   async downloadPdf(plan: SavedPlan): Promise<void> {
-    const { name, date } = plan.client;
+    const [first, last] = plan.client.name.split(' ');
+    const safeName      = `${first}_${last}`.replace(/\s+/g, '_');
+    const cedula        = plan.client.cedula;
+    const date          = plan.client.date;
+    const filename      = `${safeName}_${cedula}_${date}.pdf`;
+
     await this.mergeSvc.fillAndInsertTable(
       'assets/Recomendaciones.pdf',
-      name,
+      plan.client.name,
       date,
       this.buildTableDocDef(plan.portions),
-      `plan_${plan.id}_${date}.pdf`
+      filename
     );
   }
 
-  private buildTableDocDef(
-    portions: SavedPlan['portions']
-  ): TDocumentDefinitions {
+  openModal(plan: SavedPlan): void {
+    this.modalPlan = plan;
+  }
+
+  closeModal(): void {
+    this.modalPlan = null;
+  }
+
+  private buildTableDocDef(portions: SavedPlan['portions']): TDocumentDefinitions {
     const header = [
       { text: 'Alimentos', style: 'tableHeader' },
       { text: 'Porciones', style: 'tableHeader' },
@@ -209,7 +241,10 @@ export class NutritionPlanFormComponent implements OnInit {
             body: [header, ...rows]
           },
           layout: {
-            fillColor: (i: number) => i === 0 ? '#71ac42' : i % 2 === 0 ? '#F0F5F0' : null,
+            fillColor: (i: number) =>
+              i === 0 ? '#a1c037'
+            : i % 2 === 0 ? '#F0F5F0'
+            : null,
             hLineWidth: () => 0.5,
             vLineWidth: () => 0.5,
             hLineColor: () => '#CCCCCC',
