@@ -1,0 +1,161 @@
+<!-- src/app/features/nutrition-plan-form/nutrition-plan-form.component.html -->
+<div class="nutrition-plan-container">
+  <div class="nutrition-plan-card">
+    <h2 class="card-title">Planes Nutricionales</h2>
+
+    <div class="tabs">
+      <button
+        [class.active]="currentTab==='create'"
+        (click)="setTab('create')">
+        Nuevo Plan
+      </button>
+      <button
+        [class.active]="currentTab==='history'"
+        (click)="setTab('history')">
+        Histórico
+      </button>
+    </div>
+
+    <!-- NUEVO PLAN -->
+    <section *ngIf="currentTab==='create'" class="create-tab">
+      <div class="client-select">
+        <label for="client">Cliente</label>
+        <select
+          #clientSelect
+          id="client"
+          (change)="onClientSelect(clientSelect)">
+          <option value="" disabled selected>-- Seleccione cliente --</option>
+          <option *ngFor="let c of clients" [value]="c.id">
+            {{ c.cedula }} – {{ c.nombre }} {{ c.apellido }}
+          </option>
+        </select>
+      </div>
+
+      <form *ngIf="selectedClient" [formGroup]="portionsForm">
+        <div class="table-wrapper">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Alimentos</th>
+                <th>Porciones</th>
+                <th>Desayuno</th>
+                <th>Mer#1</th>
+                <th>Almu</th>
+                <th>Mer#2</th>
+                <th>Cena</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let cat of categories" [formGroupName]="cat">
+                <td>{{ cat }}</td>
+                <td>{{ computePorciones(cat) }}</td>
+                <td>
+                  <select formControlName="desayuno">
+                    <option *ngFor="let n of numbers" [value]="n">{{ n }}</option>
+                  </select>
+                </td>
+                <td>
+                  <select formControlName="merienda1">
+                    <option *ngFor="let n of numbers" [value]="n">{{ n }}</option>
+                  </select>
+                </td>
+                <td>
+                  <select formControlName="almuerzo">
+                    <option *ngFor="let n of numbers" [value]="n">{{ n }}</option>
+                  </select>
+                </td>
+                <td>
+                  <select formControlName="merienda2">
+                    <option *ngFor="let n of numbers" [value]="n">{{ n }}</option>
+                  </select>
+                </td>
+                <td>
+                  <select formControlName="cena">
+                    <option *ngFor="let n of numbers" [value]="n">{{ n }}</option>
+                  </select>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <button class="btn-submit" (click)="onExportTablaYRecomendaciones()">
+          Guardar Plan & Descargar PDF
+        </button>
+      </form>
+    </section>
+
+    <!-- HISTÓRICO -->
+    <section *ngIf="currentTab==='history'" class="history-tab">
+      <div class="client-select">
+        <label for="filterClient">Filtrar Cliente</label>
+        <select [formControl]="filterControl" id="filterClient">
+          <option value="">Todos</option>
+          <option *ngFor="let c of clients" [value]="c.id">
+            {{ c.cedula }} – {{ c.nombre }} {{ c.apellido }}
+          </option>
+        </select>
+      </div>
+
+      <table class="history-table">
+        <thead>
+          <tr>
+            <th>Cliente</th>
+            <th>Fecha Plan</th>
+            <th>Creado</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let p of filteredPlans$ | async">
+            <td>{{ p.client.name }}</td>
+            <td>{{ p.client.date }}</td>
+            <td>{{ p.createdAt?.toDate() | date:'short' }}</td>
+            <td class="actions">
+              <button (click)="showTable(p)">Ver Tabla</button>
+              <button (click)="downloadPdf(p)">Descargar PDF</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div *ngIf="viewPlan" class="plan-preview">
+        <h3>Plan de {{ viewPlan.client.name }} – {{ viewPlan.client.date }}</h3>
+        <div class="table-wrapper">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Alimentos</th>
+                <th>Porciones</th>
+                <th>Desayuno</th>
+                <th>Mer#1</th>
+                <th>Almu</th>
+                <th>Mer#2</th>
+                <th>Cena</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let cat of categories">
+                <td>{{ cat }}</td>
+                <td>
+                  {{
+                    viewPlan.portions[cat]['desayuno']
+                    + viewPlan.portions[cat]['merienda1']
+                    + viewPlan.portions[cat]['almuerzo']
+                    + viewPlan.portions[cat]['merienda2']
+                    + viewPlan.portions[cat]['cena']
+                  }}
+                </td>
+                <td>{{ viewPlan.portions[cat]['desayuno'] }}</td>
+                <td>{{ viewPlan.portions[cat]['merienda1'] }}</td>
+                <td>{{ viewPlan.portions[cat]['almuerzo'] }}</td>
+                <td>{{ viewPlan.portions[cat]['merienda2'] }}</td>
+                <td>{{ viewPlan.portions[cat]['cena'] }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>
