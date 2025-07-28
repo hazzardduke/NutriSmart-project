@@ -1,4 +1,36 @@
-/* src/app/features/nutri-schedule/nutri-schedule.component.scss */
+/* --- FULLSCREEN LOADING OVERLAY --- */
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(255, 255, 255, 0.9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+}
+
+.spinner-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  .spinner-gif {
+    width: 80px;
+    height: 80px;
+  }
+
+  .spinner-text {
+    margin-top: 0.75rem;
+    color: #555;
+    font-size: 1.1rem;
+    font-weight: 500;
+  }
+}
+
+/* --- CONTENEDOR PRINCIPAL --- */
 .schedule-container {
   max-width: 900px;
   margin: 2rem auto;
@@ -35,7 +67,6 @@
     }
   }
 
-  /* --- NUEVAS CITAS --- */
   .form-schedule {
     .form-group {
       margin-bottom: 1rem;
@@ -53,32 +84,38 @@
         font-size: 1rem;
       }
     }
+
     .horarios {
       display: flex;
       flex-wrap: wrap;
       gap: 0.5rem;
       margin-top: 0.5rem;
+
       button {
         padding: 0.5rem 1rem;
         border: 1px solid #ccc;
         border-radius: 6px;
         background: #f7f7f7;
         cursor: pointer;
+
         &.selected {
           background: #a1c037;
           color: #fff;
           border-color: #a1c037;
         }
+
         &:disabled {
           background: #eee;
           color: #999;
           cursor: not-allowed;
         }
+
         &:not(:disabled):hover:not(.selected) {
           background: #eaeaea;
         }
       }
     }
+
     .btn-schedule {
       display: block;
       margin: 1.5rem auto 0;
@@ -89,6 +126,7 @@
       border-radius: 8px;
       font-size: 1rem;
       cursor: pointer;
+
       &:disabled {
         opacity: 0.5;
         cursor: not-allowed;
@@ -96,7 +134,6 @@
     }
   }
 
-  /* --- CALENDARIO --- */
   .calendar-tab {
     .fullcalendar-wrapper {
       margin-bottom: 1.5rem;
@@ -107,72 +144,73 @@
       }
     }
   }
-}
 
-/* --- HISTÓRICO --- */
-.history-list-tab {
-  margin-top: 2rem;
+  .history-list-tab {
+    margin-top: 2rem;
 
-  .history-filter {
-    display: flex;
-    align-items: center;
-    margin-bottom: 1rem;
-    label {
-      margin-right: 0.5rem;
-      font-weight: 600;
+    .history-filter {
+      display: flex;
+      align-items: center;
+      margin-bottom: 1rem;
+
+      label {
+        margin-right: 0.5rem;
+        font-weight: 600;
+      }
+
+      .form-control {
+        padding: 0.4rem;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+      }
     }
-    .form-control {
-      padding: 0.4rem;
-      border: 1px solid #ccc;
-      border-radius: 4px;
+
+    .history-table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      font-size: 0.9rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+
+      th, td {
+        padding: 0.6rem 0.8rem;
+        text-align: left;
+        border-right: 1px solid #a1c037;
+        border-bottom: 1px solid #eee;
+      }
+
+      th:last-child, td:last-child {
+        border-right: none;
+      }
+
+      th {
+        background: #a1c037;
+        color: #fff;
+        font-weight: 600;
+      }
+
+      tbody tr:hover {
+        background: #f7fff3;
+      }
+
+      tbody tr.row-cancelada:hover {
+        background-color: #ffe6e6;
+      }
+
+      tr.row-cancelada {
+        background-color: #ffe6e6;
+      }
+
+      .no-data {
+        text-align: center;
+        padding: 1rem;
+        color: #777;
+      }
     }
   }
-
-  .history-table {
-    width: 100%;
-    border-collapse: separate;
-    border-spacing: 0;
-    font-size: 0.9rem;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-
-    th, td {
-      padding: 0.6rem 0.8rem;
-      text-align: left;
-      border-right: 1px solid #a1c037;
-      border-bottom: 1px solid #eee;
-    }
-    th:last-child, td:last-child {
-      border-right: none;
-    }
-    th {
-      background: #a1c037;
-      color: #fff;
-      font-weight: 600;
-    }
-    tbody tr:hover {
-      background: #f7fff3;
-    }
-    tbody tr.row-cancelada:hover {
-      background-color: #ffe6e6;
-    }
-
-   
-    tr.row-cancelada {
-      background-color: #ffe6e6;  
-     
-      
-    }
-     
-
-    .no-data {
-      text-align: center;
-      padding: 1rem;
-      color: #777;
-    }
-  }
 }
 
-/* --- BOTONES Y MODAL --- */
+/* --- EVENTO Y MODAL --- */
 .event-btn-icon {
   width: 18px;
   height: 18px;

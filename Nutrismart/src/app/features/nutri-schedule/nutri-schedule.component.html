@@ -1,4 +1,12 @@
-<!-- src/app/features/nutri-schedule/nutri-schedule.component.html -->
+<!-- Full-Screen Loading Overlay -->
+<div class="loading-overlay" *ngIf="isLoading">
+  <div class="spinner-wrapper">
+    <img src="assets/images/loader_parpadeo.gif" alt="Cargando..." class="spinner-gif" />
+    <p class="spinner-text">Procesando cita...</p>
+  
+  </div>
+</div>
+
 <div class="schedule-container">
   <h2 class="title">Horario del nutricionista</h2>
 
@@ -49,13 +57,15 @@
         </div>
       </div>
 
-      <button
-        type="submit"
-        class="btn-schedule"
-        [disabled]="!selectedClientId || !horaSeleccionada"
-      >
-        Programar cita
-      </button>
+      <div class="form-group" style="text-align: center;">
+        <button
+          type="submit"
+          class="btn-schedule"
+          [disabled]="!selectedClientId || !horaSeleccionada || isLoading"
+        >
+          Programar cita
+        </button>
+      </div>
     </form>
   </section>
 
@@ -70,11 +80,7 @@
   <section *ngIf="activeTab==='history'" class="history-list-tab">
     <div class="history-filter">
       <label for="historyClient">Filtrar por cliente:</label>
-      <select
-        id="historyClient"
-        [(ngModel)]="historyClientId"
-        class="form-control"
-      >
+      <select id="historyClient" [(ngModel)]="historyClientId" class="form-control">
         <option value="">-- Todos los clientes --</option>
         <option *ngFor="let c of clients" [value]="c.id">
           {{ c.nombre }} {{ c.apellido }}
