@@ -1,0 +1,63 @@
+<h2>Administrar Clientes</h2>
+
+
+<table class="clients-table">
+  <thead>
+    <tr>
+      <th>Nombre</th><th>Correo</th><th>Activo</th><th>Acciones</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr *ngFor="let c of clients$ | async">
+      <td>{{ c.nombre }}</td>
+      <td>{{ c.correo }}</td>
+      <td>
+        <input type="checkbox"
+               [checked]="c.active"
+               (change)="onToggleActive(c)" />
+      </td>
+      <td>
+       <button
+          type="button"
+          class="btn-action edit"
+          (click)="onEdit(c)"
+        >
+          <i class="fas fa-edit"></i> Editar
+        </button>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+
+<div *ngIf="editForm.get('uid')!.value" class="edit-panel">
+  <h3>Editar Cliente</h3>
+  <form [formGroup]="editForm" (ngSubmit)="saveEdit()" class="edit-form">
+    <div class="field">
+      <label for="nombre">Nombre:</label>
+      <input id="nombre" type="text" formControlName="nombre" />
+    </div>
+
+    <div class="field">
+      <label for="telefono">Teléfono:</label>
+      <input id="telefono" type="text" formControlName="telefono" />
+    </div>
+
+    <div class="field">
+      <label for="correo">Correo:</label>
+      <input id="correo" type="email" formControlName="correo"/>
+    </div>
+
+    <div class="field-active">
+      <label for="active">Activo:</label>
+      <input id="active" type="checkbox" formControlName="active" />
+    </div>
+
+    <div class="form-actions">
+      <button type="submit" class="btn-action save">
+        <i class="fas fa-save"></i> Guardar
+      </button>
+    </div>
+  </form>
+</div>
+

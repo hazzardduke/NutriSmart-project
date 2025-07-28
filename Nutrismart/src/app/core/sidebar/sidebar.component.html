@@ -52,6 +52,13 @@
         </a>
       </li>
 
+      <li *ngIf="profile?.role==='admin'" class="nav-item">
+        <a routerLink="/admin/clients" routerLinkActive="active" class="nav-link">
+          <i class="fas fa-users-cog"></i>
+          <span>Gestionar Clientes</span>
+        </a>
+      </li>
+
       <!-- Nutricionista -->
       <li *ngIf="profile?.role==='nutricionista'" class="nav-item">
         <a routerLink="/dashboard-nutricionista" routerLinkActive="active" class="nav-link">

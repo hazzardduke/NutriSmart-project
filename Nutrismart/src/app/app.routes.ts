@@ -16,6 +16,7 @@ import { ResetPasswordRequestComponent } from './reset-password-request/reset-pa
 import { NutriScheduleComponent } from './features/nutri-schedule/nutri-schedule.component';
 import { LoyaltyCardClientComponent } from './loyalty-card-client/loyalty-card-client.component';
 import { LoyaltyCardNutricionistComponent } from './loyalty-card-nutricionist/loyalty-card-nutricionist.component';
+import { AdminClientsComponent }      from './admin-clients/admin-clients.component';
 
 
 export const routes: Routes = [
@@ -64,6 +65,13 @@ export const routes: Routes = [
       {
         path: 'dashboard-admin',
         component: DashboardAdminComponent,
+        canActivate: [ roleGuard ],
+        data: { role: 'admin' }
+      },
+
+       {
+        path: 'admin/clients',
+        component: AdminClientsComponent,
         canActivate: [ roleGuard ],
         data: { role: 'admin' }
       },
