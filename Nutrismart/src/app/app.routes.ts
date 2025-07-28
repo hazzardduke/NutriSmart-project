@@ -16,6 +16,7 @@ import { ResetPasswordRequestComponent } from './reset-password-request/reset-pa
 import { NutriScheduleComponent } from './features/nutri-schedule/nutri-schedule.component';
 import { LoyaltyCardClientComponent } from './loyalty-card-client/loyalty-card-client.component';
 import { LoyaltyCardNutricionistComponent } from './loyalty-card-nutricionist/loyalty-card-nutricionist.component';
+import { GoalsNutricionistComponent } from './features/goals-nutricionist/goals-nutricionist.component';
 
 
 export const routes: Routes = [
@@ -81,11 +82,13 @@ export const routes: Routes = [
         canActivate: [ roleGuard ],
         data: { role: 'nutricionista' }
       },
-
-      
-  
-
-       {
+      {
+        path: 'goals-nutricionist',
+        component: GoalsNutricionistComponent,
+        canActivate: [ roleGuard ],
+        data: { role: 'nutricionista' }
+      },
+      {
         path: 'loyalty-card-nutricionist',
         component: LoyaltyCardNutricionistComponent,
         canActivate: [ roleGuard ],

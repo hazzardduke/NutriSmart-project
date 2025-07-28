@@ -25,9 +25,11 @@ export interface LoyaltyCard {
 }
 
 export interface UserSummary {
-  uid:    string;
+  uid: string;
   nombre: string;
-  correo: string;
+  apellidos: string;
+  cedula: string;
+  
 }
 
 export interface ClientWithStamps extends UserSummary {
@@ -44,9 +46,10 @@ export class LoyaltyCardNutricionistService {
     const q        = query(usersCol, where('role', '==', 'cliente'));
     return collectionData(q, { idField: 'uid' }).pipe(
       map(arr => (arr as any[]).map(u => ({
-        uid:    u.uid,
-        nombre: u.nombre,
-        correo: u.correo
+        uid: u.uid,
+          nombre: u.nombre,
+          apellidos: u.apellidos,
+          cedula: u.cedula
       })))
     );
   }
