@@ -52,9 +52,13 @@
         <ng-container *ngIf="userRole==='nutricionista'">
           <a routerLink="/nutri-schedule" class="menu-item"><i class="fas fa-calendar-check"></i>Citas</a>
         </ng-container>
+           <ng-container *ngIf="userRole==='nutricionista'">
+          <a routerLink="/goals-nutricionist"  class="menu-item"><i class="fas fa-bullseye"></i>Seguimiento de objetivos</a>
+        </ng-container>
           <ng-container *ngIf="userRole==='nutricionista'">
           <a routerLink="/loyalty-card-nutricionist"  class="menu-item"><i class="fas fa-star"></i>Tarjeta de Fidelidad</a>
         </ng-container>
+        
 
         <div class="menu-divider"></div>
         <a (click)="logout()" class="menu-item logout"><i class="fas fa-sign-out-alt"></i>Cerrar Sesión</a>

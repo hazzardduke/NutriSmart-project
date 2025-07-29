@@ -17,6 +17,7 @@ import { NutriScheduleComponent } from './features/nutri-schedule/nutri-schedule
 import { NutritionPlanFormComponent } from './features/nutrition-plan-form/nutrition-plan-form.component';
 import { LoyaltyCardClientComponent } from './loyalty-card-client/loyalty-card-client.component';
 import { LoyaltyCardNutricionistComponent } from './loyalty-card-nutricionist/loyalty-card-nutricionist.component';
+import { GoalsNutricionistComponent } from './features/goals-nutricionist/goals-nutricionist.component';
 
 export const routes: Routes = [
   { path: 'login',    component: LoginComponent },
