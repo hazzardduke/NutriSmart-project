@@ -43,7 +43,6 @@
     }
   }
 
-  /* ─── Tabla de citas ───────────────────────────────── */
   .appt-card {
     .table-wrapper {
       overflow-x: auto;
@@ -102,9 +101,8 @@
     }
   }
 
-  /* ─── Lista de pacientes ───────────────────────────── */
   .clients-card {
-    margin-top: 0; // quita margen extra
+    margin-top: 0; 
     .clients-list {
       display: flex;
       flex-direction: column;
