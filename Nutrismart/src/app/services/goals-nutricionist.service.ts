@@ -9,7 +9,8 @@ import {
   doc,
   query,
   orderBy,
-  where
+  where,
+  collectionGroup
 } from '@angular/fire/firestore';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -89,30 +90,35 @@ export class GoalsNutricionistService {
     return deleteDoc(ref);
   }
 
-  addRecommendation(
-    userId: string,
-    goal: Goal,
-    comentario: string
-  ): Promise<void> {
-    const recCol = collection(this.fs, 'recommendations');
-    const rec: Omit<Recommendation, 'id'> = {
-      userId,
-      goalId: goal.id!,
-      tipo: goal.tipo,
-      meta: goal.meta,
-      fecha: new Date().toISOString(),
-      comentario
-    };
-    return addDoc(recCol, rec).then(() => {});
+
+ addRecommendation(uid: string, goalId: string, recommendation: { comentario: string; tipo: string; meta: string }): Promise<void> {
+    const col = collection(this.fs,`users/${uid}/goals/${goalId}/recommendations`);
+    return addDoc(col, {
+      comentario: recommendation.comentario,
+      tipo:       recommendation.tipo,         
+      meta:       recommendation.meta,              
+      fecha:      new Date().toISOString(),
+      userId:     uid,
+      goalId
+    }).then(() => {});
   }
 
-  listRecommendations(userId: string): Observable<Recommendation[]> {
-    const recCol = collection(this.fs, 'recommendations');
-    const q = query(
-      recCol,
-      where('userId', '==', userId),
-      orderBy('fecha', 'desc')
+
+  listRecommendations(uid: string, goalId: string): Observable<Recommendation[]> {
+    const col = collection(this.fs,`users/${uid}/goals/${goalId}/recommendations`);
+    const q = query(col, orderBy('fecha', 'desc'));
+    return collectionData(q, { idField: 'id' }).pipe(
+      map((arr: any[]) =>
+        arr.map(goal => ({
+          id:          goal.id,
+          comentario:  goal.comentario,
+          fecha:       goal.fecha,
+          tipo:        goal.tipo,
+          meta:        goal.meta,
+          goalId,      
+          userId:      uid
+        }))
+      )
     );
-    return collectionData(q, { idField: 'id' }) as Observable<Recommendation[]>;
   }
 }

@@ -1,5 +1,3 @@
-// src/app/features/goals-nutricionist/goals-nutricionist.component.ts
-
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule }                      from '@angular/common';
 import { FormsModule }                       from '@angular/forms';
@@ -25,6 +23,7 @@ export class GoalsNutricionistComponent implements OnInit, OnDestroy {
   objetivos: Goal[]                   = [];
   historico: Goal[]                   = [];
   recomendaciones: Recommendation[]   = [];
+  progresoTemp: Record<string, number> = {};
 
   tabPrincipal: 'crear' | 'objetivos' | 'historico'         = 'crear';
   subTab:      'objetivos' | 'recomendaciones'              = 'objetivos';
@@ -62,7 +61,7 @@ export class GoalsNutricionistComponent implements OnInit, OnDestroy {
     this.subTab             = 'objetivos';
   }
 
-  onClientSelect(): void {
+ onClientSelect(): void {
     if (!this.selectedClientUid) {
       this.objetivos       = [];
       this.historico       = [];
@@ -71,8 +70,16 @@ export class GoalsNutricionistComponent implements OnInit, OnDestroy {
     }
     this.subs.add(
       this.svc.getGoals(this.selectedClientUid).subscribe(all => {
-        this.objetivos = all.filter(o => o.progreso < 100);
-        this.historico = all.filter(o => o.progreso === 100);
+        
+        this.objetivos = all.filter(o => o.estado === 'en progreso');
+        this.historico = all.filter(o => o.estado === 'completado');
+
+       
+        this.progresoTemp = {};
+        this.objetivos.forEach(o => {
+          if (o.id) this.progresoTemp[o.id] = o.progreso;
+        });
+
         if (this.subTab === 'recomendaciones') {
           this.loadRecs();
         }
@@ -98,18 +105,24 @@ export class GoalsNutricionistComponent implements OnInit, OnDestroy {
   }
 
   updateProgreso(o: Goal): void {
-    const p = Math.max(1, Math.min(100, o.progreso));
-    this.svc.updateGoal(this.selectedClientUid!, o.id!, { progreso: p })
+    const id = o.id!;
+    const valor = Math.max(0, Math.min(100, this.progresoTemp[id] ?? o.progreso));
+    this.svc.updateGoal(this.selectedClientUid!, id, { progreso: valor })
       .then(() => this.onClientSelect());
   }
+
 
   completarObjetivo(o: Goal): void {
     if (!confirm('¿Seguro que deseas marcar este objetivo como completado?')) {
       return;
     }
+
+    const hoy = new Date().toISOString().split('T')[0];
+
     this.svc.updateGoal(this.selectedClientUid!, o.id!, {
       progreso: 100,
-      estado: 'completado'
+      estado: 'completado',
+      fecha: hoy
     }).then(() => {
       this.alert('Objetivo completado');
       this.onClientSelect();
@@ -129,26 +142,48 @@ export class GoalsNutricionistComponent implements OnInit, OnDestroy {
     this.showRecModal = true;
   }
 
+
   saveRecomendacion(): void {
     if (!this.newComentario.trim()) {
       return this.alert('Escribe tu recomendación.');
     }
-    this.svc.addRecommendation(
-      this.selectedClientUid!,
-      this.recModalGoal,
-      this.newComentario.trim()
-    ).then(() => {
-      this.alert('Recomendación guardada');
-      this.showRecModal = false;
-      this.loadRecs();
-    });
+    this.svc
+      .addRecommendation(
+        this.selectedClientUid!,                 
+        this.recModalGoal.id!,                   
+        {
+          comentario: this.newComentario.trim(), 
+          tipo:       this.recModalGoal.tipo,    
+          meta:       this.recModalGoal.meta     
+        }
+      )
+      .then(() => {
+        this.alert('Recomendación guardada');
+        this.showRecModal = false;
+        this.loadRecs();
+      });
   }
 
+
   private loadRecs(): void {
-    this.subs.add(
-      this.svc.listRecommendations(this.selectedClientUid!)
-        .subscribe(recs => this.recomendaciones = recs)
-    );
+    
+    this.recomendaciones = [];
+
+   
+    this.objetivos.forEach(goal => {
+      this.subs.add(
+        this.svc
+          .listRecommendations(this.selectedClientUid!, goal.id!)
+          .subscribe(arr => {
+         
+            this.recomendaciones.push(...arr);
+            
+            this.recomendaciones.sort((a, b) =>
+              new Date(b.fecha).getTime() - new Date(a.fecha).getTime()
+            );
+          })
+      );
+    });
   }
 
   private addMonths(d: Date, m: number): Date {

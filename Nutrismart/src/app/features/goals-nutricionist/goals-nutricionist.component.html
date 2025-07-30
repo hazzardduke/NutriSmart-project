@@ -1,4 +1,3 @@
-<!-- src/app/features/goals-nutricionist/goals-nutricionist.component.html -->
 <div class="container p-4">
   <h1 class="text-2xl font-bold mb-4">Gestión de Objetivos Nutricionales</h1>
   <hr /><br />
@@ -96,19 +95,14 @@
             <p><strong>Meta:</strong> {{ obj.meta }}</p>
             <p><strong>Fecha meta:</strong> {{ obj.fecha | date:'dd-MM-yyyy' }}</p>
 
-            <div class="progreso-input">
-              <label for="progreso-{{ obj.id }}">Progreso (%)</label>
-              <input
-                type="number"
-                id="progreso-{{ obj.id }}"
-                class="input-progreso"
-                [(ngModel)]="obj.progreso"
-                (ngModelChange)="updateProgreso(obj)"
-                min="1"
-                max="100"
-                step="1"
-              />
-            </div>
+          <div class="progreso-input">
+            <label for="progreso-{{ obj.id }}">Progreso (%)</label>
+            <input type="number" id="progreso-{{ obj.id }}" class="input-progreso" [(ngModel)]="progresoTemp[obj.id!]"
+              name="progreso-{{ obj.id }}" min="0" max="100" step="1" />
+            <button class="btn-action" (click)="updateProgreso(obj)">
+              Actualizar
+            </button>
+          </div>
 
             <button *ngIf="obj.progreso===100" class="btn-action" (click)="completarObjetivo(obj)">
               Completar
@@ -127,51 +121,58 @@
 
         <!-- LISTA DE RECOMENDACIONES -->
         <div *ngIf="subTab==='recomendaciones'" class="recs-container">
-          <div *ngIf="recomendaciones.length===0" class="no-data">
-            No hay recomendaciones aún.
+          <div *ngIf="recomendaciones.length === 0" class="no-data">
+            No hay recomendaciones para objetivos en progreso.
           </div>
           <div *ngFor="let rec of recomendaciones" class="recomendacion-card">
-            <p class="rec-meta">
-              Objetivo: <strong>{{ rec.tipo }}</strong> (Meta: {{ rec.meta }})
-            </p>
+            <h4 class="rec-objective">{{ rec.tipo }} (Meta: {{ rec.meta }})</h4>
+            <p class="rec-date"><strong>Fecha:</strong> {{ rec.fecha | date:'dd-MM-yyyy' }}</p>
             <p class="rec-comment">{{ rec.comentario }}</p>
-            <time class="rec-date">{{ rec.fecha | date:'dd-MM-yyyy' }}</time>
           </div>
         </div>
       </ng-container>
     </ng-container>
 
-    <!-- HISTÓRICO -->
-    <ng-container *ngIf="tabPrincipal==='historico'">
-      <div class="client-select">
-        <label for="clientHist">Cliente</label>
-        <select id="clientHist" class="input"
-                [(ngModel)]="selectedClientUid"
-                (change)="onClientSelect()"
-                name="clientHist">
-          <option [ngValue]="null" disabled selected>-- Seleccionar cliente --</option>
-          <option *ngFor="let c of clients" [ngValue]="c.uid">
-            {{ c.nombre }} {{ c.apellidos }} ({{ c.cedula }})
-          </option>
-        </select>
-      </div>
-
-      <div *ngIf="!selectedClientUid" class="no-data">
-        Selecciona un cliente para ver el histórico.
-      </div>
-
-      <div *ngIf="selectedClientUid" class="form-section">
-        <div *ngIf="historico.length===0" class="no-data">
-          No hay objetivos completados.
-        </div>
-        <div *ngFor="let obj of historico" class="objetivo">
-          <h4>{{ obj.tipo }}</h4>
-          <p><strong>Meta:</strong> {{ obj.meta }}</p>
-          <p><strong>Fecha completado:</strong> {{ obj.fecha | date:'dd-MM-yyyy' }}</p>
-        </div>
-      </div>
-    </ng-container>
+<!-- HISTÓRICO -->
+<ng-container *ngIf="tabPrincipal==='historico'">
+  <div class="client-select">
+    <label for="clientHist">Cliente</label>
+    <select
+      id="clientHist"
+      class="input"
+      [(ngModel)]="selectedClientUid"
+      (ngModelChange)="onClientSelect()"
+      name="clientHist"
+    >
+     
+      <option [ngValue]="null" disabled>-- Seleccionar cliente --</option>
+      <option *ngFor="let c of clients" [ngValue]="c.uid">
+        {{ c.nombre }} {{ c.apellidos }} ({{ c.cedula }})
+      </option>
+    </select>
   </div>
+
+  <div *ngIf="!selectedClientUid" class="no-data">
+    Selecciona un cliente para ver el histórico.
+  </div>
+
+  <div *ngIf="selectedClientUid" class="form-section">
+    <div *ngIf="historico.length === 0" class="no-data">
+      No hay objetivos completados.
+    </div>
+
+    <div *ngFor="let obj of historico" class="objetivo">
+      <h4>{{ obj.tipo }}</h4>
+      <p><strong>Meta:</strong> {{ obj.meta }}</p>
+      
+      <p>
+        <strong>Fecha completado:</strong>
+        {{ obj.fecha | date: 'dd-MM-yyyy' }}
+      </p>
+    </div>
+  </div>
+</ng-container>
+
 
   <!-- Modal de Recomendación -->
   <div class="modal-bg" *ngIf="showRecModal">
@@ -184,7 +185,7 @@
         [(ngModel)]="newComentario"
       ></textarea>
       <button class="btn-save mt-2" (click)="saveRecomendacion()">Guardar</button>
-      <button class="btn-action mt-2 ml-2" (click)="showRecModal=false">Cancelar</button>
+      <button class="btn-action mt-2" (click)="showRecModal = false">Cancelar</button>
     </div>
   </div>
 
@@ -192,7 +193,7 @@
   <div class="popup" *ngIf="showPopup">
     <div class="popup-content">
       {{ mensajeService }}
-      <button class="close-btn" (click)="showPopup=false">×</button>
+      <button class="close-btn" (click)="showPopup = false">×</button>
     </div>
   </div>
 </div>
