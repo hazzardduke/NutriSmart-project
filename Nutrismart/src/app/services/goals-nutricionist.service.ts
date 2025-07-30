@@ -20,6 +20,7 @@ export interface Goal {
   meta: string;
   fecha: string;
   progreso: number;
+  estado?: string;
   createdAt: string;
 }
 
@@ -28,7 +29,16 @@ export interface UserSummary {
   nombre: string;
   apellidos: string;
   cedula: string;
-  
+}
+
+export interface Recommendation {
+  id?: string;
+  userId: string;
+  goalId: string;
+  tipo: string;
+  meta: string;
+  fecha: string;
+  comentario: string;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -56,11 +66,15 @@ export class GoalsNutricionistService {
     return collectionData(q, { idField: 'id' }) as Observable<Goal[]>;
   }
 
-  addGoal(uid: string, goal: Omit<Goal, 'id' | 'createdAt' | 'progreso'>): Promise<void> {
+  addGoal(
+    uid: string,
+    goal: Omit<Goal, 'id' | 'progreso' | 'createdAt'>
+  ): Promise<void> {
     const col = collection(this.fs, `users/${uid}/goals`);
     return addDoc(col, {
       ...goal,
       progreso: 0,
+      estado: 'en progreso',
       createdAt: new Date().toISOString()
     }).then(() => {});
   }
@@ -73,5 +87,32 @@ export class GoalsNutricionistService {
   deleteGoal(uid: string, id: string): Promise<void> {
     const ref = doc(this.fs, `users/${uid}/goals/${id}`);
     return deleteDoc(ref);
+  }
+
+  addRecommendation(
+    userId: string,
+    goal: Goal,
+    comentario: string
+  ): Promise<void> {
+    const recCol = collection(this.fs, 'recommendations');
+    const rec: Omit<Recommendation, 'id'> = {
+      userId,
+      goalId: goal.id!,
+      tipo: goal.tipo,
+      meta: goal.meta,
+      fecha: new Date().toISOString(),
+      comentario
+    };
+    return addDoc(recCol, rec).then(() => {});
+  }
+
+  listRecommendations(userId: string): Observable<Recommendation[]> {
+    const recCol = collection(this.fs, 'recommendations');
+    const q = query(
+      recCol,
+      where('userId', '==', userId),
+      orderBy('fecha', 'desc')
+    );
+    return collectionData(q, { idField: 'id' }) as Observable<Recommendation[]>;
   }
 }

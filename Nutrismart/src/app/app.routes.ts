@@ -88,6 +88,12 @@ export const routes: Routes = [
         canActivate: [ roleGuard ],
         data: { role: 'nutricionista' }
       },
+      {
+        path: 'goals-nutricionist',
+        component: GoalsNutricionistComponent,
+        canActivate: [ roleGuard ],
+        data: { role: 'nutricionista' }
+      },
       
   
 

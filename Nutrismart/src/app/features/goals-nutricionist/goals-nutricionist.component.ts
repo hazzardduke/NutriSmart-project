@@ -1,55 +1,154 @@
+// src/app/features/goals-nutricionist/goals-nutricionist.component.ts
+
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
-import { Subscription } from 'rxjs';
-import { GoalsNutricionistService, Goal, UserSummary } from '../../services/goals-nutricionist.service';
+import { CommonModule }                      from '@angular/common';
+import { FormsModule }                       from '@angular/forms';
+import { Subscription }                      from 'rxjs';
+import {
+  GoalsNutricionistService,
+  Goal,
+  Recommendation,
+  UserSummary
+} from '../../services/goals-nutricionist.service';
 
 @Component({
   selector: 'app-goals-nutricionist',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [ CommonModule, FormsModule ],
   templateUrl: './goals-nutricionist.component.html',
-  styleUrls: ['./goals-nutricionist.component.scss']
+  styleUrls:  [ './goals-nutricionist.component.scss' ]
 })
 export class GoalsNutricionistComponent implements OnInit, OnDestroy {
-  clients: UserSummary[] = [];
-  selectedClientUid: string | null = null;
-  mesesOptions = [1, 2, 3, 4, 5, 6];
-  nuevoObjetivo: { tipo: string; meta: string; meses: number | null } = { tipo: '', meta: '', meses: null };
-  objetivos: Goal[] = [];
-  progresoTemp: Record<string, number> = {};
-  tabInterno: 'objetivos' | 'recomendaciones' = 'objetivos';
-  recomendaciones = [
-    { fecha: '2025-03-20', resumen: 'Reducir carbohidratos refinados.', comentario: 'Evita panes blancos y azúcares.' },
-    { fecha: '2025-03-10', resumen: 'Aumentar consumo de agua.', comentario: 'Toma al menos 2.5 L diarios.' }
-  ];
-  selectedRecomendacion: any = null;
-  showPopup = false;
+  clients: UserSummary[]              = [];
+  selectedClientUid: string | null    = null;
+
+  objetivos: Goal[]                   = [];
+  historico: Goal[]                   = [];
+  recomendaciones: Recommendation[]   = [];
+
+  tabPrincipal: 'crear' | 'objetivos' | 'historico'         = 'crear';
+  subTab:      'objetivos' | 'recomendaciones'              = 'objetivos';
+
+  mesesOptions = [1,2,3,4,5,6];
+  nuevoObjetivo = { tipo: '', meta: '', meses: null as number | null };
+
+  showRecModal   = false;
+  recModalGoal!: Goal;
+  newComentario = '';
+
+  showPopup      = false;
   mensajeService = '';
-  private subs = new Subscription();
+  private subs   = new Subscription();
 
   constructor(private svc: GoalsNutricionistService) {}
 
   ngOnInit(): void {
-    this.subs.add(this.svc.listClients().subscribe(c => this.clients = c));
+    this.subs.add(
+      this.svc.listClients().subscribe(list => this.clients = list)
+    );
   }
 
   ngOnDestroy(): void {
     this.subs.unsubscribe();
   }
 
+  switchPrincipal(tab: 'crear' | 'objetivos' | 'historico'): void {
+    this.tabPrincipal       = tab;
+    this.selectedClientUid  = null;
+    this.objetivos          = [];
+    this.historico          = [];
+    this.recomendaciones    = [];
+    this.nuevoObjetivo      = { tipo: '', meta: '', meses: null };
+    this.subTab             = 'objetivos';
+  }
+
   onClientSelect(): void {
-    if (this.selectedClientUid) {
-      this.subs.add(
-        this.svc.getGoals(this.selectedClientUid).subscribe(g => {
-          this.objetivos = g;
-          this.progresoTemp = {};
-          g.forEach(o => { if (o.id) this.progresoTemp[o.id] = o.progreso; });
-        })
-      );
-    } else {
-      this.objetivos = [];
+    if (!this.selectedClientUid) {
+      this.objetivos       = [];
+      this.historico       = [];
+      this.recomendaciones = [];
+      return;
     }
+    this.subs.add(
+      this.svc.getGoals(this.selectedClientUid).subscribe(all => {
+        this.objetivos = all.filter(o => o.progreso < 100);
+        this.historico = all.filter(o => o.progreso === 100);
+        if (this.subTab === 'recomendaciones') {
+          this.loadRecs();
+        }
+      })
+    );
+  }
+
+  guardarObjetivo(): void {
+    if (!this.nuevoObjetivo.tipo || !this.nuevoObjetivo.meta || this.nuevoObjetivo.meses == null) {
+      return this.alert('Completa todos los campos.');
+    }
+    const fechaMeta = this.addMonths(new Date(), this.nuevoObjetivo.meses)
+                          .toISOString().split('T')[0];
+    this.svc.addGoal(this.selectedClientUid!, {
+      tipo: this.nuevoObjetivo.tipo,
+      meta: this.nuevoObjetivo.meta,
+      fecha: fechaMeta
+    }).then(() => {
+      this.alert('Objetivo creado y en progreso');
+      this.switchPrincipal('objetivos');
+      this.onClientSelect();
+    });
+  }
+
+  updateProgreso(o: Goal): void {
+    const p = Math.max(1, Math.min(100, o.progreso));
+    this.svc.updateGoal(this.selectedClientUid!, o.id!, { progreso: p })
+      .then(() => this.onClientSelect());
+  }
+
+  completarObjetivo(o: Goal): void {
+    if (!confirm('¿Seguro que deseas marcar este objetivo como completado?')) {
+      return;
+    }
+    this.svc.updateGoal(this.selectedClientUid!, o.id!, {
+      progreso: 100,
+      estado: 'completado'
+    }).then(() => {
+      this.alert('Objetivo completado');
+      this.onClientSelect();
+    });
+  }
+
+  switchSub(tab: 'objetivos' | 'recomendaciones'): void {
+    this.subTab = tab;
+    if (tab === 'recomendaciones' && this.selectedClientUid) {
+      this.loadRecs();
+    }
+  }
+
+  openRecomendacion(goal: Goal): void {
+    this.recModalGoal = goal;
+    this.newComentario = '';
+    this.showRecModal = true;
+  }
+
+  saveRecomendacion(): void {
+    if (!this.newComentario.trim()) {
+      return this.alert('Escribe tu recomendación.');
+    }
+    this.svc.addRecommendation(
+      this.selectedClientUid!,
+      this.recModalGoal,
+      this.newComentario.trim()
+    ).then(() => {
+      this.alert('Recomendación guardada');
+      this.showRecModal = false;
+      this.loadRecs();
+    });
+  }
+
+  private loadRecs(): void {
+    this.subs.add(
+      this.svc.listRecommendations(this.selectedClientUid!)
+        .subscribe(recs => this.recomendaciones = recs)
+    );
   }
 
   private addMonths(d: Date, m: number): Date {
@@ -59,38 +158,9 @@ export class GoalsNutricionistComponent implements OnInit, OnDestroy {
     return new Date(y1, m1, d1);
   }
 
-  guardarObjetivo(): void {
-    if (!this.nuevoObjetivo.tipo || !this.nuevoObjetivo.meta || this.nuevoObjetivo.meses == null) {
-      this.mensajeService = 'Completa todos los campos.';
-      this.showPopup = true; setTimeout(() => this.showPopup = false, 5000);
-      return;
-    }
-    const m = this.nuevoObjetivo.meses;
-    const iso = this.addMonths(new Date(), m).toISOString().split('T')[0];
-    const toSave = { tipo: this.nuevoObjetivo.tipo, meta: this.nuevoObjetivo.meta, fecha: iso };
-    this.svc.addGoal(this.selectedClientUid!, toSave).then(() => {
-      this.nuevoObjetivo = { tipo: '', meta: '', meses: null };
-      this.mensajeService = 'Objetivo guardado';
-      this.showPopup = true; setTimeout(() => this.showPopup = false, 5000);
-      this.tabInterno = 'objetivos';
-      this.onClientSelect();
-    });
-  }
-
-  actualizarProgreso(o: Goal): void {
-    const p = Math.max(0, Math.min(100, this.progresoTemp[o.id!] ?? o.progreso));
-    this.svc.updateGoal(this.selectedClientUid!, o.id!, { progreso: p }).then(() => this.onClientSelect());
-  }
-
-  eliminarObjetivo(o: Goal): void {
-    this.svc.deleteGoal(this.selectedClientUid!, o.id!).then(() => this.onClientSelect());
-  }
-
-  abrirModal(r: any): void {
-    this.selectedRecomendacion = r;
-  }
-
-  cerrarModal(): void {
-    this.selectedRecomendacion = null;
+  private alert(msg: string): void {
+    this.mensajeService = msg;
+    this.showPopup = true;
+    setTimeout(() => this.showPopup = false, 3000);
   }
 }
