@@ -25,6 +25,9 @@
           </option>
         </select>
       </div>
+       <p *ngIf="!selectedClientUid" class="no-data">
+        Selecciona un cliente para crear un objetivo.
+      </p>
       <form *ngIf="selectedClientUid" (ngSubmit)="guardarObjetivo()" class="form-section">
         <div class="objetivo">
           <h2 class="section-title">Definir Objetivo Nutricional</h2>

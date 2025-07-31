@@ -105,7 +105,6 @@
               <tr>
                 <th>Cliente</th>
                 <th>Fecha</th>
-                <th>Creado</th>
                 <th>Acciones</th>
               </tr>
             </thead>
@@ -114,7 +113,6 @@
                 <!-- ahora solo mostramos el nombre -->
                 <td>{{ p.client.name }}</td>
                 <td>{{ p.client.date }}</td>
-                <td>{{ p.createdAt?.toDate() | date:'short' }}</td>
                 <td class="actions">
                   <button class="btn-action" (click)="openModal(p)">Mostrar Tabla</button>
                   <button class="btn-action" (click)="downloadPdf(p)">Descargar PDF</button>

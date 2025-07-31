@@ -1,6 +1,4 @@
-/* src/app/loyalty-card-client/loyalty-card-client.component.scss */
 
-/* Contenedor responsivo y más compacto */
 .loyalty-wrapper {
   width: 90%;
   max-width: 360px;
@@ -65,7 +63,7 @@
     transition: background 0.2s, transform 0.2s;
 
     &.filled {
-      background: #66bb6a;
+      background: #a1c037;
       border: none;
       transform: scale(1.05);
     }
@@ -143,7 +141,7 @@
         content: '';
         display: block;
         height: 2px;
-        background: #66bb6a;
+        background: #a1c037;
         width: 100%;
         position: absolute;
         bottom: -3px;
@@ -179,7 +177,6 @@
   }
 }
 
-/* Ajustes extra en pantallas muy pequeñas */
 @media (max-width: 320px) {
   .company-logo { max-width: 100px; }
   .stamp { width: 60px; height: 60px; }

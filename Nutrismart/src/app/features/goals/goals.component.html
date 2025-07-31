@@ -1,13 +1,16 @@
-<!-- goals.component.html -->
 <div class="container p-4">
-  <h1 class="text-2xl font-bold mb-4">Gestión de Objetivos Nutricionales</h1>
-  <hr /><br />
+  <h1 class="text-2xl font-bold mb-6">Gestión de Objetivos Nutricionales</h1>
 
-  <!-- Formulario para crear objetivos -->
-  <div class="form-section">
-    <form (ngSubmit)="guardarObjetivo()">
-      <div class="objetivo">
-        <h2 class="section-title">Definir Objetivo Nutricional</h2>
+  <div class="tabs mb-6">
+    <button [class.active]="tab==='definir'" (click)="tab='definir'">Definir Objetivo</button>
+    <button [class.active]="tab==='en-progreso'" (click)="tab='en-progreso'">En Progreso</button>
+    <button [class.active]="tab==='historico'" (click)="tab='historico'">Histórico</button>
+  </div>
+
+  <section *ngIf="tab==='definir'" class="tab-content">
+    <form (ngSubmit)="guardarObjetivo()" class="form-section">
+      <h2 class="section-title">Definir Objetivo Nutricional</h2>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div>
           <label for="tipo">Tipo de Objetivo</label>
           <select id="tipo" class="input" [(ngModel)]="nuevoObjetivo.tipo" name="tipo" required>
@@ -27,121 +30,79 @@
         <div>
           <label for="meses">Meses Estimados</label>
           <select id="meses" class="input" [(ngModel)]="nuevoObjetivo.meses" name="meses" required>
-            <option [ngValue]="null" disabled>-- Seleccionar meses --</option>
-            <option *ngFor="let m of mesesOptions" [ngValue]="m">{{ m }}</option>
+            <option [ngValue]="null" disabled>-- Seleccionar --</option>
+            <option *ngFor="let m of mesesOptions" [ngValue]="m">{{ m }} meses</option>
           </select>
         </div>
-        <div>
-          <label>&nbsp;</label>
-          <button type="submit" class="btn-save">Guardar Objetivo</button>
-        </div>
+      </div>
+      <div class="actions-form">
+        <button type="submit" class="btn-save">Guardar Objetivo</button>
       </div>
     </form>
-  </div>
-
-  <!-- Popup de mensajes -->
-  <div class="popup" *ngIf="showPopup">
-    <div class="popup-content">
-      {{ mensajeService }}
-      <button class="close-btn" (click)="closePopup()">×</button>
-    </div>
-  </div>
-  <hr /><br />
-
-  <!-- Sección de Objetivos / Recomendaciones -->
-  <div class="form-section">
-    <div class="objetivo">
-      <h2 class="section-title">Mis Objetivos</h2>
-
-      <!-- Pestañas -->
-      <div class="tabs">
-        <button [class.active]="tabInterno==='objetivos'" (click)="tabInterno='objetivos'">Objetivos</button>
-        <button [class.active]="tabInterno==='recomendaciones'" (click)="tabInterno='recomendaciones'">Recomendaciones</button>
+    <div class="popup" *ngIf="showPopup">
+      <div class="popup-content">
+        {{ mensajeService }}
+        <button class="close-btn" (click)="closePopup()">×</button>
       </div>
+    </div>
+  </section>
 
-      <!-- Lista de Objetivos -->
-      <div *ngIf="tabInterno==='objetivos'">
-        <div class="objetivo" *ngFor="let obj of objetivos">
+  <section *ngIf="tab==='en-progreso'" class="tab-content">
+    <h2 class="section-title mb-4">Objetivos en Progreso</h2>
+    <ng-container *ngIf="objetivosEnProgreso.length; else sinProgreso">
+      <div class="objetivo-card" *ngFor="let obj of objetivosEnProgreso">
+        <div class="card-header">
           <h4>{{ obj.tipo }}</h4>
-          <p>{{ obj.meta }}</p>
-          <p><strong>Fecha meta:</strong> {{ obj.fecha }}</p>
-          <p><strong>Progreso:</strong> {{ obj.progreso }}%</p>
-
-          <!-- Input y botón Actualizar encima de la barra -->
-          <div class="progreso-input">
-            <label for="progreso-{{obj.id}}">Progreso (%)</label>
-            <input
-              type="number"
-              id="progreso-{{obj.id}}"
-              name="progreso-{{obj.id}}"
-              min="0"
-              max="100"
-              step="1"
-              [(ngModel)]="progresoTemp[obj.id!]"
-              class="input-progreso" />
-            <button class="btn-action" (click)="actualizarProgreso(obj)">Actualizar</button>
+        </div>
+        <p class="text-sm">Meta: {{ obj.meta }}</p>
+        <p class="text-sm">Límite: {{ obj.fecha | date:'dd-MM-yyyy' }}</p>
+        <div class="progress-display">
+          <div class="progress-bar-wrapper">
+            <div class="indicator" [style.width.%]="obj.progreso"></div>
           </div>
-
-          <!-- Barra de progreso debajo -->
-          <div class="progress-wrapper">
-            <div class="progress-bar" [style.width.%]="obj.progreso"></div>
-            <div class="thumb" [style.left.%]="obj.progreso"></div>
-            <span class="progress-text">{{ obj.progreso }}%</span>
-          </div>
-
-          <!-- Botón Completar -->
-          <button class="btn-action" (click)="eliminarObjetivo(obj)">Completar</button>
+          <span class="progress-text">{{ obj.progreso }}%</span>
+        </div>
+        <div class="actions">
+          <button class="btn-recomendations" (click)="abrirRecs(obj)">Recomendaciones</button>
         </div>
       </div>
+    </ng-container>
+    <ng-template #sinProgreso>
+      <p class="text-center text-gray-mid">No hay objetivos en progreso.</p>
+    </ng-template>
+  </section>
 
-      <!-- Lista de Recomendaciones -->
-      <div *ngIf="tabInterno==='recomendaciones'">
-        <div class="recomendacion" *ngFor="let rec of recomendaciones">
-          <p><strong>{{ rec.fecha }}</strong>: {{ rec.resumen }}</p>
-          <button class="btn btn-sm btn-primary" (click)="abrirModal(rec)">Ver Detalles</button>
-        </div>
+
+  <section *ngIf="tab==='historico'" class="tab-content">
+    <h2 class="section-title mb-4">Histórico de Objetivos Completados</h2>
+    <ng-container *ngIf="objetivosCompletados.length; else sinHistorico">
+      <div class="hist-card" *ngFor="let obj of objetivosCompletados">
+        <h4 class="hist-header">{{ obj.tipo }} (Meta: {{ obj.meta }})</h4>
+        <p class="hist-date">Fecha: {{ obj.fecha | date:'dd-MM-yyyy' }}</p>
       </div>
-    </div>
-  </div>
+    </ng-container>
+    <ng-template #sinHistorico>
+      <p class="text-center text-gray-mid">No tienes objetivos completados.</p>
+    </ng-template>
+  </section>
+</div>
 
-  <!-- Modal de Recomendación -->
-  <div class="modal-bg" *ngIf="selectedRecomendacion">
-    <div class="detalles">
-      <h4>Recomendación del {{ selectedRecomendacion.fecha }}</h4>
-      <p>{{ selectedRecomendacion.comentario }}</p>
-      <button class="btn btn-danger mt-3" (click)="cerrarModal()">Cerrar</button>
-    </div>
-  </div>
-  <hr /><br />
 
-  <!-- Planes Nutricionales Existentes -->
-  <div class="objetivo">
-    <h2 class="section-title">Planes Nutricionales Existentes</h2>
-    <table class="plans-table">
-      <thead>
-        <tr>
-          <th>Cliente</th>
-          <th>Fecha de Creación</th>
-          <th>Acciones</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td>John Doe</td>
-          <td>2025-04-04</td>
-          <td><button class="btn-action" (click)="verDetalles = true">Ver Detalles</button></td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-
-  <!-- Modal de Detalles del Plan -->
-  <div *ngIf="verDetalles" class="modal-overlay">
-    <div class="modal-content">
-      <span class="close" (click)="verDetalles = false">&times;</span>
-      <h2 class="section-title">Detalles del Plan Nutricional</h2>
-      <div id="pdf-content"></div>
-      <button class="btn-export mt-4" (click)="exportarPDF()">Exportar como PDF</button>
+<div class="modal-bg" *ngIf="showRecModal">
+  <div class="rec-modal">
+    <h3 class="rec-title">Recomendaciones</h3>
+    <p class="rec-subtitle">Para: {{ currentGoalTipo }} (Meta: {{ currentGoalMeta }})</p>
+    <ng-container *ngIf="selectedRecs.length; else noRecs">
+      <div class="rec-card" *ngFor="let r of selectedRecs">
+        <p class="rec-date">Fecha: {{ r.fecha | date:'dd-MM-yyyy' }}</p>
+        <p class="rec-text">{{ r.comentario }}</p>
+      </div>
+    </ng-container>
+    <ng-template #noRecs>
+      <div class="no-recs">No hay recomendaciones para este objetivo.</div>
+    </ng-template>
+    <div class="modal-actions">
+      <button class="btn-save" (click)="cerrarRecs()">Cerrar</button>
     </div>
   </div>
 </div>

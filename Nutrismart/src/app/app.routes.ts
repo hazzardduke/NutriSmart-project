@@ -18,6 +18,8 @@ import { NutritionPlanFormComponent } from './features/nutrition-plan-form/nutri
 import { LoyaltyCardClientComponent } from './loyalty-card-client/loyalty-card-client.component';
 import { LoyaltyCardNutricionistComponent } from './loyalty-card-nutricionist/loyalty-card-nutricionist.component';
 import { GoalsNutricionistComponent } from './features/goals-nutricionist/goals-nutricionist.component';
+import { ClientNutritionPlanService } from './services/client-nutrition-plan.service';
+import { ClientNutritionPlansComponent } from './features/client-nutrition-plans/client-nutrition-plans.component';
 
 export const routes: Routes = [
   { path: 'login',    component: LoginComponent },
@@ -45,6 +47,12 @@ export const routes: Routes = [
       {
         path: 'appoinments',
         component: AppointmentsComponent,
+        canActivate: [ roleGuard ],
+        data: { role: 'cliente' }
+      },
+       {
+        path: 'client-plan',
+        component: ClientNutritionPlansComponent,
         canActivate: [ roleGuard ],
         data: { role: 'cliente' }
       },
