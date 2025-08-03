@@ -38,8 +38,8 @@
 }
 
 .nutri-wrapper .tabs li.active {
-  color: #4caf50;
-  border-bottom: 3px solid #4caf50;
+  color: #a1c037;
+  border-bottom: 3px solid #a1c037;
 }
 
 /* FORMULARIO: Gestionar sellos */
@@ -71,13 +71,13 @@
 
 .manage-tab .cliente-select:focus {
   outline: none;
-  border-color: #4caf50;
+  border-color: #a1c037;
 }
 
 .manage-tab .btn.add-stamp {
   white-space: nowrap;
   padding: 0.6rem 1.6rem;
-  background-color: #4caf50;
+  background-color: #a1c037;
   color: #fff;
   border: none;
   border-radius: 8px;
@@ -88,12 +88,12 @@
 }
 
 .manage-tab .btn.add-stamp:disabled {
-  background-color: #a5d6a7;
+  background-color: #cbdd8e;
   cursor: not-allowed;
 }
 
 .manage-tab .btn.add-stamp:not(:disabled):hover {
-  background-color: #43a047;
+  background-color: #a1c037;
   transform: translateY(-1px);
 }
 

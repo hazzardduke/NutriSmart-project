@@ -38,7 +38,7 @@
             *ngFor="let c of clients$ | async"
             [value]="c.uid"
           >
-            {{ c.nombre }} ({{ c.correo }})
+            {{ c.nombre }} {{ c.apellidos }} ({{ c.cedula }})
           </option>
         </select>
         <button
@@ -58,14 +58,14 @@
       <thead>
         <tr>
           <th>Cliente</th>
-          <th>Correo</th>
+          
           <th>Sellos</th>
         </tr>
       </thead>
       <tbody>
         <tr *ngFor="let c of overview$ | async">
-          <td>{{ c.nombre }}</td>
-          <td>{{ c.correo }}</td>
+          <td>{{ c.nombre }} {{ c.apellidos }}</td>
+       
           <td>{{ c.stamps }} / 7</td>
         </tr>
       </tbody>

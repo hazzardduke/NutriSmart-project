@@ -1,21 +1,52 @@
-<!-- src/app/features/dashboard-nutricionista/dashboard-nutricionista.component.html -->
 <div class="nutri-dashboard">
   <h1>Panel de Nutricionista</h1>
-  <div class="cards-grid">
-    <div class="card">
+
+  <div class="dashboard-grid">
+
+    <div class="card appt-card">
+      <h2>Citas de Hoy</h2>
+
+      <ng-container *ngIf="todayAppointments$ | async as appts; else noAppts">
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>Fecha</th>
+                <th>Cliente</th>
+                <th>Estado</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let a of appts">
+                <td>{{ a.datetime | date:'dd/MM/yyyy hh:mm a' }}</td>
+                <td>{{ a.clientName }}</td>
+                <td class="status status-{{ a.status }}">
+                  {{ translateStatus(a.status) }}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </ng-container>
+      <ng-template #noAppts>
+        <p class="no-data">No tienes citas para hoy.</p>
+      </ng-template>
+    </div>
+
+
+    <div class="card clients-card">
       <h2>Mis Pacientes</h2>
-      <p>Lista y detalles de pacientes.</p>
-      <a routerLink="/nutri/patients">Ver pacientes</a>
-    </div>
-    <div class="card">
-      <h2>Planes Nutricionales</h2>
-      <p>Crear y gestionar planes.</p>
-      <a routerLink="/nutri/plans">Ver planes</a>
-    </div>
-    <div class="card">
-      <h2>Citas</h2>
-      <p>Programar y revisar citas.</p>
-      <a routerLink="/nutri/appointments">Ver citas</a>
+
+      <ng-container *ngIf="activeClients$ | async as clients; else noClients">
+        <div class="clients-list">
+          <div class="client-item" *ngFor="let c of clients">
+            {{ c.name }}
+          </div>
+        </div>
+      </ng-container>
+      <ng-template #noClients>
+        <p class="no-data">No hay pacientes activos.</p>
+      </ng-template>
     </div>
   </div>
 </div>

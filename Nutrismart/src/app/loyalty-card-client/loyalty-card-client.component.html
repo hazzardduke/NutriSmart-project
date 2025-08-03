@@ -1,39 +1,71 @@
-<div class="loyalty-wrapper" *ngIf="card$ | async as card; else noCard">
+<nav class="tab-bar">
+  <button
+    [class.active]="activeTab==='card'"
+    (click)="activeTab='card'"
+  >Tarjeta</button>
+  <button
+    [class.active]="activeTab==='history'"
+    (click)="activeTab='history'"
+  >Historial</button>
+</nav>
+
+<!-- PESTAÑA TARJETA -->
+<div class="loyalty-wrapper" *ngIf="activeTab==='card'">
   <div class="card-header">
-    <h2 class="company-name">Nutrition To Go</h2>
+    <!-- Logo en lugar de texto -->
+    <img src="assets/images/logontg.png" alt="Nutrition To Go" class="company-logo" />
     <h3 class="card-title">Tarjeta NutriFidelidad</h3>
   </div>
-
   <div class="stamps">
     <div
       class="stamp"
       *ngFor="let _ of stars; let i = index"
-      [class.filled]="i < card.stamps"
+      [class.filled]="(card$ | async)?.stamps! > i"
     >
-      <!-- Aquí cargamos tu SVG de hoja -->
       <img src="assets/images/hoja.png" alt="hoja" class="leaf-icon" />
     </div>
   </div>
-
   <p class="footer-text">¡Acumula 7 sellos y canjea una cita nutricional gratis!</p>
-
   <button
     class="btn redeem-btn"
-    [disabled]="card.stamps < 7"
+    [disabled]="(card$ | async)?.stamps! < 7"
     (click)="redeem()"
   >
     Canjear Recompensa
   </button>
 
-    <div *ngIf="successMessage" class="reedem-success" role="alert">
+  <!-- Banner del canje -->
+  <div *ngIf="successMessage" class="redeem-banner">
     {{ successMessage }}
-    </div>
+  </div>
 </div>
 
-
-<ng-template #noCard>
-  <div class="loyalty-wrapper">
-    <p>No tienes tarjeta aún. Se creará al recibir tu primer sello.</p>
-    <button class="btn add-btn" (click)="createCard()">Crear Tarjeta</button>
+<!-- PESTAÑA HISTORIAL -->
+<div class="loyalty-wrapper" *ngIf="activeTab==='history'">
+  <div class="card-header">
+    <h2>Historial de Recompensas</h2>
+    <br>
+    <h3 class="card-title2">
+      <ng-container *ngIf="history$ | async as hist">
+       
+        <ng-container *ngIf="hist.length === 1">
+          Haz canjeado 1 cita gratis
+        </ng-container>
+        <ng-container *ngIf="hist.length > 1">
+          Haz canjeado {{ hist.length }} veces citas gratis
+        </ng-container>
+      </ng-container>
+    </h3>
   </div>
-</ng-template>
+
+  <ul class="history-list">
+    
+    <li *ngFor="let entry of history$ | async">
+      <span class="date">{{ entry.date | date:'dd-MM-yyyy' }}</span>
+      <span class="msg">{{ entry.message }}</span>
+    </li>
+    <li *ngIf="(history$ | async)?.length === 0">
+      Aún no has canjeado recompensas.
+    </li>
+  </ul>
+</div>

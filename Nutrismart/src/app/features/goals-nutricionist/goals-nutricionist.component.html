@@ -1,0 +1,202 @@
+<div class="container p-4">
+  <h1 class="text-2xl font-bold mb-4">Gestión de Objetivos Nutricionales</h1>
+  <hr /><br />
+
+  <!-- TABS PRINCIPALES -->
+  <div class="tabs">
+    <button [class.active]="tabPrincipal==='crear'" (click)="switchPrincipal('crear')">Crear</button>
+    <button [class.active]="tabPrincipal==='objetivos'" (click)="switchPrincipal('objetivos')">Objetivos</button>
+    <button [class.active]="tabPrincipal==='historico'" (click)="switchPrincipal('historico')">Histórico</button>
+  </div>
+
+  <div class="tab-content">
+
+    <!-- CREAR OBJETIVO -->
+    <ng-container *ngIf="tabPrincipal==='crear'">
+      <div class="client-select">
+        <label for="clientCrear">Cliente</label>
+        <select id="clientCrear" class="input"
+                [(ngModel)]="selectedClientUid"
+                (change)="onClientSelect()"
+                name="clientCrear">
+          <option [ngValue]="null" disabled selected>-- Seleccionar cliente --</option>
+          <option *ngFor="let c of clients" [ngValue]="c.uid">
+            {{ c.nombre }} {{ c.apellidos }} ({{ c.cedula }})
+          </option>
+        </select>
+      </div>
+       <p *ngIf="!selectedClientUid" class="no-data">
+        Selecciona un cliente para crear un objetivo.
+      </p>
+      <form *ngIf="selectedClientUid" (ngSubmit)="guardarObjetivo()" class="form-section">
+        <div class="objetivo">
+          <h2 class="section-title">Definir Objetivo Nutricional</h2>
+          <div>
+            <label for="tipo">Tipo de Objetivo</label>
+            <select id="tipo" class="input" [(ngModel)]="nuevoObjetivo.tipo" name="tipo" required>
+              <option value="" disabled selected>-- Seleccionar --</option>
+              <option>Pérdida de peso</option>
+              <option>Ganancia muscular</option>
+              <option>Aumentar porcentaje de agua</option>
+              <option>Mantenimiento</option>
+              <option>Reducir porcentaje de grasa</option>
+              <option>Otro</option>
+            </select>
+          </div>
+          <div>
+            <label for="meta">Meta (porcentaje o cantidad)</label>
+            <input id="meta" class="input" [(ngModel)]="nuevoObjetivo.meta" name="meta" required />
+          </div>
+          <div>
+            <label for="meses">Meses Estimados</label>
+            <select id="meses" class="input" [(ngModel)]="nuevoObjetivo.meses" name="meses" required>
+              <option [ngValue]="null" disabled selected>-- Seleccionar meses --</option>
+              <option *ngFor="let m of mesesOptions" [ngValue]="m">{{ m }}</option>
+            </select>
+          </div>
+          <button type="submit" class="btn-save">Guardar Objetivo</button>
+        </div>
+      </form>
+    </ng-container>
+
+    <!-- OBJETIVOS + RECOMENDACIONES -->
+    <ng-container *ngIf="tabPrincipal==='objetivos'">
+      <div class="client-select">
+        <label for="clientObj">Cliente</label>
+        <select id="clientObj" class="input"
+                [(ngModel)]="selectedClientUid"
+                (change)="onClientSelect()"
+                name="clientObj">
+          <option [ngValue]="null" disabled selected>-- Seleccionar cliente --</option>
+          <option *ngFor="let c of clients" [ngValue]="c.uid">
+            {{ c.nombre }} {{ c.apellidos }} ({{ c.cedula }})
+          </option>
+        </select>
+      </div>
+
+      <p *ngIf="!selectedClientUid" class="no-data">
+        Selecciona un cliente para ver objetivos y recomendaciones.
+      </p>
+
+      <ng-container *ngIf="selectedClientUid">
+        <div class="subtabs">
+          <button [class.active]="subTab==='objetivos'" (click)="switchSub('objetivos')">
+            Objetivos
+          </button>
+          <button [class.active]="subTab==='recomendaciones'" (click)="switchSub('recomendaciones')">
+            Recomendaciones
+          </button>
+        </div>
+
+        <!-- LISTA DE OBJETIVOS -->
+        <div *ngIf="subTab==='objetivos'" class="form-section">
+          <div *ngIf="objetivos.length===0" class="no-data">
+            No hay objetivos en progreso.
+          </div>
+          <div *ngFor="let obj of objetivos" class="objetivo">
+            <h4>{{ obj.tipo }}</h4>
+            <p><strong>Meta:</strong> {{ obj.meta }}</p>
+            <p><strong>Fecha meta:</strong> {{ obj.fecha | date:'dd-MM-yyyy' }}</p>
+
+          <div class="progreso-input">
+            <label for="progreso-{{ obj.id }}">Progreso (%)</label>
+            <input type="number" id="progreso-{{ obj.id }}" class="input-progreso" [(ngModel)]="progresoTemp[obj.id!]"
+              name="progreso-{{ obj.id }}" min="0" max="100" step="1" />
+            <button class="btn-action" (click)="updateProgreso(obj)">
+              Actualizar
+            </button>
+          </div>
+
+            <button *ngIf="obj.progreso===100" class="btn-action" (click)="completarObjetivo(obj)">
+              Completar
+            </button>
+            <button class="btn-rec" (click)="openRecomendacion(obj)">
+              Recomendaciones
+            </button>
+
+            <div class="progress-wrapper">
+              <div class="progress-bar" [style.width.%]="obj.progreso"></div>
+              <div class="thumb" [style.left.%]="obj.progreso"></div>
+              <span class="progress-text">{{ obj.progreso }}%</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- LISTA DE RECOMENDACIONES -->
+        <div *ngIf="subTab==='recomendaciones'" class="recs-container">
+          <div *ngIf="recomendaciones.length === 0" class="no-data">
+            No hay recomendaciones para objetivos en progreso.
+          </div>
+          <div *ngFor="let rec of recomendaciones" class="recomendacion-card">
+            <h4 class="rec-objective">{{ rec.tipo }} (Meta: {{ rec.meta }})</h4>
+            <p class="rec-date"><strong>Fecha:</strong> {{ rec.fecha | date:'dd-MM-yyyy' }}</p>
+            <p class="rec-comment">{{ rec.comentario }}</p>
+          </div>
+        </div>
+      </ng-container>
+    </ng-container>
+
+<!-- HISTÓRICO -->
+<ng-container *ngIf="tabPrincipal==='historico'">
+  <div class="client-select">
+    <label for="clientHist">Cliente</label>
+    <select
+      id="clientHist"
+      class="input"
+      [(ngModel)]="selectedClientUid"
+      (ngModelChange)="onClientSelect()"
+      name="clientHist"
+    >
+     
+      <option [ngValue]="null" disabled>-- Seleccionar cliente --</option>
+      <option *ngFor="let c of clients" [ngValue]="c.uid">
+        {{ c.nombre }} {{ c.apellidos }} ({{ c.cedula }})
+      </option>
+    </select>
+  </div>
+
+  <div *ngIf="!selectedClientUid" class="no-data">
+    Selecciona un cliente para ver el histórico.
+  </div>
+
+  <div *ngIf="selectedClientUid" class="form-section">
+    <div *ngIf="historico.length === 0" class="no-data">
+      No hay objetivos completados.
+    </div>
+
+    <div *ngFor="let obj of historico" class="objetivo">
+      <h4>{{ obj.tipo }}</h4>
+      <p><strong>Meta:</strong> {{ obj.meta }}</p>
+      
+      <p>
+        <strong>Fecha completado:</strong>
+        {{ obj.fecha | date: 'dd-MM-yyyy' }}
+      </p>
+    </div>
+  </div>
+</ng-container>
+
+
+  <!-- Modal de Recomendación -->
+  <div class="modal-bg" *ngIf="showRecModal">
+    <div class="detalles">
+      <h4>Recomendación para: {{ recModalGoal.tipo }}</h4>
+      <textarea
+        class="input-rec"
+        rows="4"
+        placeholder="Escribe tu recomendación..."
+        [(ngModel)]="newComentario"
+      ></textarea>
+      <button class="btn-save mt-2" (click)="saveRecomendacion()">Guardar</button>
+      <button class="btn-action mt-2" (click)="showRecModal = false">Cancelar</button>
+    </div>
+  </div>
+
+  <!-- Popup breve -->
+  <div class="popup" *ngIf="showPopup">
+    <div class="popup-content">
+      {{ mensajeService }}
+      <button class="close-btn" (click)="showPopup = false">×</button>
+    </div>
+  </div>
+</div>

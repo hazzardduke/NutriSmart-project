@@ -1,4 +1,5 @@
 // src/app/features/nutri-schedule/nutri-schedule.component.ts
+
 import {
   Component,
   OnInit,
@@ -42,7 +43,7 @@ import { CalendarOptions, EventInput } from '@fullcalendar/core';
 export class NutriScheduleComponent implements OnInit, OnDestroy {
   // ── Tabs & Filters ─────────────────────────────────────────
   activeTab: 'new' | 'calendar' | 'history' = 'new';
-  historyClientId = '';  // Filtrar histórico por cliente
+  historyClientId = '';
 
   // ── Data & Selection ───────────────────────────────────────
   clients: ClientProfile[] = [];
@@ -61,6 +62,9 @@ export class NutriScheduleComponent implements OnInit, OnDestroy {
     '08:00 AM','09:00 AM','10:00 AM','11:00 AM',
     '01:00 PM','02:00 PM','03:00 PM','04:00 PM','05:00 PM'
   ];
+
+  // ── Spinner Loading ─────────────────────────────────────────
+  isLoading = false;
 
   // ── Calendar Config ────────────────────────────────────────
   calendarOptions: CalendarOptions = {
@@ -173,6 +177,8 @@ export class NutriScheduleComponent implements OnInit, OnDestroy {
   scheduleCita(): void {
     if (!this.selectedClientId || !this.fechaSeleccionada || !this.horaSeleccionada) return;
 
+    this.isLoading = true;
+
     const iso = new Date(
       `${this.fechaSeleccionada}T${this.to24h(this.horaSeleccionada)}:00`
     ).toISOString();
@@ -186,15 +192,23 @@ export class NutriScheduleComponent implements OnInit, OnDestroy {
       urlCita: `https://nutrismart.com/citas/${this.editingId ?? ''}`
     };
 
-    const action = this.editingId
-      ? this.apptService.updateAppointment(this.editingId, { userId: this.selectedClientId, datetime: iso })
+    const flujo = this.editingId
+      ? this.apptService
+          .updateAppointment(this.editingId!, { userId: this.selectedClientId, datetime: iso })
           .then(() => this.emailService.sendCitaActualizada(cliente.correo, mailData))
-          .then(() => this.showModal('Cita actualizada', 'info'))
-      : this.apptService.createAppointment({ userId: this.selectedClientId, datetime: iso, status: 'confirmed' })
-          .then(() => this.emailService.sendCitaConfirmada(cliente.correo, mailData))
-          .then(() => this.showModal('Cita creada', 'info'));
+      : this.apptService
+          .createAppointment({ userId: this.selectedClientId, datetime: iso, status: 'confirmed' })
+          .then(() => this.emailService.sendCitaConfirmada(cliente.correo, mailData));
 
-    action.finally(() => this.finishEdit());
+    flujo
+      .then(() => {
+        this.isLoading = false;
+        return this.showModal(
+          this.editingId ? 'Cita actualizada' : 'Cita creada',
+          'info'
+        );
+      })
+      .finally(() => this.finishEdit());
   }
 
   private cancelAppointment(id: string): void {
@@ -310,6 +324,7 @@ export class NutriScheduleComponent implements OnInit, OnDestroy {
     const c = this.clients.find(x => x.id === uid);
     return c ? `${c.nombre} ${c.apellido}` : uid;
   }
+
   public onDateChange(): void {
     this.horaSeleccionada = '';
   }

@@ -1,0 +1,116 @@
+<div class="client-plans-wrapper">
+  <h2 class="title">Mis planes nutricionales</h2>
+
+  <div *ngIf="errorMessage" class="error-box" role="alert">
+    {{ errorMessage }}
+  </div>
+
+  <ng-container *ngIf="plans$ | async as plans; else loading">
+    <div *ngIf="plans.length === 0" class="empty">
+      <p>Aún no tienes planes nutricionales.</p>
+    </div>
+
+    <div *ngIf="plans.length > 0" class="plans-container">
+      <table class="plans-table" aria-label="Listado de planes nutricionales">
+        <thead>
+          <tr>
+            <th scope="col">Fecha</th>
+            <th scope="col" class="actions-header">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let plan of plans; trackBy: trackByPlanId">
+            <td>{{ displayDate(plan.createdAt) }}</td>
+            <td class="actions">
+              <button class="btn primary" type="button" (click)="openModal(plan)">
+                Ver tabla
+              </button>
+              <button
+                class="btn outline"
+                type="button"
+                (click)="downloadPdf(plan)"
+                [disabled]="downloading[plan.id]"
+                [attr.aria-busy]="downloading[plan.id]">
+                <ng-container *ngIf="!downloading[plan.id]; else busy">
+                  Descargar PDF
+                </ng-container>
+                <ng-template #busy>Generando...</ng-template>
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </ng-container>
+
+  <ng-template #loading>
+    <div class="loading">Cargando planes...</div>
+  </ng-template>
+</div>
+
+<!-- Modal -->
+<div
+  class="modal-backdrop"
+  *ngIf="showModal && selectedPlan"
+  role="dialog"
+  aria-modal="true"
+  aria-label="Detalle del plan nutricional">
+  <div class="modal">
+    <div class="modal-header">
+      <div>
+        <h3 class="modal-title">Plan de {{ selectedPlan.client.name }}</h3>
+        <div class="meta">
+          <span><strong>Cédula:</strong> {{ selectedPlan.client.cedula }}</span>
+          <span><strong>Fecha:</strong> {{ selectedPlan.client.date }}</span>
+        </div>
+      </div>
+      <button class="close" aria-label="Cerrar" (click)="closeModal()">×</button>
+    </div>
+
+    <div class="modal-body">
+      <div *ngIf="selectedPlan.portions; else noPortions">
+        <table class="detail-table" aria-label="Detalle de porciones">
+          <thead>
+            <tr>
+              <th>Alimentos</th>
+              <th>Porciones</th>
+              <th>Desayuno</th>
+              <th>Mer #1</th>
+              <th>Almuerzo</th>
+              <th>Mer #2</th>
+              <th>Cena</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let entry of selectedPlan.portions | keyvalue">
+              <td class="food-name">{{ entry.key }}</td>
+              <td>{{ totalPorciones(entry.value) }}</td>
+              <td>{{ entry.value.desayuno }}</td>
+              <td>{{ entry.value.merienda1 }}</td>
+              <td>{{ entry.value.almuerzo }}</td>
+              <td>{{ entry.value.merienda2 }}</td>
+              <td>{{ entry.value.cena }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <ng-template #noPortions>
+        <div class="empty small">No hay datos de porciones.</div>
+      </ng-template>
+    </div>
+
+    <div class="modal-footer">
+      <button
+        class="btn primary"
+        type="button"
+        (click)="selectedPlan && downloadPdf(selectedPlan)"
+        [disabled]="selectedPlan ? downloading[selectedPlan.id] : false">
+        <ng-container *ngIf="selectedPlan && !downloading[selectedPlan.id]; else busyModal">
+          Descargar PDF
+        </ng-container>
+        <ng-template #busyModal>Generando...</ng-template>
+      </button>
+      <button class="btn outline" type="button" (click)="closeModal()">Cerrar</button>
+    </div>
+  </div>
+</div>
