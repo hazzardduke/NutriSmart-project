@@ -1,5 +1,3 @@
-// src/app/features/nutri-schedule/nutri-schedule.component.ts
-
 import {
   Component,
   OnInit,
