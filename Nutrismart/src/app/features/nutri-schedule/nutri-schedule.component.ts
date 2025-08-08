@@ -221,7 +221,7 @@ export class NutriScheduleComponent implements OnInit, OnDestroy {
         ubicacion: 'Clínica NutriSmart'
       };
       this.apptService.updateAppointment(id, { status: 'canceled' })
-        .then(() => this.emailService.sendCitaCancelada(cliente.nombre, mailData))
+        .then(() => this.emailService.sendCitaCancelada(cliente.correo, mailData))
         .then(() => this.showModal('Cita cancelada', 'info'))
         .then(() => this.loadCalendarEvents());
     });

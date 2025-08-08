@@ -18,6 +18,7 @@ export class EmailService {
   private readonly tplConfirmada  = 'd-81cccf19099247e385e6908bd814eae6';
   private readonly tplActualizada = 'd-33a9c51a1404451690492df5b1beb1a1';
   private readonly tplCancelada   = 'd-6d0602792de94d58843adc88d002cd55';
+  
 
   constructor(private functions: Functions) {}
 
