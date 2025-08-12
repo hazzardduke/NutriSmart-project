@@ -37,7 +37,7 @@ export class LoginComponent implements OnInit, OnDestroy {
         .then(() => {
           window.localStorage.removeItem('emailForSignIn');
           // Forzar recarga para inicializar la app ya autentificada
-          window.location.href = '/dashboard-admin';
+          window.location.href = '/admin-clients';
         })
         .catch((e: any) => this.error = e.message);
       return;

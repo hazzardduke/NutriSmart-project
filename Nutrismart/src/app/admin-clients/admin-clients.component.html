@@ -1,26 +1,42 @@
-<h2>Administrar Clientes</h2>
-
+<h2>Administrar Usuarios</h2>
 
 <table class="clients-table">
   <thead>
     <tr>
-      <th>Nombre</th><th>Correo</th><th>Activo</th><th>Acciones</th>
+      <th>Nombre</th>
+      <th>Correo</th>
+      <th>Rol</th>
+      <th>Activo</th>
+      <th>Acciones</th>
     </tr>
   </thead>
+
   <tbody>
-    <tr *ngFor="let c of clients$ | async">
-      <td>{{ c.nombre }}</td>
-      <td>{{ c.correo }}</td>
+    <tr *ngFor="let u of users$ | async">
+      <td>{{ u.nombre }}</td>
+      <td>{{ u.correo }}</td>
       <td>
-        <input type="checkbox"
-               [checked]="c.active"
-               (change)="onToggleActive(c)" />
+        <select
+          #roleSel
+          [ngModel]="u.role"
+          (ngModelChange)="onRoleChange(u, $event, roleSel)"
+          class="role-select"
+        >
+          <option *ngFor="let r of roles" [value]="r">{{ r }}</option>
+        </select>
+      </td>
+      <td class="col-active">
+        <input
+          type="checkbox"
+          [checked]="u.active"
+          (change)="onToggleActive(u)"
+        />
       </td>
       <td>
-       <button
+        <button
           type="button"
           class="btn-action edit"
-          (click)="onEdit(c)"
+          (click)="onEdit(u)"
         >
           <i class="fas fa-edit"></i> Editar
         </button>
@@ -29,9 +45,9 @@
   </tbody>
 </table>
 
-
 <div *ngIf="editForm.get('uid')!.value" class="edit-panel">
-  <h3>Editar Cliente</h3>
+  <h3>Editar Usuario</h3>
+
   <form [formGroup]="editForm" (ngSubmit)="saveEdit()" class="edit-form">
     <div class="field">
       <label for="nombre">Nombre:</label>
@@ -45,7 +61,14 @@
 
     <div class="field">
       <label for="correo">Correo:</label>
-      <input id="correo" type="email" formControlName="correo"/>
+      <input id="correo" type="email" formControlName="correo" />
+    </div>
+
+    <div class="field">
+      <label for="role">Rol:</label>
+      <select id="role" formControlName="role">
+        <option *ngFor="let r of roles" [value]="r">{{ r }}</option>
+      </select>
     </div>
 
     <div class="field-active">
@@ -60,4 +83,3 @@
     </div>
   </form>
 </div>
-

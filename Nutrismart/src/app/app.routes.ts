@@ -6,7 +6,7 @@ import { roleGuard } from './guards/role.guard';
 import { LoginComponent }             from './core/login/login.component';
 import { RegisterComponent }          from './core/register/register.component';
 import { DashboardComponent }         from './features/dashboard/dashboard.component';        // tu dashboard cliente
-import { DashboardAdminComponent }    from './features/dashboard-admin/dashboard-admin.component';
+
 import { DashboardNutricionistaComponent } from './features/dashboard-nutricionista/dashboard-nutricionista.component';
 
 import { PersonalrecordComponent }    from './core/client/personalrecord/personalrecord.component';
@@ -72,15 +72,10 @@ export const routes: Routes = [
       },
 
       // Admin
-      {
-        path: 'dashboard-admin',
-        component: DashboardAdminComponent,
-        canActivate: [ roleGuard ],
-        data: { role: 'admin' }
-      },
+      
 
        {
-        path: 'admin/clients',
+        path: 'admin-clients',
         component: AdminClientsComponent,
         canActivate: [ roleGuard ],
         data: { role: 'admin' }
