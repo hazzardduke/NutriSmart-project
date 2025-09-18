@@ -1,6 +1,6 @@
-/* src/app/features/loyalty-card-nutricionist/loyalty-card-nutricionist.component.scss */
+/* Contenedor */
 .nutri-wrapper {
-  max-width: 600px;
+  max-width: 760px;
   margin: 3rem auto;
   padding: 2rem;
   background-color: #fafafa;
@@ -10,148 +10,165 @@
   color: #333;
 }
 
-/* Título */
 .nutri-wrapper h2 {
-  margin-bottom: 1.5rem;
-  color: #2a2a2a;
-  font-size: 1.8rem;
+  margin: 0 0 1.5rem;
+  color: #1f3a52;
+  font-size: 1.9rem;
   text-align: center;
+  font-weight: 800;
 }
 
-/* Pestañas */
+/* Tabs */
 .nutri-wrapper .tabs {
   display: flex;
   justify-content: center;
   list-style: none;
   padding: 0;
-  margin-bottom: 2rem;
-  border-bottom: 2px solid #e0e0e0;
+  margin: 0 0 1.75rem;
+  gap: .5rem;
+  border-bottom: 2px solid #e6e9ee;
 }
 
 .nutri-wrapper .tabs li {
-  margin: 0 1rem;
-  padding: 0.5rem 1rem;
+  padding: .55rem 1rem;
+  border-radius: 10px 10px 0 0;
   cursor: pointer;
-  font-weight: 500;
-  color: #555;
-  transition: color 0.2s ease, border-bottom 0.2s ease;
+  font-weight: 700;
+  color: #44515f;
+  transition: background .2s, color .2s;
+  outline: none;
 }
 
 .nutri-wrapper .tabs li.active {
+  background: #f2f6ea;
   color: #a1c037;
-  border-bottom: 3px solid #a1c037;
 }
 
-/* FORMULARIO: Gestionar sellos */
-.manage-tab .form-group {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 1rem;
-  margin-top: 1rem;
+.nutri-wrapper .tabs li:not(.active):hover {
+  background: #eef2f7;
+  color: #1f3a52;
 }
 
-.manage-tab .input-group {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  flex-grow: 1;
-}
-
-.manage-tab .cliente-select {
-  flex-grow: 1;
-  max-width: 300px;
-  padding: 0.6rem;
-  font-size: 1rem;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  background-color: #fff;
-  transition: border-color 0.2s ease;
-}
-
-.manage-tab .cliente-select:focus {
-  outline: none;
-  border-color: #a1c037;
-}
-
-.manage-tab .btn.add-stamp {
-  white-space: nowrap;
-  padding: 0.6rem 1.6rem;
-  background-color: #a1c037;
-  color: #fff;
-  border: none;
-  border-radius: 8px;
-  font-size: 1rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: background-color 0.2s ease, transform 0.1s ease;
-}
-
-.manage-tab .btn.add-stamp:disabled {
-  background-color: #cbdd8e;
-  cursor: not-allowed;
-}
-
-.manage-tab .btn.add-stamp:not(:disabled):hover {
-  background-color: #a1c037;
-  transform: translateY(-1px);
-}
-
-/* Tabla de resumen */
-.nutri-wrapper .summary-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 1rem;
-}
-
-.nutri-wrapper .summary-table th,
-.nutri-wrapper .summary-table td {
-  padding: 0.75rem 1rem;
-  text-align: left;
-  border-bottom: 1px solid #e0e0e0;
-}
-
-.nutri-wrapper .summary-table th {
-  background-color: #f1f8e9;
-  color: #33691e;
-  font-weight: 600;
-}
-
-.nutri-wrapper .summary-table tbody tr:hover {
-  background-color: #f9fbe7;
-}
-
-/* Responsive */
-@media (max-width: 480px) {
-  .nutri-wrapper {
-    padding: 1rem;
-  }
-  .nutri-wrapper h2 {
-    font-size: 1.5rem;
-  }
-  .nutri-wrapper .tabs li {
-    margin: 0 0.5rem;
-    padding: 0.4rem 0.8rem;
-    font-size: 0.9rem;
-  }
-  .manage-tab .form-group {
-    flex-direction: column;
-    align-items: stretch;
-  }
-  .manage-tab .btn.add-stamp {
-    width: 100%;
-  }
-
+/* Mensaje */
 .info-message {
   background: #e8f5e9;
   border: 1px solid #66bb6a;
   color: #2e3a2f;
   padding: 0.75rem 1rem;
-  border-radius: 4px;
+  border-radius: 8px;
   margin-bottom: 1rem;
-  font-weight: 500;
-  display: flex;
+  font-weight: 600;
+}
+
+/* Formulario gestionar */
+.manage-tab .form-group {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: .75rem;
+}
+
+.manage-tab .form-group label {
+  font-weight: 700;
+  color: #1f3a52;
+}
+
+.manage-tab .input-group {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: .6rem;
   align-items: center;
 }
 
+.manage-tab .cliente-select {
+  width: 100%;
+  padding: 0.65rem .9rem;
+  font-size: 1rem;
+  border: 1px solid #cfd6dd;
+  border-radius: 10px;
+  background-color: #fff;
+  transition: border-color .2s, box-shadow .2s;
+}
+
+.manage-tab .cliente-select:focus {
+  outline: none;
+  border-color: #a1c037;
+  box-shadow: 0 0 0 3px rgba(161,192,55,.18);
+}
+
+.manage-tab .btn.add-stamp {
+  padding: .65rem 1.25rem;
+  background-color: #a1c037;
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  font-size: .95rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: background-color .2s, transform .06s, box-shadow .2s;
+  box-shadow: 0 4px 10px rgba(161,192,55,.22);
+}
+
+.manage-tab .btn.add-stamp:hover { background-color: #8aa72d; }
+.manage-tab .btn.add-stamp:active { transform: translateY(1px); }
+.manage-tab .btn.add-stamp:disabled {
+  background-color: #cbdd8e;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+/* Tabla resumen */
+.summary-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  overflow: hidden;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.06);
+}
+
+.summary-table thead th {
+  background: #f1f8e9;
+  color: #335c1e;
+  font-weight: 800;
+  padding: .8rem 1rem;
+  border-bottom: 1px solid #dfe7d5;
+  text-align: left;
+}
+
+.summary-table tbody td {
+  padding: .85rem 1rem;
+  border-bottom: 1px solid #eef1f4;
+}
+
+.summary-table tbody tr:hover {
+  background: #f9fbe7;
+}
+
+.summary-table .stamps-cell {
+  white-space: nowrap;
+}
+
+.stamps-badge {
+  display: inline-block;
+  padding: .25rem .6rem;
+  border-radius: 999px;
+  background: #eef6ff;
+  color: #1f3a52;
+  font-weight: 800;
+  border: 1px solid #d7e6ff;
+}
+
+.no-data {
+  text-align: center;
+  color: #67707a;
+  font-style: italic;
+}
+
+/* Responsive */
+@media (max-width: 520px) {
+  .nutri-wrapper { padding: 1.25rem; }
+  .nutri-wrapper h2 { font-size: 1.6rem; }
+  .nutri-wrapper .tabs { gap: .25rem; }
+  .nutri-wrapper .tabs li { padding: .45rem .75rem; font-size: .95rem; }
+  .manage-tab .input-group { grid-template-columns: 1fr; }
 }

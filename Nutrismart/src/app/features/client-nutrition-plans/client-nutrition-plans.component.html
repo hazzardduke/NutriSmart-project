@@ -101,7 +101,7 @@
 
     <div class="modal-footer">
       <button
-        class="btn primary"
+        class="btn outline"
         type="button"
         (click)="selectedPlan && downloadPdf(selectedPlan)"
         [disabled]="selectedPlan ? downloading[selectedPlan.id] : false">
@@ -110,7 +110,7 @@
         </ng-container>
         <ng-template #busyModal>Generando...</ng-template>
       </button>
-      <button class="btn outline" type="button" (click)="closeModal()">Cerrar</button>
+      <button class="btn close" type="button" (click)="closeModal()">Cerrar</button>
     </div>
   </div>
 </div>

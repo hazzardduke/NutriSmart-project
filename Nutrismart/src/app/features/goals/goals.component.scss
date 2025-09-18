@@ -1,217 +1,315 @@
+/* ===== GESTIÓN DE OBJETIVOS NUTRICIONALES ===== */
+/* Nota: si usas Tailwind `.container`, considera cambiar este selector a algo
+   más específico (por ej. `.objetivos-container`) para evitar colisiones. */
+
 .container {
   max-width: 900px;
   margin: auto;
   font-family: 'Segoe UI', sans-serif;
-  color: #333;
+  color: #2f3b44;
+  line-height: 1.35;
 }
 
+/* ---------- Tabs ---------- */
 .tabs {
   display: flex;
   gap: 1rem;
+  margin-bottom: 1.5rem;
 }
 .tabs button {
   flex: 1;
-  padding: 0.75rem;
+  padding: 0.75rem 1rem;
   border: none;
-  border-radius: 8px;
-  background: #f0f0f0;
-  font-weight: bold;
+  border-radius: 10px;
+  background: #f1f3f6;
+  color: #2f3b44;
+  font-weight: 700;
   cursor: pointer;
-  transition: background 0.2s;
+  transition: background 0.2s, transform 0.06s, box-shadow 0.2s;
+  outline: none;
+}
+.tabs button:hover:not(.active) { background: #e7ebf0; }
+.tabs button:focus-visible {
+  box-shadow: 0 0 0 2px rgba(31, 58, 82, 0.25);
 }
 .tabs button.active {
   background: #a1c037;
-  color: #fff;
-}
-.tabs button:hover:not(.active) {
-  background: #e0e0e0;
+  color: #ffffff;
 }
 
+/* ---------- Contenido de pestañas ---------- */
 .tab-content {
-  margin-top: 1.5rem;
+  margin-top: 1rem;
   background: #fafafa;
   padding: 1.5rem;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.06);
 }
 
+/* ---------- Títulos ---------- */
+h1.text-2xl {
+  color: #2f3b44;
+}
 .section-title {
   font-size: 1.25rem;
+  font-weight: 800;
+  color: #2f3b44;
   margin-bottom: 1rem;
+}
+
+/* ---------- Formularios ---------- */
+label {
+  display: block;
+  font-weight: 700;
+  color: #2f3b44;
+  margin-bottom: 0.4rem;
 }
 .input,
 select {
   width: 100%;
-  padding: 0.5rem;
-  border: 1px solid #ccc;
-  border-radius: 6px;
+  padding: 0.6rem 0.75rem;
+  border: 1px solid #cfd6dd;
+  border-radius: 10px;
+  background: #fafbfd;
+  color: #2f3b44;
+  transition: border 0.2s, box-shadow 0.2s;
+  outline: none;
 }
-.actions-form {
-  margin-top: 1.5rem;
+.input:focus,
+select:focus {
+  border-color: #1f3a52;
+  box-shadow: 0 0 0 2px rgba(31, 58, 82, 0.15);
 }
+.actions-form { margin-top: 1.25rem; }
+
+/* Botón guardar (verde base) */
 .btn-save {
   background: #a1c037;
-  color: #fff;
+  color: #ffffff;
   padding: 0.75rem 1.5rem;
   border: none;
-  border-radius: 8px;
+  border-radius: 10px;
   cursor: pointer;
-  font-weight: 600;
-  transition: background 0.2s;
+  font-weight: 700;
+  transition: filter 0.2s, transform 0.06s, box-shadow 0.2s;
 }
-.btn-save:hover {
-  background: #88a134;
+.btn-save:hover { filter: brightness(0.97); }
+.btn-save:focus-visible { box-shadow: 0 0 0 2px rgba(31, 58, 82, 0.25); }
+
+
+.btn-close {
+  background: #b01313;
+  color: #ffffff;
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: 700;
+  transition: filter 0.2s, transform 0.06s, box-shadow 0.2s;
+}
+.btn-save:hover { filter: brightness(0.97); }
+.btn-save:focus-visible { box-shadow: 0 0 0 2px rgba(31, 58, 82, 0.25); }
+/* ---------- Popup inline (coherente con otros módulos) ---------- */
+.popup {
+  position: sticky;
+  top: 0;
+  margin-top: 1rem;
+  display: flex;
+  justify-content: center;
+  z-index: 5;
+}
+.popup .popup-content {
+  background: #a1c037;
+  color: #ffffff;
+  padding: 0.85rem 1.25rem;
+  border-radius: 12px;
+  font-weight: 700;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.12);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  animation: fadeOutObj 8s ease-in forwards;
+  max-width: 90%;
+}
+.close-btn {
+  appearance: none;
+  border: none;
+  background: #ffffff;
+  color: #2f3b44;
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  font-size: 18px;
+  font-weight: 700;
+  cursor: pointer;
+  line-height: 1;
+  display: grid;
+  place-items: center;
+}
+@keyframes fadeOutObj {
+  0%, 80% { opacity: 1; }
+  100%    { opacity: 0; }
 }
 
+/* ---------- Tarjetas (en progreso / histórico / recs) ---------- */
 .objetivo-card,
 .hist-card,
 .rec-card {
-  background: #fff;
-  border-radius: 8px;
-  padding: 1rem 1.5rem;
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 1rem 1.25rem;
   margin-bottom: 1rem;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.08);
+  border: 1px solid #e6ebf1;
 }
-
 .card-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 0.75rem;
+  margin-bottom: 0.6rem;
 }
 .card-header h4 {
-  font-size: 1.25rem;
-  font-weight: 600;
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #2f3b44;
 }
+.text-gray-mid { color: #6b7785; }
 
+/* ---------- Progreso ---------- */
 .progress-display {
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  margin: 0.5rem 0;
+  margin: 0.5rem 0 0.2rem;
 }
 .progress-bar-wrapper {
   flex: 1;
-  background: #e0e0e0;
+  background: #f1f3f6;
+  border: 1px solid #cfd6dd;
   height: 12px;
-  border-radius: 6px;
+  border-radius: 999px;
   overflow: hidden;
 }
 .indicator {
-  background: #a1c037;
+  background: #1f3a52; /* verde base */
   height: 100%;
   transition: width 0.3s ease;
 }
 .progress-text {
   font-size: 0.875rem;
-  font-weight: 600;
-  color: #333;
+  font-weight: 700;
+  color: #1f3a52; /* acento azul sutil */
   width: 3rem;
   text-align: right;
 }
 
+/* ---------- Acciones ---------- */
 .actions {
   display: flex;
   justify-content: flex-end;
+  gap: 0.5rem;
 }
 .btn-primary {
   background: #a1c037;
-  color: #fff;
-  padding: 0.5rem 1rem;
+  color: #ffffff;
+  padding: 0.55rem 1rem;
   border: none;
-  border-radius: 6px;
+  border-radius: 10px;
   cursor: pointer;
-  font-weight: 600;
-  transition: background 0.2s;
+  font-weight: 700;
+  transition: filter 0.2s, transform 0.06s, box-shadow 0.2s;
 }
-.btn-primary:hover {
-  background: #88a134;
-}
+.btn-primary:hover { filter: brightness(0.97); }
+.btn-primary:focus-visible { box-shadow: 0 0 0 2px rgba(31, 58, 82, 0.25); }
 
+/* Mantener el naranja nativo para recomendaciones */
 .btn-recomendations {
-  background: #ff6600;
-  color: #fff;
-  padding: 0.5rem 1rem;
+  background: #ff6600; /* naranja del proyecto */
+  color: #ffffff;
+  padding: 0.55rem 1rem;
   border: none;
-  border-radius: 6px;
+  border-radius: 10px;
   cursor: pointer;
-  font-weight: 600;
-  transition: background 0.2s;
+  font-weight: 700;
+  transition: filter 0.2s, transform 0.06s;
 }
-.btn-recomendations:hover {
-  background: #e2752c;
-}
+.btn-recomendations:hover { filter: brightness(0.98); }
 
+/* ---------- Histórico ---------- */
 .hist-card {
-  border-left: 4px solid #ff6600;
+  border-left: 4px solid #ff6600; /* respetar naranja */
 }
 .hist-header {
-  font-size: 1.25rem;
-  font-weight: 600;
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #2f3b44;
 }
-.hist-date {
-  font-size: 0.875rem;
-  color: #666;
-}
+.hist-date { font-size: 0.9rem; color: #6b7785; }
 
+/* ---------- Modal de recomendaciones ---------- */
 .modal-bg {
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.6);
+  inset: 0;
+  background: rgba(15, 23, 42, 0.6);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 1000;
 }
-
 .rec-modal {
-  background: #fff;
-  border-radius: 12px;
+  background: #ffffff;
+  border-radius: 14px;
   padding: 2rem;
   width: 90%;
-  max-width: 500px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  max-width: 520px;
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.25);
+  border: 1px solid #e6ebf1;
 }
-
 .rec-title {
-  font-size: 1.5rem;
-  font-weight: 600;
+  font-size: 1.4rem;
+  font-weight: 800;
   text-align: center;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.4rem;
+  color: #2f3b44;
 }
 .rec-subtitle {
   text-align: center;
-  color: #555;
-  margin-bottom: 1.5rem;
+  color: #47525c;
+  margin-bottom: 1.2rem;
   font-size: 1rem;
 }
-
 .rec-card {
-  border-left: 4px solid #ff6600;
+  border-left: 4px solid #ff6600; /* respetar naranja */
 }
 .rec-date {
   font-size: 0.875rem;
-  color: #666;
-  margin-bottom: 0.5rem;
+  color: #6b7785;
+  margin-bottom: 0.4rem;
 }
 .rec-text {
   font-size: 1rem;
-  color: #333;
-  line-height: 1.4;
+  color: #2f3b44;
+  line-height: 1.45;
 }
-
 .no-recs {
   text-align: center;
-  color: #777;
+  color: #6b7785;
   font-style: italic;
-  margin: 1.5rem 0;
+  margin: 1.25rem 0;
 }
-
 .modal-actions {
   display: flex;
   justify-content: center;
   margin-top: 1rem;
+}
+
+/* ---------- Utilidades ---------- */
+.text-center { text-align: center; }
+.mb-4 { margin-bottom: 1rem; }
+.mb-6 { margin-bottom: 1.5rem; }
+.p-4 { padding: 1rem; }
+
+/* ---------- Responsivo ---------- */
+@media (min-width: 768px) {
+  .tab-content { padding: 1.75rem; }
 }

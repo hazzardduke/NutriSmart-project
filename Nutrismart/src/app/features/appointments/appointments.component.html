@@ -1,4 +1,3 @@
-<!-- src/app/features/appointments/appointments.component.html -->
 <div class="citas-container">
   <h2 class="titulo-citas">
     <i class="fas fa-calendar-alt"></i> Gestión de Citas
@@ -48,7 +47,7 @@
         class="btn-accion cancel"
         (click)="cancelarEdicion()"
       >
-        ⟵ Cancelar Edición
+         Cancelar Edición
       </button>
     </div>
   </form>
@@ -71,7 +70,7 @@
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let c of citasUsuario">
+        <tr *ngFor="let c of citasPaginadas">
           <td>{{ formateaFecha(c.datetime) }}</td>
           <td>{{ formateaHora(c.datetime) }}</td>
           <td>
@@ -83,8 +82,8 @@
               }"
             >
               {{ c.status === 'confirmed' ? 'Confirmada'
-                 : c.status === 'completed' ? 'Completada'
-                 : 'Cancelada' }}
+                : c.status === 'completed' ? 'Completada'
+                : 'Cancelada' }}
             </span>
           </td>
           <td>
@@ -103,8 +102,34 @@
               Cancelar
             </button>
           </td>
-        </tr>
       </tbody>
     </table>
+
+    <!-- PAGINACIÓN -->
+    <div class="paginacion">
+      <button (click)="cambiarPagina(-1)" [disabled]="paginaActual === 1">
+        Anterior
+      </button>
+
+      <button *ngIf="hayBloqueAnterior()" (click)="irABloqueAnterior()">...</button>
+
+      <ng-container *ngFor="let p of paginasVisibles">
+        <button
+          (click)="irAPagina(p)"
+          [class.pagina-activa]="paginaActual === p"
+        >
+          {{ p }}
+        </button>
+      </ng-container>
+
+      <button *ngIf="hayBloqueSiguiente()" (click)="irABloqueSiguiente()">...</button>
+
+      <button
+        (click)="cambiarPagina(1)"
+        [disabled]="paginaActual === totalPaginas()"
+      >
+        Siguiente
+      </button>
+    </div>
   </div>
 </div>

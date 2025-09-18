@@ -1,25 +1,19 @@
+/* ==============================
+   LOADING / SPINNER
+============================== */
 .loading-overlay {
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
+  top: 0; left: 0;
+  width: 100vw; height: 100vh;
   background: rgba(255, 255, 255, 0.9);
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  display: flex; align-items: center; justify-content: center;
   z-index: 2000;
 }
 
 .spinner-wrapper {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+  display: flex; flex-direction: column; align-items: center;
 
-  .spinner-gif {
-    width: 80px;
-    height: 80px;
-  }
+  .spinner-gif { width: 80px; height: 80px; }
 
   .spinner-text {
     margin-top: 0.75rem;
@@ -29,7 +23,9 @@
   }
 }
 
-/* --- CONTENEDOR PRINCIPAL --- */
+/* ==============================
+   CONTENEDOR PRINCIPAL
+============================== */
 .schedule-container {
   max-width: 900px;
   margin: 2rem auto;
@@ -41,175 +37,223 @@
 
   .title {
     text-align: center;
-    color: #3e372d;
+    color: #205072;
     margin-bottom: 1rem;
+    font-weight: 700;
   }
+}
 
-  .tabs {
-    display: flex;
-    list-style: none;
-    padding: 0;
-    margin-bottom: 1.5rem;
+/* ==============================
+   TABS
+============================== */
+.schedule-container .tabs {
+  display: flex;
+  list-style: none;
+  padding: 0;
+  margin-bottom: 1.5rem;
+  gap: 0.25rem;
 
-    li {
-      flex: 1;
-      text-align: center;
-      padding: 0.5rem 0;
-      cursor: pointer;
-      border-bottom: 2px solid transparent;
-      font-weight: 500;
+  li {
+    flex: 1;
+    text-align: center;
+    padding: 0.6rem 0;
+    cursor: pointer;
+    font-weight: 600;
+    border-bottom: 2px solid transparent;
+    background: #eef3f6;
+    color: #205072;
+    border-radius: 6px 6px 0 0;
 
-      &.active {
-        border-color: #a1c037;
-        color: #a1c037;
-      }
-    }
-  }
-
-  .form-schedule {
-    .form-group {
-      margin-bottom: 1rem;
-      label {
-        display: block;
-        font-weight: 600;
-        margin-bottom: 0.3rem;
-      }
-      select,
-      input {
-        width: 100%;
-        padding: 0.5rem;
-        border: 1px solid #ccc;
-        border-radius: 6px;
-        font-size: 1rem;
-      }
-    }
-
-    .horarios {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.5rem;
-      margin-top: 0.5rem;
-
-      button {
-        padding: 0.5rem 1rem;
-        border: 1px solid #ccc;
-        border-radius: 6px;
-        background: #f7f7f7;
-        cursor: pointer;
-
-        &.selected {
-          background: #a1c037;
-          color: #fff;
-          border-color: #a1c037;
-        }
-
-        &:disabled {
-          background: #eee;
-          color: #999;
-          cursor: not-allowed;
-        }
-
-        &:not(:disabled):hover:not(.selected) {
-          background: #eaeaea;
-        }
-      }
-    }
-
-    .btn-schedule {
-      display: block;
-      margin: 1.5rem auto 0;
-      padding: 0.7rem 2rem;
+    &.active {
       background: #a1c037;
       color: #fff;
-      border: none;
-      border-radius: 8px;
-      font-size: 1rem;
-      cursor: pointer;
-
-      &:disabled {
-        opacity: 0.5;
-        cursor: not-allowed;
-      }
-    }
-  }
-
-  .calendar-tab {
-    .fullcalendar-wrapper {
-      margin-bottom: 1.5rem;
-      .fc {
-        width: 100% !important;
-        box-shadow: none;
-        border: none;
-      }
-    }
-  }
-
-  .history-list-tab {
-    margin-top: 2rem;
-
-    .history-filter {
-      display: flex;
-      align-items: center;
-      margin-bottom: 1rem;
-
-      label {
-        margin-right: 0.5rem;
-        font-weight: 600;
-      }
-
-      .form-control {
-        padding: 0.4rem;
-        border: 1px solid #ccc;
-        border-radius: 4px;
-      }
+      border-bottom-color: #a1c037;
     }
 
-    .history-table {
-      width: 100%;
-      border-collapse: separate;
-      border-spacing: 0;
-      font-size: 0.9rem;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-
-      th, td {
-        padding: 0.6rem 0.8rem;
-        text-align: left;
-        border-right: 1px solid #a1c037;
-        border-bottom: 1px solid #eee;
-      }
-
-      th:last-child, td:last-child {
-        border-right: none;
-      }
-
-      th {
-        background: #a1c037;
-        color: #fff;
-        font-weight: 600;
-      }
-
-      tbody tr:hover {
-        background: #f7fff3;
-      }
-
-      tbody tr.row-cancelada:hover {
-        background-color: #ffe6e6;
-      }
-
-      tr.row-cancelada {
-        background-color: #ffe6e6;
-      }
-
-      .no-data {
-        text-align: center;
-        padding: 1rem;
-        color: #777;
-      }
+    &:not(.active):hover {
+      background: #e2eaee;
     }
   }
 }
 
-/* --- EVENTO Y MODAL --- */
+/* ==============================
+   FORMULARIO NUEVAS CITAS
+============================== */
+.form-schedule {
+  .form-group {
+    margin-bottom: 1rem;
+
+    label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 0.3rem;
+      color: #205072;
+    }
+
+    select,
+    input {
+      width: 100%;
+      padding: 0.5rem;
+      border: 1px solid #cfd8dc;
+      border-radius: 8px;
+      font-size: 1rem;
+
+      &:focus {
+        outline: none;
+        border-color: #205072;
+        box-shadow: 0 0 0 3px rgba(32, 80, 114, .12);
+      }
+    }
+  }
+
+  .horarios {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+
+    button {
+      padding: 0.5rem 1rem;
+      border: 1px solid #cfd8dc;
+      border-radius: 8px;
+      background: #f7f9fa;
+      cursor: pointer;
+      color: #2c3e50;
+      font-weight: 600;
+
+      &.selected {
+        background: #a1c037;
+        color: #fff;
+        border-color: #a1c037;
+      }
+
+      &:disabled {
+        background: #eee;
+        color: #999;
+        cursor: not-allowed;
+      }
+
+      &:not(:disabled):hover:not(.selected) {
+        background: #e9f1f5;
+      }
+    }
+  }
+
+  .btn-schedule {
+    display: inline-block;
+    margin: 1.5rem auto 0;
+    padding: 0.8rem 2rem;
+    background: #a1c037;
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    font-size: 1rem;
+    cursor: pointer;
+    font-weight: 700;
+    transition: background .2s, transform .08s, box-shadow .2s;
+    box-shadow: 0 6px 14px rgba(161,192,55,.2);
+
+    &:hover { background: #8ab32f; }
+    &:active { transform: translateY(1px); }
+    &:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+  }
+}
+
+/* ==============================
+   CALENDARIO
+============================== */
+.calendar-tab .fullcalendar-wrapper {
+  margin-bottom: 1.5rem;
+
+  .fc {
+    width: 100% !important;
+    box-shadow: none;
+    border: none;
+  }
+}
+
+/* ==============================
+   HISTÓRICO
+============================== */
+.history-list-tab {
+  margin-top: 2rem;
+
+  .history-filter {
+    display: flex;
+    align-items: center;
+    margin-bottom: 1rem;
+    gap: 0.5rem;
+
+    label {
+      font-weight: 700;
+      color: #205072;
+    }
+
+    .form-control {
+      padding: 0.45rem 0.6rem;
+      border: 1px solid #cfd8dc;
+      border-radius: 8px;
+
+      &:focus {
+        outline: none;
+        border-color: #205072;
+        box-shadow: 0 0 0 3px rgba(32, 80, 114, .12);
+      }
+    }
+  }
+
+  .history-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    font-size: 0.95rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    border-radius: 10px;
+    overflow: hidden;
+
+    th, td {
+      padding: 0.7rem 0.9rem;
+      text-align: left;
+      border-bottom: 1px solid #eceff1;
+    }
+
+    th {
+      background: #205072;
+      color: #fff;
+      font-weight: 700;
+      letter-spacing: 0.2px;
+    }
+
+    tbody tr:hover { background: rgba(32,80,114,.05); }
+
+    td.completada {
+      color: #205072;
+      font-weight: 700;
+    }
+
+    td.cancelada {
+      color: #c62828;
+      font-weight: 700;
+    }
+
+    tr.row-cancelada { background-color: #fff2f2; }
+    tr.row-cancelada:hover { background-color: #ffe9e9; }
+
+    .no-data {
+      text-align: center;
+      padding: 1rem;
+      color: #777;
+    }
+  }
+}
+
+/* ==============================
+   ICONOS
+============================== */
 .event-btn-icon {
   width: 18px;
   height: 18px;
@@ -218,17 +262,16 @@
   vertical-align: middle;
   transition: transform 0.2s ease-in-out;
 
-  &:hover {
-    transform: scale(1.15);
-  }
+  &:hover { transform: scale(1.15); }
 }
 
+/* ==============================
+   MODAL
+============================== */
 .modal-overlay {
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
+  top: 0; left: 0;
+  width: 100vw; height: 100vh;
   background: rgba(0, 0, 0, 0.5);
   z-index: 1000;
   display: flex;
@@ -239,11 +282,11 @@
 .modal {
   background: #fff;
   padding: 1.5rem;
-  border-radius: 8px;
+  border-radius: 12px;
   width: 90%;
-  max-width: 400px;
+  max-width: 420px;
   text-align: center;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
 }
 
 .modal-buttons {
@@ -251,19 +294,33 @@
   display: flex;
   justify-content: center;
   gap: 1rem;
+  flex-wrap: wrap;
 
   button {
-    padding: 0.5rem 1.5rem;
+    padding: 0.55rem 1.6rem;
     border: none;
-    border-radius: 6px;
+    border-radius: 10px;
     cursor: pointer;
-    background-color: #a1c037;
-    color: #fff;
-    font-weight: bold;
-    transition: background 0.2s;
+    font-weight: 800;
+    letter-spacing: 0.2px;
+    transition: background .2s, transform .06s, box-shadow .2s;
 
-    &:hover {
-      background-color: #8fa32f;
-    }
+    &:hover { transform: translateY(-1px); }
+    &:active { transform: translateY(0); }
+  }
+
+  button:first-child {
+    background-color: #205072;
+    color: #fff;
+    box-shadow: 0 6px 14px rgba(32,80,114,.18);
+
+    &:hover { background-color: #163b53; }
+  }
+
+  button:nth-child(2) {
+    background-color: #eceff1;
+    color: #2c3e50;
+
+    &:hover { background-color: #e0e6ea; }
   }
 }

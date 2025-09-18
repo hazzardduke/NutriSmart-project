@@ -5,7 +5,7 @@ import sgMail from '@sendgrid/mail';
 
 admin.initializeApp();
 
-// Lee la API key de SendGrid desde env vars (Firebase Functions Config o Secrets Manager)
+// Lee la API key de SendGrid desde Secrets o env vars
 const SENDGRID_API_KEY = process.env.SENDGRID_API_KEY!;
 sgMail.setApiKey(SENDGRID_API_KEY);
 
@@ -32,7 +32,10 @@ export const sendEmail = onCall(async (req) => {
   // Construye el mensaje base
   const msg: any = {
     to,
-    from: 'ntg.infocr@gmail.com'
+    from: {
+      email: 'ntg.cr@outlook.com', // ⚠️ debe estar verificado en SendGrid
+      name: 'NutriSmart'
+    }
   };
 
   if (templateId) {
@@ -40,7 +43,7 @@ export const sendEmail = onCall(async (req) => {
     msg.templateId = templateId;
     msg.dynamic_template_data = dynamic_template_data || {};
   } else {
-    // Envío tradicional subject/text
+    // Envío tradicional con subject/text
     if (!subject || !text) {
       throw new Error('Faltan datos: subject o text');
     }
@@ -49,10 +52,20 @@ export const sendEmail = onCall(async (req) => {
   }
 
   try {
-    await sgMail.send(msg);
-    return { success: true };
-  } catch (e: any) {
-    console.error('Error SendGrid:', e.response?.body || e.message);
-    throw new Error('Error al enviar correo');
+    const [response] = await sgMail.send(msg);
+    console.log('Correo enviado ✔️', {
+      status: response.statusCode,
+      headers: response.headers
+    });
+    return { success: true, status: response.statusCode };
+  } catch (err: any) {
+    const sgBody = err?.response?.body;
+    console.error('❌ Error SendGrid:', sgBody ?? err?.message ?? err);
+    throw new Error(
+      sgBody?.errors?.[0]?.message ??
+      sgBody ??
+      err?.message ??
+      'Error al enviar correo'
+    );
   }
 });

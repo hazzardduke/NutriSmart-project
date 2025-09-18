@@ -5,7 +5,7 @@ import { Subscription } from 'rxjs';
 import { AuthService } from '../../services/auth.service';
 import { AppointmentsService, Appointment } from '../../services/appointments.service';
 import { EmailService } from '../../services/email.service';
-import { ProfileService, UserProfileData } from '../../services/profile.service';
+import { ProfileService } from '../../services/profile.service';
 
 @Component({
   selector: 'app-appointments',
@@ -34,6 +34,11 @@ export class AppointmentsComponent implements OnInit, OnDestroy {
   enEdicion = false;
   citaEnEdicion?: Appointment;
   todosHorasPasaron = false;
+
+  // PAGINACIÓN
+  paginaActual = 1;
+  citasPorPagina = 5;
+  tamañoBloque = 10;
 
   constructor(
     private authService: AuthService,
@@ -104,6 +109,7 @@ export class AppointmentsComponent implements OnInit, OnDestroy {
           }
           return new Date(b.datetime).getTime() - new Date(a.datetime).getTime();
         });
+        this.paginaActual = 1;
       })
     );
   }
@@ -168,7 +174,7 @@ export class AppointmentsComponent implements OnInit, OnDestroy {
     const dt = new Date(c.datetime);
     this.fechaSeleccionada = dt.toISOString().split('T')[0];
     this.horaSeleccionada = this.formateaHora(c.datetime);
-    this.displayPopup(`🖊️ Editando cita para ${this.formateaFecha(c.datetime)} a las ${this.horaSeleccionada}.`);
+    this.displayPopup(` Editando cita para ${this.formateaFecha(c.datetime)} a las ${this.horaSeleccionada}.`);
     this.verificarSiHorasPasaron();
   }
 
@@ -264,5 +270,52 @@ export class AppointmentsComponent implements OnInit, OnDestroy {
 
   formatFullDate(iso: string): string {
     return new Date(iso).toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' });
+  }
+
+  // Paginación completa con bloques de 10
+  get citasPaginadas(): Appointment[] {
+    const inicio = (this.paginaActual - 1) * this.citasPorPagina;
+    return this.citasUsuario.slice(inicio, inicio + this.citasPorPagina);
+  }
+
+  totalPaginas(): number {
+    return Math.ceil(this.citasUsuario.length / this.citasPorPagina);
+  }
+
+  cambiarPagina(direccion: number): void {
+    const nueva = this.paginaActual + direccion;
+    if (nueva >= 1 && nueva <= this.totalPaginas()) {
+      this.paginaActual = nueva;
+    }
+  }
+
+  irAPagina(pagina: number): void {
+    if (pagina >= 1 && pagina <= this.totalPaginas()) {
+      this.paginaActual = pagina;
+    }
+  }
+
+  get paginasVisibles(): number[] {
+    const total = this.totalPaginas();
+    const bloque = Math.floor((this.paginaActual - 1) / this.tamañoBloque);
+    const inicio = bloque * this.tamañoBloque + 1;
+    const fin = Math.min(inicio + this.tamañoBloque - 1, total);
+    return Array.from({ length: fin - inicio + 1 }, (_, i) => inicio + i);
+  }
+
+  hayBloqueAnterior(): boolean {
+    return this.paginasVisibles[0] > 1;
+  }
+
+  hayBloqueSiguiente(): boolean {
+    return this.paginasVisibles[this.paginasVisibles.length - 1] < this.totalPaginas();
+  }
+
+  irABloqueAnterior(): void {
+    this.irAPagina(this.paginasVisibles[0] - 1);
+  }
+
+  irABloqueSiguiente(): void {
+    this.irAPagina(this.paginasVisibles[this.paginasVisibles.length - 1] + 1);
   }
 }

@@ -104,34 +104,46 @@
           </div>
 
           <div *ngFor="let obj of objetivos" class="objetivo">
-            <h4>{{ obj.tipo }}</h4>
-            <p><strong>Meta:</strong> {{ obj.meta }}</p>
-            <p><strong>Fecha meta:</strong> {{ obj.fecha | date: 'dd-MM-yyyy' }}</p>
+            <div class="obj-header">
+              <div class="obj-title">
+                <h4>{{ obj.tipo }}</h4>
+                <p><strong>Meta:</strong> {{ obj.meta }}</p>
+                <p><strong>Fecha meta:</strong> {{ obj.fecha | date: 'dd-MM-yyyy' }}</p>
+              </div>
 
-            <div class="progreso-input">
-              <label for="progreso-{{ obj.id }}">Progreso (%)</label>
-              <input
-                type="number"
-                id="progreso-{{ obj.id }}"
-                class="input-progreso"
-                [(ngModel)]="progresoTemp[obj.id!]"
-                name="progreso-{{ obj.id }}"
-                min="0"
-                max="100"
-                step="1"
-              />
-              <button class="btn-action" (click)="updateProgreso(obj)">Actualizar</button>
+              <div class="header-actions">
+                <button class="btn-recommend" (click)="openRecomendacion(obj)">
+                  Recomendaciones
+                </button>
+              </div>
             </div>
 
-            <button *ngIf="obj.progreso===100" class="btn-action" (click)="completarObjetivo(obj)">
-              Completar
-            </button>
-            <button class="btn-rec" (click)="openRecomendacion(obj)">Recomendaciones</button>
+            <div class="obj-body">
+              <!-- Progreso con input + botón actualizar al lado -->
+              <div class="field-progress">
+                <label for="progreso-{{ obj.id }}">Progreso (%)</label>
 
-            <div class="progress-wrapper">
-              <div class="progress-bar" [style.width.%]="obj.progreso"></div>
-              <div class="thumb" [style.left.%]="obj.progreso"></div>
-              <span class="progress-text">{{ obj.progreso }}%</span>
+                <input
+                  id="progreso-{{ obj.id }}"
+                  type="number"
+                  class="input-progreso"
+                  [(ngModel)]="progresoTemp[obj.id!]"
+                  name="progreso-{{ obj.id }}"
+                  min="0"
+                  max="100"
+                  step="1"
+                />
+
+                <button class="btn-primary btn-update" (click)="updateProgreso(obj)">
+                  Actualizar
+                </button>
+              </div>
+
+              <div class="progress-wrapper">
+                <div class="progress-bar" [style.width.%]="obj.progreso"></div>
+                <div class="thumb" [style.left.%]="obj.progreso"></div>
+                <span class="progress-text">{{ obj.progreso }}%</span>
+              </div>
             </div>
           </div>
         </div>
@@ -189,16 +201,19 @@
 
   <!-- Modal de Recomendación -->
   <div class="modal-bg" *ngIf="showRecModal">
-    <div class="detalles">
-      <h4>Recomendación para: {{ recModalGoal.tipo }}</h4>
-      <textarea
-        class="input-rec"
-        rows="4"
-        placeholder="Escribe tu recomendación..."
-        [(ngModel)]="newComentario"
-      ></textarea>
-      <button class="btn-save mt-2" (click)="saveRecomendacion()">Guardar</button>
-      <button class="btn-action mt-2" (click)="showRecModal = false">Cancelar</button>
+  <div class="detalles">
+    <h4>Recomendación para: {{ recModalGoal.tipo }}</h4>
+    <textarea
+      class="input-rec"
+      rows="4"
+      placeholder="Escribe tu recomendación..."
+      [(ngModel)]="newComentario"
+    ></textarea>
+
+    <div class="actions">
+      <button class="btn-save" (click)="saveRecomendacion()">Guardar</button>
+      <button class="btn-cancel" (click)="showRecModal = false">Cancelar</button>
     </div>
   </div>
 </div>
+

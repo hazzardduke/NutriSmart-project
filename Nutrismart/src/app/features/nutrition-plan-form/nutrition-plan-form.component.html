@@ -1,8 +1,8 @@
-<!-- src/app/features/nutrition-plan-form/nutrition-plan-form.component.html -->
 <div class="nutrition-plan-container">
   <div class="nutrition-plan-card">
     <h2 class="card-title">Planes Nutricionales</h2>
 
+    <!-- Tabs -->
     <div class="tabs">
       <button
         [class.active]="currentTab==='create'"
@@ -96,9 +96,8 @@
         </select>
       </div>
 
-      <!-- 1. Guardamos el async en 'plans' -->
+      <!-- Lista de planes -->
       <ng-container *ngIf="filteredPlans$ | async as plans">
-        <!-- 2. Solo mostramos la tabla si plans.length > 0 -->
         <ng-container *ngIf="plans.length > 0; else noPlans">
           <table class="history-table">
             <thead>
@@ -110,12 +109,22 @@
             </thead>
             <tbody>
               <tr *ngFor="let p of plans">
-                <!-- ahora solo mostramos el nombre -->
                 <td>{{ p.client.name }}</td>
                 <td>{{ p.client.date }}</td>
                 <td class="actions">
-                  <button class="btn-action" (click)="openModal(p)">Mostrar Tabla</button>
-                  <button class="btn-action" (click)="downloadPdf(p)">Descargar PDF</button>
+             
+                  <button
+                    class="btn-action btn-view"
+                    (click)="openModal(p)">
+                    Mostrar Tabla
+                  </button>
+
+          
+                  <button
+                    class="btn-action btn-download"
+                    (click)="downloadPdf(p)">
+                    Descargar PDF
+                  </button>
                 </td>
               </tr>
             </tbody>

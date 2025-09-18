@@ -1,92 +1,141 @@
-<!-- src/app/features/personalrecord/personalrecord.component.html -->
-<form [formGroup]="profileForm" class="expediente-container container py-4">
+<form [formGroup]="profileForm" class="expediente container">
 
   <!-- Popup -->
   <div class="popup-overlay" *ngIf="showPopup">
     <div class="popup-window" [ngClass]="popupType">
       <p>{{ popupMessage }}</p>
-      <button (click)="closePopup()">OK</button>
+      <button (click)="closePopup()">Aceptar</button>
     </div>
   </div>
 
-  <!-- Navigation -->
-  <div class="section-nav mb-4">
-    <button type="button" class="btn" [class.active]="currentSection==='photo'" (click)="selectSection('photo')">Foto de Perfil</button>
-    <button type="button" class="btn" [class.active]="currentSection==='personal'" (click)="selectSection('personal')">Datos Personales</button>
-    <button type="button" class="btn" [class.active]="currentSection==='nutritional'" (click)="selectSection('nutritional')">Datos Nutricionales</button>
-    <button type="button" class="btn" [class.active]="currentSection==='restrictions'" (click)="selectSection('restrictions')">Restricciones Alimenticias</button>
-  </div>
+  <!-- Tabs -->
+  <nav class="seg-tabs" role="tablist" aria-label="Secciones del expediente">
+    <button type="button" role="tab"
+            class="seg-tab"
+            [class.active]="currentSection==='photo'"
+            (click)="selectSection('photo')">
+      Foto de Perfil
+    </button>
+    <button type="button" role="tab"
+            class="seg-tab"
+            [class.active]="currentSection==='personal'"
+            (click)="selectSection('personal')">
+      Datos Personales
+    </button>
+    <button type="button" role="tab"
+            class="seg-tab"
+            [class.active]="currentSection==='nutritional'"
+            (click)="selectSection('nutritional')">
+      Datos Nutricionales
+    </button>
+    <button type="button" role="tab"
+            class="seg-tab"
+            [class.active]="currentSection==='restrictions'"
+            (click)="selectSection('restrictions')">
+      Restricciones Alimenticias
+    </button>
+  </nav>
 
-  <div class="section-content">
+  <section class="section">
 
-    <!-- Foto de Perfil -->
-    <div *ngIf="currentSection==='photo'" class="panel photo-panel">
-      <h3>Foto de Perfil</h3>
-      <div class="panel-body text-center">
-        <img [src]="photoURL || 'assets/images/logo.jpeg'" class="profile-picture" alt="Foto">
-        <input #fileInput type="file" accept="image/*" hidden (change)="onPhotoSelected($event)">
+    <!-- FOTO -->
+    <article *ngIf="currentSection==='photo'" class="panel">
+      <header class="panel-header">
+        <h3 class="panel-title">Foto de Perfil</h3>
+      </header>
+
+      <div class="panel-body photo-card">
+        <div class="avatar-wrap">
+          <img [src]="photoURL || 'assets/images/logo.jpeg'" class="avatar" alt="Foto de perfil">
+        </div>
+
+        <div class="btn-row">
+          <input #fileInput type="file" accept="image/*" hidden (change)="onPhotoSelected($event)">
+          <button type="button" class="btn btn-primary btn-sm" (click)="fileInput.click()">Editar Foto</button>
+          <button type="button" class="btn btn-success btn-sm" (click)="savePhoto()">Guardar Foto</button>
+        </div>
       </div>
-      <div class="panel-footer photo-actions">
-        <button type="button" class="btn btn-sm btn-primary" (click)="fileInput.click()">Editar Foto</button>
-        <button type="button" class="btn btn-sm btn-success" (click)="savePhoto()">Guardar Foto</button>
-      </div>
-    </div>
+    </article>
 
-    <!-- Datos Personales -->
-    <div *ngIf="currentSection==='personal'" class="panel personal-panel">
-      <h3>Datos Personales</h3>
+    <!-- PERSONALES -->
+    <article *ngIf="currentSection==='personal'" class="panel">
+      <header class="panel-header">
+        <h3 class="panel-title">Datos Personales</h3>
+      </header>
+
       <div class="panel-body">
-        <div class="form-group">
-          <label for="direccion">Dirección</label>
-          <input id="direccion" type="text" formControlName="direccion" class="form-control">
-          <div class="invalid-feedback" *ngIf="profileForm.get('direccion')?.invalid && profileForm.get('direccion')?.touched">Campo requerido</div>
-        </div>
-        <div class="form-group">
-          <label for="telefono">Teléfono</label>
-          <input id="telefono" type="text" formControlName="telefono" class="form-control">
-          <div class="invalid-feedback" *ngIf="profileForm.get('telefono')?.invalid && profileForm.get('telefono')?.touched">Debe tener 8 dígitos</div>
-        </div>
-        <div class="form-group">
-          <label for="correo">Correo</label>
-          <input id="correo" type="email" formControlName="correo" class="form-control">
-          <div class="invalid-feedback" *ngIf="profileForm.get('correo')?.invalid && profileForm.get('correo')?.touched">Formato inválido</div>
-        </div>
-      </div>
-      <div class="panel-footer text-end">
-        <button type="button" class="btn btn-success" (click)="savePersonal()">Guardar Cambios</button>
-      </div>
-    </div>
-
-    <!-- Datos Nutricionales -->
-    <div *ngIf="currentSection==='nutritional'" class="panel nutritional-panel">
-      <h3>Datos Nutricionales</h3>
-      <div class="panel-body">
-        <ng-container *ngFor="let fld of nutricionales">
-          <div class="form-group">
-            <label [for]="fld.id">{{ fld.label }}</label>
-            <input [id]="fld.id" [type]="fld.type" [step]="fld.step" formControlName="{{fld.control}}" class="form-control">
-            <div class="invalid-feedback" *ngIf="profileForm.get(fld.control)?.invalid && profileForm.get(fld.control)?.touched">Dato requerido</div>
+        <div class="form-grid">
+          <div class="form-field row-full">
+            <label for="direccion">Dirección</label>
+            <input id="direccion" type="text" formControlName="direccion" class="form-control">
+            <div class="invalid-feedback" *ngIf="profileForm.get('direccion')?.invalid && profileForm.get('direccion')?.touched">Campo requerido</div>
           </div>
-        </ng-container>
-      </div>
-      <div class="panel-footer text-end">
-        <button type="button" class="btn btn-success" (click)="saveNutritional()">Guardar Cambios</button>
-      </div>
-    </div>
 
-    <!-- Restricciones Alimenticias -->
-    <div *ngIf="currentSection==='restrictions'" class="panel restrictions-panel">
-      <h3>Restricciones Alimenticias</h3>
-      <div class="panel-body">
-        <div class="form-group">
-          <label for="restricciones">Descripción</label>
-          <textarea id="restricciones" formControlName="restricciones" class="form-control" rows="4"></textarea>
+          <div class="form-field">
+            <label for="telefono">Teléfono</label>
+            <input id="telefono" type="text" formControlName="telefono" class="form-control">
+            <div class="invalid-feedback" *ngIf="profileForm.get('telefono')?.invalid && profileForm.get('telefono')?.touched">Debe tener 8 dígitos</div>
+          </div>
+
+          <div class="form-field">
+            <label for="correo">Correo</label>
+            <input id="correo" type="email" formControlName="correo" class="form-control">
+            <div class="invalid-feedback" *ngIf="profileForm.get('correo')?.invalid && profileForm.get('correo')?.touched">Formato inválido</div>
+          </div>
         </div>
       </div>
-      <div class="panel-footer text-end">
-        <button type="button" class="btn btn-success" (click)="saveRestrictions()">Guardar Cambios</button>
-      </div>
-    </div>
 
-  </div>
+      <footer class="panel-footer">
+        <div class="footer-actions">
+          <button type="button" class="btn btn-success" (click)="savePersonal()">Guardar Cambios</button>
+        </div>
+      </footer>
+    </article>
+
+    <!-- NUTRICIONALES -->
+    <article *ngIf="currentSection==='nutritional'" class="panel">
+      <header class="panel-header">
+        <h3 class="panel-title">Datos Nutricionales</h3>
+      </header>
+
+      <div class="panel-body">
+        <div class="form-grid">
+          <ng-container *ngFor="let fld of nutricionales">
+            <div class="form-field">
+              <label [for]="fld.id">{{ fld.label }}</label>
+              <input [id]="fld.id" [type]="fld.type" [step]="fld.step" formControlName="{{fld.control}}" class="form-control">
+              <div class="invalid-feedback" *ngIf="profileForm.get(fld.control)?.invalid && profileForm.get(fld.control)?.touched">Dato requerido</div>
+            </div>
+          </ng-container>
+        </div>
+      </div>
+
+      <footer class="panel-footer">
+        <div class="footer-actions">
+          <button type="button" class="btn btn-success" (click)="saveNutritional()">Guardar Cambios</button>
+        </div>
+      </footer>
+    </article>
+
+    <!-- RESTRICCIONES -->
+    <article *ngIf="currentSection==='restrictions'" class="panel">
+      <header class="panel-header">
+        <h3 class="panel-title">Restricciones Alimenticias</h3>
+      </header>
+
+      <div class="panel-body">
+        <div class="form-field row-full">
+          <label for="restricciones">Descripción</label>
+          <textarea id="restricciones" formControlName="restricciones" class="form-control" rows="5"></textarea>
+        </div>
+      </div>
+
+      <footer class="panel-footer">
+        <div class="footer-actions">
+          <button type="button" class="btn btn-success" (click)="saveRestrictions()">Guardar Cambios</button>
+        </div>
+      </footer>
+    </article>
+
+  </section>
 </form>

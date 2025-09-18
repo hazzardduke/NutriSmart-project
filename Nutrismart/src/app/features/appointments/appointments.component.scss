@@ -1,26 +1,26 @@
-/* src/app/features/appointments/appointments.component.scss */
 .citas-container {
   max-width: 800px;
   margin: 2rem auto;
   padding: 2rem;
-  background: #fff;
-  border-radius: 12px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
-  font-family: 'Roboto', sans-serif;
-  text-align: center;
+  background: #ffffff;
+  border-radius: 14px;
+  font-family: 'Segoe UI', sans-serif;
+  color: #2f3b44;
+  box-shadow: 0 2px 10px rgba(15, 23, 42, 0.05);
 }
 
 .titulo-citas {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #3e372d;
   font-size: 1.8rem;
+  font-weight: 800;
   margin-bottom: 2rem;
+  color: #2f3b44;
 }
 .titulo-citas i {
   color: #a1c037;
-  margin-right: 0.5rem;
+  margin-right: 0.6rem;
   font-size: 1.5rem;
 }
 
@@ -29,46 +29,50 @@
   text-align: left;
 }
 .form-cita label {
-  font-weight: 600;
-  color: #3e372d;
+  font-weight: 700;
+  color: #2f3b44;
+  margin-bottom: 0.4rem;
   display: block;
-  margin-bottom: 0.5rem;
 }
 .form-cita input[type="date"] {
   width: 100%;
-  padding: 0.6rem;
-  border: 1px solid #ccc;
-  border-radius: 6px;
+  padding: 0.65rem 1rem;
+  border: 1px solid #cfd6dd;
+  border-radius: 10px;
+  background: #fafbfd;
+  color: #2f3b44;
+  font-size: 1rem;
 }
 
 .horarios {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.7rem;
   justify-content: center;
+  gap: 0.75rem;
   margin-top: 1rem;
 }
 .btn-horario {
   padding: 0.5rem 1rem;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  background: #f7f7f7;
-  color: #3e372d;
+  background: #f1f3f6;
+  border: 1px solid #cfd6dd;
+  border-radius: 10px;
+  color: #1f3a52;
+  font-weight: 600;
   cursor: pointer;
-  transition: 0.3s;
+  transition: 0.25s;
 }
 .btn-horario.selected {
   background: #a1c037;
-  color: #fff;
+  color: #ffffff;
   border-color: #a1c037;
 }
 .btn-horario:disabled {
-  background: #ccc;
-  color: #888;
+  background: #ebebeb;
+  color: #999;
   cursor: not-allowed;
 }
 .btn-horario:not(:disabled):hover:not(.selected) {
-  background: #eaeaea;
+  background: #e7e7e7;
 }
 
 .acciones {
@@ -81,50 +85,50 @@
   padding: 0.7rem 2rem;
   font-size: 1rem;
   border: none;
-  border-radius: 8px;
-  color: #fff;
+  border-radius: 10px;
+  font-weight: 700;
   cursor: pointer;
-  transition: 0.3s;
+  transition: background 0.25s, transform 0.06s;
 }
 .btn-accion.confirm {
   background: #a1c037;
+  color: #ffffff;
 }
 .btn-accion.confirm:disabled {
-  opacity: 0.5;
+  background: #cdd9a8;
   cursor: not-allowed;
 }
 .btn-accion.cancel {
   background: #e74c3c;
+  color: #ffffff;
 }
 
 .nota {
   margin-top: 2rem;
   font-size: 0.95rem;
   color: #666;
-}
-
-.error-hora {
-  margin-top: 0.5rem;
-  color: #e74c3c;
-  font-weight: bold;
-}
-
-.no-citas-hoy {
-  margin: 1rem auto;
-  color: #3e372d;
-  font-weight: 600;
+  text-align: center;
 }
 
 .popup {
-  display: inline-block;
-  margin: 1rem auto;
+  position: sticky;
+  top: 0; 
+  margin-top: 1rem;
   background: #a1c037;
-  color: #fff;
-  padding: 0.8rem 1.2rem;
-  border-radius: 6px;
-  font-weight: 600;
+  color: #ffffff;
+  padding: 0.9rem 1.5rem;
+  border-radius: 12px;
+  font-weight: 700;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  z-index: 5;
   animation: fadeOut 8s ease-in forwards;
+  max-width: 90%;
+  width: fit-content;
+  margin-left: auto;
+  margin-right: auto;
 }
+
 @keyframes fadeOut {
   0%, 80% { opacity: 1; }
   100% { opacity: 0; }
@@ -134,9 +138,10 @@
   margin-top: 2.5rem;
   text-align: left;
 }
-.lista-citas .subtitulo {
+.subtitulo {
   font-size: 1.3rem;
-  color: #3e372d;
+  font-weight: 800;
+  color: #2f3b44;
   margin-bottom: 1rem;
 }
 .tabla-citas {
@@ -144,46 +149,81 @@
   border-collapse: collapse;
 }
 .tabla-citas thead {
-  background: #a1c037;
-  color: #fff;
+  background: #ffffff;
+  color: #2f3b44;
+  border-bottom: 2px solid #a1c037;
 }
 .tabla-citas th,
 .tabla-citas td {
-  border: 1px solid #ddd;
+  border: 1px solid #dce3eb;
   padding: 0.8rem 1rem;
   text-align: center;
-  font-size: 0.95rem;
 }
 .tabla-citas tr:nth-child(even) {
   background: #f9f9f9;
 }
 
 .estado-confirmed {
-  color: #3498db;
-  font-weight: bold;
+  color: #1f3a52;
+  font-weight: 700;
 }
 .estado-completed {
   color: #6d851c;
-  font-weight: bold;
+  font-weight: 700;
 }
 .estado-canceled {
   color: #e74c3c;
-  font-weight: bold;
+  font-weight: 700;
 }
 
 .btn-editar,
 .btn-cancelar {
   padding: 0.4rem 0.8rem;
   border: none;
-  border-radius: 6px;
-  color: #fff;
-  cursor: pointer;
+  border-radius: 8px;
   font-size: 0.85rem;
-  margin-right: 0.5rem;
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
 }
 .btn-editar {
   background: #3498db;
 }
 .btn-cancelar {
   background: #e74c3c;
+}
+
+.paginacion {
+  margin-top: 1.5rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+
+  button {
+    background: #f1f3f6;
+    color: #2f3b44;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+
+    &:hover:not(:disabled) {
+      background: #e7ebf0;
+    }
+
+    &:disabled {
+      background: #ccc;
+      color: #777;
+      cursor: not-allowed;
+    }
+
+    &.pagina-activa {
+      background: #a1c037;
+      color: #fff;
+    }
+  }
 }
