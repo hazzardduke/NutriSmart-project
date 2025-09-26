@@ -1,9 +1,29 @@
 <h2>Administrar Usuarios</h2>
+<br>
+
+<div class="toolbar">
+  <input
+    type="text"
+    placeholder="Buscar usuario..."
+    [(ngModel)]="searchTerm"
+    class="search-input"
+  />
+
+  <select [(ngModel)]="pageSize" class="page-size-select" (change)="goToPage(1)">
+    <option [value]="5">5 por página</option>
+    <option [value]="10">10 por página</option>
+    <option [value]="20">20 por página</option>
+  </select>
+</div>
 
 <table class="clients-table">
   <thead>
     <tr>
       <th>Nombre</th>
+      <th>Apellidos</th>
+      <th>Cédula</th>
+      <th>Teléfono</th>
+      <th>Dirección</th>
       <th>Correo</th>
       <th>Rol</th>
       <th>Activo</th>
@@ -12,74 +32,107 @@
   </thead>
 
   <tbody>
-    <tr *ngFor="let u of users$ | async">
+    <tr *ngFor="let u of filteredUsers() | slice:(currentPage-1)*pageSize:(currentPage*pageSize)">
       <td>{{ u.nombre }}</td>
+      <td>{{ u.apellidos }}</td>
+      <td>{{ u.cedula }}</td>
+      <td>{{ u.telefono }}</td>
+      <td>{{ u.direccion }}</td>
       <td>{{ u.correo }}</td>
+      <td><span class="badge" [ngClass]="u.role">{{ u.role }}</span></td>
       <td>
-        <select
-          #roleSel
-          [ngModel]="u.role"
-          (ngModelChange)="onRoleChange(u, $event, roleSel)"
-          class="role-select"
-        >
-          <option *ngFor="let r of roles" [value]="r">{{ r }}</option>
-        </select>
+        <span class="status" [ngClass]="u.active ? 'active' : 'inactive'">
+          {{ u.active ? 'Activo' : 'Inactivo' }}
+        </span>
       </td>
-      <td class="col-active">
-        <input
-          type="checkbox"
-          [checked]="u.active"
-          (change)="onToggleActive(u)"
-        />
-      </td>
-      <td>
+      <td class="actions">
+        <button type="button" class="btn-action edit" (click)="onEdit(u)" title="Editar usuario">
+          <i class="fas fa-edit"></i>
+        </button>
         <button
           type="button"
-          class="btn-action edit"
-          (click)="onEdit(u)"
+          class="btn-action toggle"
+          (click)="onToggleActive(u)"
+          [title]="u.active ? 'Inactivar usuario' : 'Activar usuario'"
         >
-          <i class="fas fa-edit"></i> Editar
+          <i class="fas" [ngClass]="u.active ? 'fa-user-slash' : 'fa-user-check'"></i>
         </button>
       </td>
     </tr>
   </tbody>
 </table>
 
-<div *ngIf="editForm.get('uid')!.value" class="edit-panel">
-  <h3>Editar Usuario</h3>
+<div class="pagination">
+  <button (click)="prevPage()" [disabled]="currentPage === 1">«</button>
 
-  <form [formGroup]="editForm" (ngSubmit)="saveEdit()" class="edit-form">
-    <div class="field">
-      <label for="nombre">Nombre:</label>
-      <input id="nombre" type="text" formControlName="nombre" />
-    </div>
+  <button
+    *ngFor="let page of pagesArray()"
+    (click)="goToPage(page)"
+    [class.active]="page === currentPage"
+  >
+    {{ page }}
+  </button>
 
-    <div class="field">
-      <label for="telefono">Teléfono:</label>
-      <input id="telefono" type="text" formControlName="telefono" />
-    </div>
+  <button (click)="nextPage()" [disabled]="currentPage === totalPages()">»</button>
+</div>
 
-    <div class="field">
-      <label for="correo">Correo:</label>
-      <input id="correo" type="email" formControlName="correo" />
-    </div>
 
-    <div class="field">
-      <label for="role">Rol:</label>
-      <select id="role" formControlName="role">
-        <option *ngFor="let r of roles" [value]="r">{{ r }}</option>
-      </select>
-    </div>
+<div class="modal-overlay" *ngIf="isModalOpen">
+  <div class="modal-content">
+    <button class="modal-close" (click)="closeModal()">
+      <i class="fas fa-times"></i>
+    </button>
 
-    <div class="field-active">
-      <label for="active">Activo:</label>
-      <input id="active" type="checkbox" formControlName="active" />
-    </div>
+    <h3>Editar Usuario</h3>
+    <br>
 
-    <div class="form-actions">
-      <button type="submit" class="btn-action save">
-        <i class="fas fa-save"></i> Guardar
-      </button>
-    </div>
-  </form>
+    <form [formGroup]="editForm" (ngSubmit)="saveEdit()" class="edit-form">
+      <div class="field">
+        <label>Nombre:</label>
+        <input type="text" formControlName="nombre" />
+      </div>
+
+      <div class="field">
+        <label>Apellidos:</label>
+        <input type="text" formControlName="apellidos" />
+      </div>
+
+      <div class="field">
+        <label>Cédula:</label>
+        <input type="text" formControlName="cedula" />
+      </div>
+
+      <div class="field">
+        <label>Teléfono:</label>
+        <input type="text" formControlName="telefono" />
+      </div>
+
+      <div class="field">
+        <label>Dirección:</label>
+        <input type="text" formControlName="direccion" />
+      </div>
+
+      <div class="field">
+        <label>Correo:</label>
+        <input type="email" formControlName="correo" readonly title="Este campo no se puede editar" />
+      </div>
+
+      <div class="field">
+        <label>Rol:</label>
+        <select formControlName="role">
+          <option *ngFor="let r of roles" [value]="r">{{ r }}</option>
+        </select>
+      </div>
+
+      <div class="field-active">
+        <label>Activo:</label>
+        <input type="checkbox" formControlName="active" />
+      </div>
+
+      <div class="form-actions">
+        <button type="submit" class="btn-action save"> Guardar</button>
+        <button type="button" class="btn-action cancel" (click)="closeModal()"> Cancelar</button>
+      </div>
+    </form>
+  </div>
 </div>

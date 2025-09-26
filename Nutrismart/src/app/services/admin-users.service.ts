@@ -14,8 +14,11 @@ export type UserRole = 'cliente' | 'nutricionista' | 'admin';
 export interface UserProfile {
   uid: string;
   nombre: string;
-  correo: string;
+  apellidos?: string;
+  cedula?: string;
   telefono?: string;
+  direccion?: string;
+  correo: string;
   role: UserRole;
   active: boolean;
 }
@@ -24,13 +27,13 @@ export interface UserProfile {
 export class AdminUsersService {
   private fs = inject(Firestore);
 
-  /** Trae TODOS los usuarios y normaliza campos (incluye 'role') */
+
   getAllUsers(): Observable<UserProfile[]> {
     const col = collection(this.fs, 'users');
     return collectionData(col, { idField: 'uid' }).pipe(
       map((arr: any[]) =>
         arr.map((u) => {
-          // Cubrimos posibles ubicaciones/nombres del rol
+
           const rawRole =
             u.role ??
             u.rol ??
@@ -44,28 +47,34 @@ export class AdminUsersService {
               : 'cliente';
 
           return {
-            uid:       u.uid,
-            nombre:    u.nombre ?? '',
-            correo:    u.correo ?? '',
-            telefono:  u.telefono ?? '',
+            uid:        u.uid,
+            nombre:     u.nombre ?? '',
+            apellidos:  u.apellidos ?? '',
+            cedula:     u.cedula ?? '',
+            telefono:   u.telefono ?? '',
+            direccion:  u.direccion ?? '',
+            correo:     u.correo ?? '',
             role,
-            active:    u.active ?? true
+            active:     u.active ?? true
           } as UserProfile;
         })
       )
     );
   }
 
+  
   toggleActive(uid: string, isActive: boolean) {
     const ref = doc(this.fs, `users/${uid}`);
     return updateDoc(ref, { active: isActive });
   }
+
 
   updateUser(uid: string, data: Partial<Omit<UserProfile, 'uid' | 'role'>>) {
     const ref = doc(this.fs, `users/${uid}`);
     return updateDoc(ref, data);
   }
 
+ 
   updateRole(uid: string, role: UserRole) {
     const ref = doc(this.fs, `users/${uid}`);
     return updateDoc(ref, { role });

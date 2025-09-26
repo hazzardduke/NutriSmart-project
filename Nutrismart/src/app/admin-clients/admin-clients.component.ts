@@ -19,13 +19,21 @@ export class AdminClientsComponent implements OnInit, OnDestroy {
 
   roles: UserRole[] = ['cliente', 'nutricionista', 'admin'];
 
+  searchTerm: string = '';
+  currentPage: number = 1;
+  pageSize: number = 5;
+  isModalOpen: boolean = false;
+
   editForm = new FormGroup({
-    uid:      new FormControl<string | null>(null),
-    nombre:   new FormControl<string>(''),
-    telefono: new FormControl<string>(''),
-    correo:   new FormControl<string>({ value: '', disabled: true }),
-    active:   new FormControl<boolean>(true),
-    role:     new FormControl<UserRole>('cliente')
+    uid:        new FormControl<string | null>(null),
+    nombre:     new FormControl<string>(''),
+    apellidos:  new FormControl<string>(''),
+    cedula:     new FormControl<string>(''),
+    telefono:   new FormControl<string>(''),
+    direccion:  new FormControl<string>(''),
+    correo:     new FormControl<string>(''),
+    active:     new FormControl<boolean>(true),
+    role:       new FormControl<UserRole>('cliente')
   });
 
   constructor(private svc: AdminUsersService) {}
@@ -39,19 +47,61 @@ export class AdminClientsComponent implements OnInit, OnDestroy {
     this.sub?.unsubscribe();
   }
 
+  filteredUsers(): UserProfile[] {
+    const term = this.searchTerm.toLowerCase();
+    return this.snapshot.filter(u =>
+      (u.nombre?.toLowerCase().includes(term) ||
+       u.apellidos?.toLowerCase().includes(term) ||
+       u.cedula?.toLowerCase().includes(term) ||
+       u.telefono?.toLowerCase().includes(term) ||
+       u.direccion?.toLowerCase().includes(term) ||
+       u.correo?.toLowerCase().includes(term) ||
+       u.role?.toLowerCase().includes(term))
+    );
+  }
+
+  totalPages(): number {
+    return Math.ceil(this.filteredUsers().length / this.pageSize) || 1;
+  }
+
+  pagesArray(): number[] {
+    return Array(this.totalPages()).fill(0).map((_, i) => i + 1);
+  }
+
+  goToPage(page: number) {
+    this.currentPage = page;
+  }
+
+  nextPage() {
+    if (this.currentPage < this.totalPages()) this.currentPage++;
+  }
+
+  prevPage() {
+    if (this.currentPage > 1) this.currentPage--;
+  }
+
   onToggleActive(user: UserProfile) {
     this.svc.toggleActive(user.uid, !user.active).catch(console.error);
   }
 
   onEdit(user: UserProfile) {
-    this.editForm.reset({
+    this.editForm.setValue({
       uid: user.uid,
       nombre: user.nombre ?? '',
+      apellidos: user.apellidos ?? '',
+      cedula: user.cedula ?? '',
       telefono: user.telefono ?? '',
+      direccion: user.direccion ?? '',
       correo: user.correo ?? '',
       active: user.active ?? true,
       role: user.role ?? 'cliente'
     });
+    this.isModalOpen = true;
+  }
+
+  closeModal() {
+    this.editForm.reset();
+    this.isModalOpen = false;
   }
 
   saveEdit() {
@@ -60,80 +110,17 @@ export class AdminClientsComponent implements OnInit, OnDestroy {
 
     this.svc.updateUser(v.uid!, {
       nombre: v.nombre ?? '',
+      apellidos: v.apellidos ?? '',
+      cedula: v.cedula ?? '',
       telefono: v.telefono ?? '',
+      direccion: v.direccion ?? '',
       active: v.active ?? true
     })
     .then(async () => {
-      if (v.role) {
-        await this.svc.updateRole(v.uid!, v.role as UserRole);
-      }
-      await Swal.fire({
-        icon: 'success',
-        title: 'Cambios guardados',
-        showConfirmButton: false,
-        timer: 1200
-      });
+      if (v.role) await this.svc.updateRole(v.uid!, v.role as UserRole);
+      await Swal.fire({ icon: 'success', title: 'Cambios guardados', timer: 1200, showConfirmButton: false });
+      this.closeModal();
     })
-    .catch(async (err) => {
-      console.error(err);
-      await Swal.fire({ icon: 'error', title: 'Error al guardar', text: String(err) });
-    });
-  }
-
-  /** Cambio de rol desde la tabla, con confirmación y UI optimista */
-  async onRoleChange(user: UserProfile, newRole: string, selectEl: HTMLSelectElement) {
-    const role = newRole as UserRole;
-    const prev = user.role;
-    if (prev === role) return;
-
-    // Proteger al último admin
-    if (prev === 'admin' && role !== 'admin') {
-      const admins = this.snapshot.filter(u => u.role === 'admin').length;
-      if (admins <= 1) {
-        await Swal.fire({
-          icon: 'warning',
-          title: 'Acción no permitida',
-          text: 'No puedes remover el último administrador del sistema.'
-        });
-        // revertir select
-        selectEl.value = prev;
-        return;
-      }
-    }
-
-    const { isConfirmed } = await Swal.fire({
-      icon: 'question',
-      title: 'Confirmar cambio de rol',
-      html: `¿Cambiar el rol de <b>${user.nombre || user.correo}</b> de <b>${prev}</b> a <b>${role}</b>?`,
-      showCancelButton: true,
-      confirmButtonText: 'Sí, cambiar',
-      cancelButtonText: 'Cancelar',
-      confirmButtonColor: '#a1c037', // verde personalizado
-      cancelButtonColor: '#6c757d'   // gris
-    });
-
-    if (!isConfirmed) {
-      // revertir si cancela
-      selectEl.value = prev;
-      return;
-    }
-
-    // UI optimista
-    user.role = role;
-    try {
-      await this.svc.updateRole(user.uid, role);
-      await Swal.fire({
-        icon: 'success',
-        title: 'Rol actualizado',
-        showConfirmButton: false,
-        timer: 1100
-      });
-    } catch (err) {
-      console.error(err);
-      // revertir si falla
-      user.role = prev;
-      selectEl.value = prev;
-      await Swal.fire({ icon: 'error', title: 'No se pudo actualizar', text: String(err) });
-    }
+    .catch(err => Swal.fire({ icon: 'error', title: 'Error', text: String(err) }));
   }
 }
