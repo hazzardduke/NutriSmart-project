@@ -19,7 +19,8 @@ import {
   collection,
   query,
   where,
-  getDocs
+  getDocs,
+  serverTimestamp
 } from '@angular/fire/firestore';
 import { Observable, from, of } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
@@ -44,7 +45,7 @@ export class AuthService {
   user$: Observable<User | null> = user(this.auth);
   isAuthenticated$: Observable<boolean> = authState(this.auth).pipe(map(u => !!u));
 
-  // Para leer custom claims si los tuvieses
+  // Para leer custom claims si los usas
   idTokenResult$: Observable<IdTokenResult | null> = this.user$.pipe(
     switchMap(u => u ? from(u.getIdTokenResult()) : of(null))
   );
@@ -61,17 +62,30 @@ export class AuthService {
 
   /** Registrar en Auth y Firestore */
   async register(profile: NewUserProfile, plainPassword: string): Promise<void> {
-    const cred: UserCredential = await createUserWithEmailAndPassword(
-      this.auth,
-      profile.correo,
-      plainPassword
-    );
-    const uid = cred.user.uid;
-    await setDoc(doc(this.firestore, 'users', uid), {
-      ...profile,
-      createdAt: new Date()
-    });
-    await sendEmailVerification(cred.user);
+    try {
+      // 1. Crear usuario en Firebase Auth
+      const cred: UserCredential = await createUserWithEmailAndPassword(
+        this.auth,
+        profile.correo,
+        plainPassword
+      );
+      const uid = cred.user.uid;
+
+      // 2. Crear documento en Firestore con rol cliente por defecto
+      await setDoc(doc(this.firestore, 'users', uid), {
+        ...profile,
+        uid,
+        role: 'cliente',             // fuerza cliente como rol inicial
+        createdAt: serverTimestamp() // fecha desde servidor Firebase
+      });
+
+      // 3. Enviar correo de verificación
+      await sendEmailVerification(cred.user);
+
+    } catch (err: any) {
+      console.error('Error en registro:', err);
+      throw new Error(err.message || 'No se pudo completar el registro.');
+    }
   }
 
   /** Obtener perfil de Firestore por correo */
