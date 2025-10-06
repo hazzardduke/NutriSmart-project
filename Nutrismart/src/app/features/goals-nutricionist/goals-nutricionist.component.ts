@@ -3,7 +3,6 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Subscription } from 'rxjs';
 import Swal from 'sweetalert2';
-
 import {
   GoalsNutricionistService,
   Goal,
@@ -21,6 +20,7 @@ import {
 export class GoalsNutricionistComponent implements OnInit, OnDestroy {
   clients: UserSummary[] = [];
   selectedClientUid: string | null = null;
+  selectedClientName = '';
 
   objetivos: Goal[] = [];
   historico: Goal[] = [];
@@ -37,6 +37,10 @@ export class GoalsNutricionistComponent implements OnInit, OnDestroy {
   recModalGoal!: Goal;
   newComentario = '';
 
+  searchTerm = '';
+  filteredClients: UserSummary[] = [];
+  showAllHist = false;
+
   private subs = new Subscription();
 
   constructor(private svc: GoalsNutricionistService) {}
@@ -52,11 +56,49 @@ export class GoalsNutricionistComponent implements OnInit, OnDestroy {
   switchPrincipal(tab: 'crear' | 'objetivos' | 'historico'): void {
     this.tabPrincipal = tab;
     this.selectedClientUid = null;
+    this.selectedClientName = '';
     this.objetivos = [];
     this.historico = [];
     this.recomendaciones = [];
     this.nuevoObjetivo = { tipo: '', meta: '', meses: null };
     this.subTab = 'objetivos';
+    this.searchTerm = '';
+    this.filteredClients = [];
+    this.showAllHist = false;
+  }
+
+  onSearchFocus(): void {
+    this.filteredClients = [...this.clients];
+  }
+
+  onSearchChange(): void {
+    const term = this.searchTerm.toLowerCase().trim();
+    if (!term) {
+      this.filteredClients = [...this.clients];
+      return;
+    }
+    this.filteredClients = this.clients.filter(c =>
+      `${c.nombre} ${c.apellidos} ${c.cedula}`.toLowerCase().includes(term)
+    );
+  }
+
+  selectClient(uid: string): void {
+    const selected = this.clients.find(c => c.uid === uid);
+    this.selectedClientUid = uid;
+    this.selectedClientName = selected ? `${selected.nombre} ${selected.apellidos}` : '';
+    this.searchTerm = this.selectedClientName;
+    this.filteredClients = [];
+    this.showAllHist = false;
+    this.onClientSelect();
+  }
+
+  showAllHistorico(): void {
+    this.selectedClientUid = null;
+    this.selectedClientName = 'Todos los clientes';
+    this.showAllHist = true;
+    this.searchTerm = this.selectedClientName;
+    this.filteredClients = [];
+    this.loadAllHistoric();
   }
 
   onClientSelect(): void {
@@ -66,12 +108,12 @@ export class GoalsNutricionistComponent implements OnInit, OnDestroy {
       this.recomendaciones = [];
       return;
     }
+
     this.subs.add(
       this.svc.getGoals(this.selectedClientUid).subscribe(all => {
         this.objetivos = all.filter(o => o.estado === 'en progreso');
         this.historico = all.filter(o => o.estado === 'completado');
 
-        // reset progreso temporal por cada carga
         this.progresoTemp = {};
         this.objetivos.forEach(o => {
           if (o.id) this.progresoTemp[o.id] = o.progreso;
@@ -82,6 +124,19 @@ export class GoalsNutricionistComponent implements OnInit, OnDestroy {
         }
       })
     );
+  }
+
+  private loadAllHistoric(): void {
+    this.historico = [];
+    this.clients.forEach(c => {
+      this.subs.add(
+        this.svc.getGoals(c.uid).subscribe(all => {
+          const completos = all.filter(o => o.estado === 'completado');
+          this.historico.push(...completos);
+          this.historico.sort((a, b) => new Date(b.fecha).getTime() - new Date(a.fecha).getTime());
+        })
+      );
+    });
   }
 
   guardarObjetivo(): void {
@@ -122,35 +177,45 @@ export class GoalsNutricionistComponent implements OnInit, OnDestroy {
       .catch(() => this.toast('No se pudo actualizar el progreso', 'error'));
   }
 
-  completarObjetivo(o: Goal): void {
-    if (!this.selectedClientUid) return;
-
+  confirmarCompletar(o: Goal): void {
     Swal.fire({
-      title: '¿Marcar como completado?',
-      text: 'Este objetivo se moverá al histórico.',
-      icon: 'warning',
+      title: '¿Deseas completar este objetivo?',
+      text: 'El progreso está al 100% y se moverá al histórico.',
+      icon: 'question',
       showCancelButton: true,
-      confirmButtonColor: '#a1c037',
+      confirmButtonColor: '#28a745',
       cancelButtonColor: '#d33',
-      confirmButtonText: 'Sí, completar',
+      confirmButtonText: 'Sí, completarlo',
       cancelButtonText: 'Cancelar'
     }).then(result => {
       if (result.isConfirmed) {
-        const hoy = new Date().toISOString().split('T')[0];
-
-        this.svc
-          .updateGoal(this.selectedClientUid!, o.id!, {
-            progreso: 100,
-            estado: 'completado',
-            fecha: hoy
-          })
-          .then(() => {
-            this.modal('Objetivo completado', 'El objetivo se movió al histórico.', 'success');
-            this.onClientSelect();
-          })
-          .catch(() => this.modal('Error', 'No se pudo completar el objetivo.', 'error'));
+        this.completarObjetivo(o);
       }
     });
+  }
+
+  completarObjetivo(o: Goal): void {
+    if (!this.selectedClientUid) return;
+
+    const hoy = new Date().toISOString().split('T')[0];
+    this.svc
+      .updateGoal(this.selectedClientUid!, o.id!, {
+        progreso: 100,
+        estado: 'completado',
+        fecha: hoy
+      })
+      .then(() => {
+        Swal.fire({
+          title: '¡Objetivo completado!',
+          text: 'El objetivo se movió al histórico con éxito.',
+          icon: 'success',
+          confirmButtonColor: '#28a745'
+        });
+        this.onClientSelect();
+      })
+      .catch(() =>
+        this.modal('Error', 'No se pudo completar el objetivo.', 'error')
+      );
   }
 
   switchSub(tab: 'objetivos' | 'recomendaciones'): void {
@@ -168,7 +233,6 @@ export class GoalsNutricionistComponent implements OnInit, OnDestroy {
 
   saveRecomendacion(): void {
     if (!this.selectedClientUid) return;
-
     if (!this.newComentario.trim()) {
       return this.toast('Escribe tu recomendación.', 'warning');
     }
@@ -187,11 +251,8 @@ export class GoalsNutricionistComponent implements OnInit, OnDestroy {
       .catch(() => this.modal('Error', 'No se pudo guardar la recomendación.', 'error'));
   }
 
-  // ----- Helpers -----
-
   private loadRecs(): void {
     if (!this.selectedClientUid) return;
-
     this.recomendaciones = [];
     this.objetivos.forEach(goal => {
       this.subs.add(
@@ -217,14 +278,12 @@ export class GoalsNutricionistComponent implements OnInit, OnDestroy {
     return new Date(y1, m1, d1);
   }
 
-  // SweetAlert helpers
-  private modal(title: string, text: string, icon: 'success' | 'error' | 'warning' | 'info' | 'question'): void {
-    Swal.fire({
-      icon,
-      title,
-      text,
-      confirmButtonColor: '#a1c037'
-    });
+  private modal(
+    title: string,
+    text: string,
+    icon: 'success' | 'error' | 'warning' | 'info' | 'question'
+  ): void {
+    Swal.fire({ icon, title, text, confirmButtonColor: '#a1c037' });
   }
 
   private toast(

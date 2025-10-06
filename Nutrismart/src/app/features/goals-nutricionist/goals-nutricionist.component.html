@@ -12,20 +12,28 @@
   <div class="tab-content">
     <!-- CREAR OBJETIVO -->
     <ng-container *ngIf="tabPrincipal==='crear'">
-      <div class="client-select">
-        <label for="clientCrear">Cliente</label>
-        <select
-          id="clientCrear"
+      <div class="client-select relative">
+        <label for="clientSearchCrear">Buscar Cliente</label>
+        <input
+          id="clientSearchCrear"
+          type="text"
           class="input"
-          [(ngModel)]="selectedClientUid"
-          (change)="onClientSelect()"
-          name="clientCrear"
-        >
-          <option [ngValue]="null" disabled selected>-- Seleccionar cliente --</option>
-          <option *ngFor="let c of clients" [ngValue]="c.uid">
+          placeholder="Escribe un nombre o cédula..."
+          [(ngModel)]="searchTerm"
+          (focus)="onSearchFocus()"
+          (input)="onSearchChange()"
+          autocomplete="off"
+        />
+        <ul *ngIf="filteredClients.length > 0" class="dropdown-results">
+          <li
+            *ngFor="let c of filteredClients"
+            (click)="selectClient(c.uid)"
+            class="dropdown-item"
+            [class.selected]="selectedClientUid === c.uid"
+          >
             {{ c.nombre }} {{ c.apellidos }} ({{ c.cedula }})
-          </option>
-        </select>
+          </li>
+        </ul>
       </div>
 
       <p *ngIf="!selectedClientUid" class="no-data">
@@ -69,20 +77,28 @@
 
     <!-- OBJETIVOS + RECOMENDACIONES -->
     <ng-container *ngIf="tabPrincipal==='objetivos'">
-      <div class="client-select">
-        <label for="clientObj">Cliente</label>
-        <select
-          id="clientObj"
+      <div class="client-select relative">
+        <label for="clientSearchObj">Buscar Cliente</label>
+        <input
+          id="clientSearchObj"
+          type="text"
           class="input"
-          [(ngModel)]="selectedClientUid"
-          (change)="onClientSelect()"
-          name="clientObj"
-        >
-          <option [ngValue]="null" disabled selected>-- Seleccionar cliente --</option>
-          <option *ngFor="let c of clients" [ngValue]="c.uid">
+          placeholder="Escribe un nombre o cédula..."
+          [(ngModel)]="searchTerm"
+          (focus)="onSearchFocus()"
+          (input)="onSearchChange()"
+          autocomplete="off"
+        />
+        <ul *ngIf="filteredClients.length > 0" class="dropdown-results">
+          <li
+            *ngFor="let c of filteredClients"
+            (click)="selectClient(c.uid)"
+            class="dropdown-item"
+            [class.selected]="selectedClientUid === c.uid"
+          >
             {{ c.nombre }} {{ c.apellidos }} ({{ c.cedula }})
-          </option>
-        </select>
+          </li>
+        </ul>
       </div>
 
       <p *ngIf="!selectedClientUid" class="no-data">
@@ -119,10 +135,8 @@
             </div>
 
             <div class="obj-body">
-              <!-- Progreso con input + botón actualizar al lado -->
               <div class="field-progress">
                 <label for="progreso-{{ obj.id }}">Progreso (%)</label>
-
                 <input
                   id="progreso-{{ obj.id }}"
                   type="number"
@@ -134,8 +148,21 @@
                   step="1"
                 />
 
-                <button class="btn-primary btn-update" (click)="updateProgreso(obj)">
+                <!-- Botones dinámicos -->
+                <button
+                  *ngIf="progresoTemp[obj.id!] < 100"
+                  class="btn-primary btn-update"
+                  (click)="updateProgreso(obj)"
+                >
                   Actualizar
+                </button>
+
+                <button
+                  *ngIf="progresoTemp[obj.id!] >= 100"
+                  class="btn-complete"
+                  (click)="confirmarCompletar(obj)"
+                >
+                  Completar
                 </button>
               </div>
 
@@ -165,20 +192,28 @@
 
     <!-- HISTÓRICO -->
     <ng-container *ngIf="tabPrincipal==='historico'">
-      <div class="client-select">
-        <label for="clientHist">Cliente</label>
-        <select
-          id="clientHist"
+      <div class="client-select relative">
+        <label for="clientSearchHist">Buscar Cliente</label>
+        <input
+          id="clientSearchHist"
+          type="text"
           class="input"
-          [(ngModel)]="selectedClientUid"
-          (ngModelChange)="onClientSelect()"
-          name="clientHist"
-        >
-          <option [ngValue]="null" disabled>-- Seleccionar cliente --</option>
-          <option *ngFor="let c of clients" [ngValue]="c.uid">
+          placeholder="Escribe un nombre o cédula..."
+          [(ngModel)]="searchTerm"
+          (focus)="onSearchFocus()"
+          (input)="onSearchChange()"
+          autocomplete="off"
+        />
+        <ul *ngIf="filteredClients.length > 0" class="dropdown-results">
+          <li
+            *ngFor="let c of filteredClients"
+            (click)="selectClient(c.uid)"
+            class="dropdown-item"
+            [class.selected]="selectedClientUid === c.uid"
+          >
             {{ c.nombre }} {{ c.apellidos }} ({{ c.cedula }})
-          </option>
-        </select>
+          </li>
+        </ul>
       </div>
 
       <div *ngIf="!selectedClientUid" class="no-data">
@@ -199,21 +234,21 @@
     </ng-container>
   </div>
 
-  <!-- Modal de Recomendación -->
+  <!-- MODAL DE RECOMENDACIONES -->
   <div class="modal-bg" *ngIf="showRecModal">
-  <div class="detalles">
-    <h4>Recomendación para: {{ recModalGoal.tipo }}</h4>
-    <textarea
-      class="input-rec"
-      rows="4"
-      placeholder="Escribe tu recomendación..."
-      [(ngModel)]="newComentario"
-    ></textarea>
+    <div class="detalles">
+      <h4>Recomendación para: {{ recModalGoal.tipo }}</h4>
+      <textarea
+        class="input-rec"
+        rows="4"
+        placeholder="Escribe tu recomendación..."
+        [(ngModel)]="newComentario"
+      ></textarea>
 
-    <div class="actions">
-      <button class="btn-save" (click)="saveRecomendacion()">Guardar</button>
-      <button class="btn-cancel" (click)="showRecModal = false">Cancelar</button>
+      <div class="actions">
+        <button class="btn-save2" (click)="saveRecomendacion()">Guardar</button>
+        <button class="btn-cancel" (click)="showRecModal = false">Cancelar</button>
+      </div>
     </div>
   </div>
 </div>
-

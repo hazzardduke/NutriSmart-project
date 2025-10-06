@@ -1,5 +1,3 @@
-// src/app/features/nutrition-plan-form/nutrition-plan-form.component.ts
-
 import { Component, OnInit } from '@angular/core';
 import Swal from 'sweetalert2';
 import { CommonModule } from '@angular/common';
@@ -19,7 +17,7 @@ import {
   serverTimestamp,
   addDoc
 } from '@angular/fire/firestore';
-import { Observable, combineLatest } from 'rxjs';
+import { Observable, combineLatest, Subscription } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 import { TDocumentDefinitions } from 'pdfmake/interfaces';
 import { PdfMergeService } from '../../services/pdf-merge.service';
@@ -50,17 +48,21 @@ export interface SavedPlan {
 })
 export class NutritionPlanFormComponent implements OnInit {
   clients: ClientProfile[] = [];
+  filteredClients: ClientProfile[] = [];
+  searchTerm = '';
   selectedClient?: ClientProfile;
+
   portionsForm!: FormGroup;
   categories = ['Lácteos','Vegetales','Frutas','Harinas','Proteínas','Grasas'];
   numbers = Array.from({ length: 11 }, (_, i) => i);
   currentTab: 'create' | 'history' = 'create';
 
   plans$!: Observable<SavedPlan[]>;
-  filterControl = new FormControl('');
   filteredPlans$!: Observable<SavedPlan[]>;
+  filterControl = new FormControl('');
 
   modalPlan: SavedPlan | null = null;
+  private subs = new Subscription();
 
   constructor(
     private fb: FormBuilder,
@@ -70,11 +72,14 @@ export class NutritionPlanFormComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.profileService.getClients().subscribe(list => this.clients = list);
+    this.subs.add(
+      this.profileService.getClients().subscribe(list => (this.clients = list))
+    );
+
     this.portionsForm = this.fb.group({});
 
     const colRef = collection(this.afs, 'nutritionPlans');
-    const q      = query(colRef, orderBy('createdAt','desc'));
+    const q = query(colRef, orderBy('createdAt', 'desc'));
     this.plans$ = collectionData(q, { idField: 'id' }) as Observable<SavedPlan[]>;
 
     this.filteredPlans$ = combineLatest([
@@ -82,31 +87,55 @@ export class NutritionPlanFormComponent implements OnInit {
       this.filterControl.valueChanges.pipe(startWith(''))
     ]).pipe(
       map(([plans, clientId]) =>
-        plans.filter(p => !clientId || p.clientId === clientId)
+        !clientId ? plans : plans.filter(p => p.clientId === clientId)
       )
     );
   }
 
-  setTab(tab: 'create' | 'history'): void {
-    this.currentTab = tab;
-    this.modalPlan = null;
+  ngOnDestroy(): void {
+    this.subs.unsubscribe();
   }
 
-  onClientSelect(sel: HTMLSelectElement): void {
-    const id = sel.value;
-    this.selectedClient = this.clients.find(c => c.id === id);
-    if (!this.selectedClient) {
-      this.portionsForm = this.fb.group({});
-      return;
-    }
+  // --- Buscador dinámico ---
+  onSearchFocus(): void {
+    this.filteredClients = this.clients.slice(); // mostrar todos al hacer focus
+  }
+
+  onSearchChange(): void {
+    const term = this.searchTerm.toLowerCase().trim();
+    this.filteredClients = term
+      ? this.clients.filter(c =>
+          `${c.nombre} ${c.apellido} ${c.cedula}`.toLowerCase().includes(term)
+        )
+      : this.clients.slice();
+  }
+
+  selectClient(client: ClientProfile): void {
+    this.selectedClient = client;
+    this.searchTerm = `${client.nombre} ${client.apellido} (${client.cedula})`;
+    this.filteredClients = [];
+    this.onClientSelected();
+  }
+
+  clearClientSelection(): void {
+    this.selectedClient = undefined;
+    this.searchTerm = '';
+    this.filteredClients = [];
+    this.portionsForm.reset();
+  }
+
+  // --- Crear plan ---
+  onClientSelected(): void {
+    if (!this.selectedClient) return;
+
     const group: Record<string, FormGroup> = {};
     this.categories.forEach(cat => {
       group[cat] = this.fb.group({
-        desayuno:  [0],
+        desayuno: [0],
         merienda1: [0],
-        almuerzo:  [0],
+        almuerzo: [0],
         merienda2: [0],
-        cena:      [0],
+        cena: [0],
       });
     });
     this.portionsForm = this.fb.group(group);
@@ -130,7 +159,6 @@ export class NutritionPlanFormComponent implements OnInit {
     const yyyy   = now.getFullYear();
     const date   = `${dd}-${mm}-${yyyy}`;
 
-    // Construir datos de porciones
     const raw = this.portionsForm.value as Record<string, any>;
     const portionsData: SavedPlan['portions'] = {};
     this.categories.forEach(cat => {
@@ -144,18 +172,15 @@ export class NutritionPlanFormComponent implements OnInit {
       };
     });
 
-    // Guardar en Firestore
-    const docRef = await addDoc(collection(this.afs, 'nutritionPlans'), {
-      clientId:  client.id,
-      client:    { name: `${client.nombre} ${client.apellido}`, cedula, date },
-      portions:  portionsData,
+    await addDoc(collection(this.afs, 'nutritionPlans'), {
+      clientId: client.id,
+      client: { name: `${client.nombre} ${client.apellido}`, cedula, date },
+      portions: portionsData,
       createdAt: serverTimestamp()
     });
 
-    // Nombre de archivo: Nombre_Apellido_Cedula_Fecha.pdf
     const filename = `${name}_${cedula}_${date}.pdf`;
 
-    // Generar y descargar PDF
     await this.mergeSvc.fillAndInsertTable(
       'assets/Recomendaciones.pdf',
       `${client.nombre} ${client.apellido}`,
@@ -164,29 +189,29 @@ export class NutritionPlanFormComponent implements OnInit {
       filename
     );
 
-    // Mostrar SweetAlert
     await Swal.fire({
       icon: 'success',
       title: '¡Plan guardado y PDF descargado!',
       showConfirmButton: false,
       timer: 1500,
-      background: '#fff',
-      iconColor: '#a1c037',
-      confirmButtonColor: '#a1c037'
+      iconColor: '#a1c037'
     });
 
-    // Limpiar y cambiar a Histórico
-    this.selectedClient = undefined;
-    this.portionsForm.reset();
+    this.clearClientSelection();
     this.setTab('history');
+  }
+
+  setTab(tab: 'create' | 'history'): void {
+    this.currentTab = tab;
+    this.clearClientSelection();
   }
 
   async downloadPdf(plan: SavedPlan): Promise<void> {
     const [first, last] = plan.client.name.split(' ');
-    const safeName      = `${first}_${last}`.replace(/\s+/g, '_');
-    const cedula        = plan.client.cedula;
-    const date          = plan.client.date;
-    const filename      = `${safeName}_${cedula}_${date}.pdf`;
+    const safeName = `${first}_${last}`.replace(/\s+/g, '_');
+    const cedula = plan.client.cedula;
+    const date = plan.client.date;
+    const filename = `${safeName}_${cedula}_${date}.pdf`;
 
     await this.mergeSvc.fillAndInsertTable(
       'assets/Recomendaciones.pdf',
@@ -220,13 +245,13 @@ export class NutritionPlanFormComponent implements OnInit {
       const r = portions[cat];
       const porc = r.desayuno + r.merienda1 + r.almuerzo + r.merienda2 + r.cena;
       return [
-        { text: cat,             style: 'tableFirstCell' },
+        { text: cat, style: 'tableFirstCell' },
         { text: porc.toString(), style: 'tableCell' },
-        { text: r.desayuno.toString(),  style: 'tableCell' },
+        { text: r.desayuno.toString(), style: 'tableCell' },
         { text: r.merienda1.toString(), style: 'tableCell' },
-        { text: r.almuerzo.toString(),  style: 'tableCell' },
+        { text: r.almuerzo.toString(), style: 'tableCell' },
         { text: r.merienda2.toString(), style: 'tableCell' },
-        { text: r.cena.toString(),      style: 'tableCell' },
+        { text: r.cena.toString(), style: 'tableCell' },
       ];
     });
 
@@ -242,25 +267,14 @@ export class NutritionPlanFormComponent implements OnInit {
           },
           layout: {
             fillColor: (i: number) =>
-              i === 0 ? '#a1c037'
-            : i % 2 === 0 ? '#F0F5F0'
-            : null,
-            hLineWidth: () => 0.5,
-            vLineWidth: () => 0.5,
-            hLineColor: () => '#CCCCCC',
-            vLineColor: () => '#CCCCCC',
-            paddingLeft:   () => 8,
-            paddingRight:  () => 8,
-            paddingTop:    () => 6,
-            paddingBottom: () => 6,
-          },
-          margin: [0,0,0,20]
+              i === 0 ? '#a1c037' : i % 2 === 0 ? '#F0F5F0' : null
+          }
         }
       ],
       styles: {
-        tableHeader:    { fontSize:12, bold:true, color:'#fff', alignment:'center' },
-        tableFirstCell: { fontSize:11, bold:true, alignment:'left', margin:[0,4,0,4] },
-        tableCell:      { fontSize:10, alignment:'center', margin:[0,4,0,4] }
+        tableHeader: { fontSize:12, bold:true, color:'#fff', alignment:'center' },
+        tableFirstCell: { fontSize:11, bold:true, alignment:'left' },
+        tableCell: { fontSize:10, alignment:'center' }
       },
       defaultStyle: { fontSize: 10 }
     };

@@ -1,14 +1,13 @@
-<!-- src/app/features/loyalty-card-nutricionist/loyalty-card-nutricionist.component.html -->
 <div class="nutri-wrapper">
   <h2>Administrar Tarjetas de Fidelidad</h2>
 
-  <!-- PESTAÑAS -->
   <ul class="tabs" role="tablist">
     <li
       role="tab"
       [attr.aria-selected]="activeTab==='manage'"
       [class.active]="activeTab==='manage'"
       (click)="switchTab('manage')"
+      (keydown)="onTabKeydown($event, 'manage')"
       tabindex="0"
     >
       Gestionar sellos
@@ -18,49 +17,90 @@
       [attr.aria-selected]="activeTab==='overview'"
       [class.active]="activeTab==='overview'"
       (click)="switchTab('overview')"
+      (keydown)="onTabKeydown($event, 'overview')"
       tabindex="0"
     >
       Resumen de sellos
     </li>
   </ul>
 
-  <!-- TAB 1: GESTIONAR -->
   <section *ngIf="activeTab==='manage'" class="manage-tab" role="tabpanel">
-    <div *ngIf="successMessage" class="info-message">
-      {{ successMessage }}
-    </div>
-
     <div class="form-group">
-      <label for="cliente-select">Seleccione Cliente</label>
+      <label for="cliente-search">Seleccione Cliente</label>
+
       <div class="input-group">
-        <select
-          id="cliente-select"
-          [(ngModel)]="selectedId"
-          class="cliente-select"
-        >
-          <option value="">— ninguno —</option>
-          <option
-            *ngFor="let c of clients$ | async"
-            [value]="c.uid"
+        <input
+          id="cliente-search"
+          type="text"
+          class="input cliente-input"
+          placeholder="Escribe nombre o cédula..."
+          [(ngModel)]="searchTerm"
+          (focus)="onSearchFocus()"
+          (input)="onSearchChange()"
+          autocomplete="off"
+        />
+
+        <ul *ngIf="filteredClients.length > 0" class="dropdown-results">
+          <li
+            *ngFor="let c of filteredClients"
+            (click)="selectClient(c.uid)"
+            class="dropdown-item"
+            [class.selected]="selectedId === c.uid"
           >
             {{ c.nombre }} {{ c.apellidos }} ({{ c.cedula }})
-          </option>
-        </select>
+          </li>
+        </ul>
 
         <button
           type="button"
           class="btn add-stamp"
           (click)="addStamp()"
-          [disabled]="!selectedId"
+          [disabled]="!selectedId || (selectedClient?.stamps ?? 0) >= 7"
         >
           Añadir sello
         </button>
       </div>
+
+      <div *ngIf="selectedClient" class="client-stamps-info">
+        <p>
+          Cliente seleccionado:
+          <strong>{{ selectedClient.nombre }} {{ selectedClient.apellidos }}</strong>
+        </p>
+
+        <p>
+          Sellos actuales:
+          <span
+            class="stamps-count"
+            [class.maxed]="(selectedClient.stamps ?? 0) >= 7"
+          >
+            {{ selectedClient.stamps ?? 0 }} / 7
+          </span>
+
+          
+        </p>
+        <span
+            *ngIf="(selectedClient.stamps ?? 0) >= 7"
+            class="maxed-text"
+          >
+            No se puede agregar sellos hasta que el cliente canjee su cita
+          </span>
+      </div>
     </div>
   </section>
 
-  <!-- TAB 2: RESUMEN -->
   <section *ngIf="activeTab==='overview'" class="overview-tab" role="tabpanel">
+    <div class="filter-row">
+      <label for="filterText">Buscar</label>
+      <input
+        id="filterText"
+        type="text"
+        class="input"
+        placeholder="Nombre, apellidos o cédula..."
+        [formControl]="filterControl"
+        autocomplete="off"
+      />
+    </div>
+
     <table class="summary-table">
       <thead>
         <tr>
@@ -69,16 +109,59 @@
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let c of overview$ | async">
-          <td>{{ c.nombre }} {{ c.apellidos }}</td>
+        <tr *ngFor="let c of pagedOverview$ | async">
+          <td>{{ c.nombre }} {{ c.apellidos }} ({{ c.cedula }})</td>
           <td class="stamps-cell">
-            <span class="stamps-badge">{{ c.stamps }} / 7</span>
+            <span
+              class="stamps-badge"
+              [class.maxed]="c.stamps >= 7"
+              >{{ c.stamps }} / 7</span
+            >
+            
           </td>
         </tr>
-        <tr *ngIf="(overview$ | async)?.length === 0">
-          <td colspan="2" class="no-data">No hay registros aún.</td>
+
+        <tr *ngIf="(pagedOverview$ | async)?.length === 0">
+          <td colspan="2" class="no-data">No hay registros.</td>
         </tr>
       </tbody>
     </table>
+
+    <ng-container *ngIf="(totalItems$ | async) as total">
+      <ng-container *ngIf="(totalPages$ | async) as pages">
+        <div class="pagination">
+          <div class="pagination-info">
+            {{ total }} registros • Página {{ pageIndex + 1 }} de {{ pages }}
+          </div>
+
+          <div class="pagination-controls">
+            <button
+              class="page-btn"
+              (click)="prevPage(pages)"
+              [disabled]="pageIndex === 0"
+            >
+              Anterior
+            </button>
+
+            <button
+              class="page-btn"
+              *ngFor="let _ of [].constructor(pages); let idx = index"
+              [class.active]="idx === pageIndex"
+              (click)="setPage(idx)"
+            >
+              {{ idx + 1 }}
+            </button>
+
+            <button
+              class="page-btn"
+              (click)="nextPage(pages)"
+              [disabled]="pageIndex >= pages - 1"
+            >
+              Siguiente
+            </button>
+          </div>
+        </div>
+      </ng-container>
+    </ng-container>
   </section>
 </div>
