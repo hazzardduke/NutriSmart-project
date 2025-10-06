@@ -45,41 +45,43 @@ export class AuthService {
   user$: Observable<User | null> = user(this.auth);
   isAuthenticated$: Observable<boolean> = authState(this.auth).pipe(map(u => !!u));
 
-  // Para leer custom claims si los usas
   idTokenResult$: Observable<IdTokenResult | null> = this.user$.pipe(
     switchMap(u => u ? from(u.getIdTokenResult()) : of(null))
   );
 
-  /** Login con correo+contraseña */
   login(email: string, password: string): Promise<void> {
     return signInWithEmailAndPassword(this.auth, email, password).then(() => {});
   }
 
-  /** Logout */
   logout(): Promise<void> {
     return signOut(this.auth);
   }
 
-  /** Registrar en Auth y Firestore */
   async register(profile: NewUserProfile, plainPassword: string): Promise<void> {
     try {
-      // 1. Crear usuario en Firebase Auth
       const cred: UserCredential = await createUserWithEmailAndPassword(
         this.auth,
         profile.correo,
         plainPassword
       );
+
       const uid = cred.user.uid;
 
-      // 2. Crear documento en Firestore con rol cliente por defecto
+      const { cedula, nombre, apellidos, direccion, fechaNacimiento, telefono, correo } = profile;
+
       await setDoc(doc(this.firestore, 'users', uid), {
-        ...profile,
         uid,
-        role: 'cliente',             // fuerza cliente como rol inicial
-        createdAt: serverTimestamp() // fecha desde servidor Firebase
+        cedula,
+        nombre,
+        apellidos,
+        direccion,
+        fechaNacimiento,
+        telefono,
+        correo,
+        role: 'cliente',
+        createdAt: serverTimestamp()
       });
 
-      // 3. Enviar correo de verificación
       await sendEmailVerification(cred.user);
 
     } catch (err: any) {
@@ -88,7 +90,6 @@ export class AuthService {
     }
   }
 
-  /** Obtener perfil de Firestore por correo */
   async getUserProfileByEmail(email: string): Promise<NewUserProfile> {
     const usersRef = collection(this.firestore, 'users');
     const q = query(usersRef, where('correo', '==', email));
@@ -97,7 +98,6 @@ export class AuthService {
     return snap.docs[0].data() as NewUserProfile;
   }
 
-  /** Enviar enlace mágico (solo admin) */
   sendSignInLink(email: string): Promise<void> {
     return sendSignInLinkToEmail(this.auth, email, {
       url: window.location.origin + '/login',
@@ -105,22 +105,18 @@ export class AuthService {
     });
   }
 
-  /** Comprobar si es un enlace Firebase magic-link */
   isSignInLink(url: string): boolean {
     return isSignInWithEmailLink(this.auth, url);
   }
 
-  /** Completar magic-link */
   completeSignInWithLink(email: string, link: string): Promise<void> {
     return signInWithEmailLink(this.auth, email, link).then(() => {});
   }
 
-  /** Enviar correo de restablecimiento */
   sendPasswordReset(email: string): Promise<void> {
     return sendPasswordResetEmail(this.auth, email);
   }
 
-  /** Reenviar correo de verificación al usuario autenticado */
   resendEmailVerification(): Promise<void> {
     const user = this.auth.currentUser;
     if (!user) {
