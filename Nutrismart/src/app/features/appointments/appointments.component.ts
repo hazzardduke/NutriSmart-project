@@ -2,6 +2,7 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule, NgIf } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Subscription } from 'rxjs';
+import Swal from 'sweetalert2';
 import { AuthService } from '../../services/auth.service';
 import { AppointmentsService, Appointment } from '../../services/appointments.service';
 import { EmailService } from '../../services/email.service';
@@ -18,8 +19,6 @@ export class AppointmentsComponent implements OnInit, OnDestroy {
   fechaSeleccionada = '';
   today = '';
   horaSeleccionada = '';
-  showPopup = false;
-  popupMessage = '';
   citasTodas: Appointment[] = [];
   citasUsuario: Appointment[] = [];
   private uid = '';
@@ -35,7 +34,6 @@ export class AppointmentsComponent implements OnInit, OnDestroy {
   citaEnEdicion?: Appointment;
   todosHorasPasaron = false;
 
-  // PAGINACIÓN
   paginaActual = 1;
   citasPorPagina = 5;
   tamañoBloque = 10;
@@ -71,13 +69,11 @@ export class AppointmentsComponent implements OnInit, OnDestroy {
         if (user) {
           this.uid = user.uid;
           this.userEmail = user.email ?? '';
-
           this.subs.add(
             this.profileService.getProfile(user.uid).subscribe(profile => {
               this.userName = profile?.nombre ?? this.userEmail;
             })
           );
-
           this.loadCitasDeUsuario();
         } else {
           this.citasUsuario = [];
@@ -100,26 +96,46 @@ export class AppointmentsComponent implements OnInit, OnDestroy {
       this.citasUsuario = [];
       return;
     }
+
     this.subs.add(
       this.apptService.getUserAppointments(this.uid).subscribe(listUsr => {
-        const order = { confirmed: 0, completed: 1, canceled: 2 };
-        this.citasUsuario = listUsr.sort((a, b) => {
-          if (order[a.status] !== order[b.status]) {
-            return order[a.status] - order[b.status];
-          }
-          return new Date(b.datetime).getTime() - new Date(a.datetime).getTime();
-        });
+        const ahora = Date.now();
+
+        const futuras = listUsr
+          .filter(c => new Date(c.datetime).getTime() >= ahora)
+          .sort((a, b) => new Date(a.datetime).getTime() - new Date(b.datetime).getTime());
+
+        const pasadas = listUsr
+          .filter(c => new Date(c.datetime).getTime() < ahora)
+          .sort((a, b) => new Date(b.datetime).getTime() - new Date(a.datetime).getTime());
+
+        this.citasUsuario = [...futuras, ...pasadas];
         this.paginaActual = 1;
       })
     );
+  }
+
+
+  get proximaCitaId(): string | null {
+    const ahora = Date.now();
+    const futuras = this.citasUsuario
+      .filter(c => c.status === 'confirmed' && new Date(c.datetime).getTime() >= ahora)
+      .sort((a, b) => new Date(a.datetime).getTime() - new Date(b.datetime).getTime());
+    return futuras.length ? futuras[0].id ?? null : null;
+  }
+
+  esCitaPasada(c: Appointment): boolean {
+    return new Date(c.datetime).getTime() < Date.now();
+  }
+
+  esProximaCita(c: Appointment): boolean {
+    return c.id === this.proximaCitaId;
   }
 
   onFechaChange(): void {
     this.horaSeleccionada = '';
     this.enEdicion = false;
     this.citaEnEdicion = undefined;
-    this.showPopup = false;
-    this.popupMessage = '';
     this.verificarSiHorasPasaron();
   }
 
@@ -166,7 +182,7 @@ export class AppointmentsComponent implements OnInit, OnDestroy {
 
   editarCita(c: Appointment): void {
     if (!this.puedeCancelar(c)) {
-      this.displayPopup('Solo se permite editar con ≥24 h de antelación.');
+      Swal.fire('Aviso', 'Solo se permite editar con ≥24 h de antelación.', 'warning');
       return;
     }
     this.enEdicion = true;
@@ -174,37 +190,51 @@ export class AppointmentsComponent implements OnInit, OnDestroy {
     const dt = new Date(c.datetime);
     this.fechaSeleccionada = dt.toISOString().split('T')[0];
     this.horaSeleccionada = this.formateaHora(c.datetime);
-    this.displayPopup(` Editando cita para ${this.formateaFecha(c.datetime)} a las ${this.horaSeleccionada}.`);
+    Swal.fire('Editando cita', `Cita para ${this.formateaFecha(c.datetime)} a las ${this.horaSeleccionada}`, 'info');
     this.verificarSiHorasPasaron();
   }
 
   cancelarCitaEspecifica(c: Appointment): void {
     if (!this.puedeCancelar(c)) {
-      this.displayPopup('⚠️ Solo se permite cancelar con ≥24 h de antelación.');
+      Swal.fire('Aviso', '⚠️ Solo se permite cancelar con ≥24 h de antelación.', 'warning');
       return;
     }
-    this.apptService.updateAppointment(c.id!, { status: 'canceled' })
-      .then(() => this.emailService.sendCitaCancelada(this.userEmail, {
-        nombre: this.userName,
-        fecha: this.formateaFecha(c.datetime),
-        hora: this.formateaHora(c.datetime),
-        ubicacion: 'Clínica NutriSmart'
-      }))
-      .then(() => {
-        this.displayPopup(`Cita cancelada para ${this.formateaFecha(c.datetime)} a las ${this.formateaHora(c.datetime)}.`);
-        this.loadCitasDeUsuario();
-      })
-      .catch(() => this.displayPopup('Error al cancelar la cita.'));
+
+    Swal.fire({
+      title: '¿Cancelar cita?',
+      text: `¿Desea cancelar la cita del ${this.formateaFecha(c.datetime)} a las ${this.formateaHora(c.datetime)}?`,
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonColor: '#e74c3c',
+      cancelButtonColor: '#6c757d',
+      confirmButtonText: 'Sí, cancelar'
+    }).then(result => {
+      if (result.isConfirmed) {
+        this.apptService.updateAppointment(c.id!, { status: 'canceled' })
+          .then(() => this.emailService.sendCitaCancelada(this.userEmail, {
+            nombre: this.userName,
+            fecha: this.formateaFecha(c.datetime),
+            hora: this.formateaHora(c.datetime),
+            ubicacion: 'Clínica NutriSmart'
+          }))
+          .then(() => {
+            Swal.fire('Cancelada', 'Tu cita ha sido cancelada correctamente.', 'success');
+            this.loadCitasDeUsuario();
+          })
+          .catch(() => Swal.fire('Error', 'Error al cancelar la cita.', 'error'));
+      }
+    });
   }
 
   guardarCita(): void {
-    if (!this.fechaSeleccionada || !this.horaSeleccionada) return;
+    if (!this.fechaSeleccionada || !this.horaSeleccionada) {
+      Swal.fire('Aviso', 'Por favor seleccione una fecha y hora válidas.', 'warning');
+      return;
+    }
+
     const iso = new Date(`${this.fechaSeleccionada}T${this.to24h(this.horaSeleccionada)}:00`).toISOString();
-    const finish = () => {
-      this.displayPopup(this.enEdicion
-        ? `Cita reprogramada a ${this.formateaFecha(iso)} ${this.horaSeleccionada}.`
-        : 'Cita confirmada con éxito.'
-      );
+    const finish = (msg: string) => {
+      Swal.fire('Éxito', msg, 'success');
       if (this.enEdicion) this.cancelarEdicion();
       else this.fechaSeleccionada = this.today;
       this.horaSeleccionada = '';
@@ -219,8 +249,8 @@ export class AppointmentsComponent implements OnInit, OnDestroy {
           hora: this.formateaHora(iso),
           ubicacion: 'Clínica NutriSmart'
         }))
-        .then(finish)
-        .catch(() => this.displayPopup('Error al actualizar la cita.'));
+        .then(() => finish(`Cita reprogramada para ${this.formateaFecha(iso)} ${this.horaSeleccionada}.`))
+        .catch(() => Swal.fire('Error', 'Error al actualizar la cita.', 'error'));
     } else {
       this.apptService.createAppointment({ userId: this.uid, datetime: iso, status: 'confirmed' })
         .then(() => this.emailService.sendCitaConfirmada(this.userEmail, {
@@ -229,8 +259,8 @@ export class AppointmentsComponent implements OnInit, OnDestroy {
           hora: this.formateaHora(iso),
           ubicacion: 'Clínica NutriSmart'
         }))
-        .then(finish)
-        .catch(() => this.displayPopup('Error al crear la cita.'));
+        .then(() => finish('Cita confirmada con éxito.'))
+        .catch(() => Swal.fire('Error', 'Error al crear la cita.', 'error'));
     }
   }
 
@@ -240,12 +270,6 @@ export class AppointmentsComponent implements OnInit, OnDestroy {
     this.fechaSeleccionada = this.today;
     this.horaSeleccionada = '';
     this.verificarSiHorasPasaron();
-  }
-
-  private displayPopup(msg: string): void {
-    this.popupMessage = msg;
-    this.showPopup = true;
-    setTimeout(() => this.showPopup = false, 8000);
   }
 
   private to24h(h12: string): string {
@@ -272,7 +296,7 @@ export class AppointmentsComponent implements OnInit, OnDestroy {
     return new Date(iso).toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' });
   }
 
-  // Paginación completa con bloques de 10
+
   get citasPaginadas(): Appointment[] {
     const inicio = (this.paginaActual - 1) * this.citasPorPagina;
     return this.citasUsuario.slice(inicio, inicio + this.citasPorPagina);

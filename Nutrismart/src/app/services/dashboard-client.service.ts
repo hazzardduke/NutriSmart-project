@@ -11,8 +11,8 @@ import {
   limit
 } from '@angular/fire/firestore';
 import { AuthService } from './auth.service';
-import { Observable, of } from 'rxjs';
-import { switchMap } from 'rxjs/operators';
+import { Observable, of, combineLatest } from 'rxjs';
+import { switchMap, map } from 'rxjs/operators';
 
 export interface UserProfile {
   uid: string;
@@ -30,9 +30,15 @@ export interface Appointment {
 
 export interface Recommendation {
   id?: string;
-  shortText: string;
-  detail: string;
-  createdAt: string;
+  shortText?: string;
+  detail?: string;
+  createdAt?: string;
+  tipo?: string;         // tipo de objetivo, ej. "Pérdida de peso", "Ganancia muscular"
+  comentario?: string;   // texto o mensaje de la recomendación
+  fecha?: string;        // fecha de creación (campo "fecha" de tus docs)
+  meta?: string;         // meta asociada si existe
+  goalId?: string;       // id del goal padre (útil para referencia)
+  userId?: string;       // id del usuario (si está guardado)
 }
 
 export interface Goal {
@@ -79,9 +85,35 @@ export class DashboardClientService {
     return this.auth.user$.pipe(
       switchMap(u => {
         if (!u) return of([]);
-        const col = collection(this.fs, `users/${u.uid}/recommendations`);
-        const q = query(col, orderBy('createdAt', 'desc'), limit(limitCount));
-        return collectionData(q, { idField: 'id' }) as Observable<Recommendation[]>;
+
+        const goalsCol = collection(this.fs, `users/${u.uid}/goals`);
+        return collectionData(goalsCol, { idField: 'id' }).pipe(
+          switchMap((goals: any[]) => {
+            if (goals.length === 0) return of([]);
+
+            const recStreams = goals.map(goal => {
+              const recCol = collection(this.fs, `users/${u.uid}/goals/${goal.id}/recommendations`);
+              return collectionData(recCol, { idField: 'id' }) as Observable<Recommendation[]>;
+            });
+
+            return combineLatest(recStreams).pipe(
+              map(allRecs => {
+                const flat = allRecs.flat();
+                if (flat.length === 0) return [];
+
+                const sorted = flat.sort((a, b) => {
+                  const da = a.fecha ? new Date(a.fecha).getTime() :
+                            a.createdAt ? new Date(a.createdAt).getTime() : 0;
+                  const db = b.fecha ? new Date(b.fecha).getTime() :
+                            b.createdAt ? new Date(b.createdAt).getTime() : 0;
+                  return db - da;
+                });
+
+                return sorted.slice(0, limitCount);
+              })
+            );
+          })
+        );
       })
     );
   }
@@ -91,8 +123,7 @@ export class DashboardClientService {
       switchMap(u => {
         if (!u) return of([]);
         const col = collection(this.fs, `users/${u.uid}/goals`);
-        const q = query(col, orderBy('createdAt', 'desc'));
-        return collectionData(q, { idField: 'id' }) as Observable<Goal[]>;
+        return collectionData(col, { idField: 'id' }) as Observable<Goal[]>;
       })
     );
   }

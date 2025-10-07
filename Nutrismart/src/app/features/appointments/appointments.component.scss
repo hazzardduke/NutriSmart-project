@@ -18,6 +18,7 @@
   margin-bottom: 2rem;
   color: #2f3b44;
 }
+
 .titulo-citas i {
   color: #a1c037;
   margin-right: 0.6rem;
@@ -28,13 +29,15 @@
   margin-bottom: 1.5rem;
   text-align: left;
 }
+
 .form-cita label {
   font-weight: 700;
   color: #2f3b44;
   margin-bottom: 0.4rem;
   display: block;
 }
-.form-cita input[type="date"] {
+
+.form-cita input[type='date'] {
   width: 100%;
   padding: 0.65rem 1rem;
   border: 1px solid #cfd6dd;
@@ -51,6 +54,7 @@
   gap: 0.75rem;
   margin-top: 1rem;
 }
+
 .btn-horario {
   padding: 0.5rem 1rem;
   background: #f1f3f6;
@@ -61,16 +65,19 @@
   cursor: pointer;
   transition: 0.25s;
 }
+
 .btn-horario.selected {
   background: #a1c037;
   color: #ffffff;
   border-color: #a1c037;
 }
+
 .btn-horario:disabled {
   background: #ebebeb;
   color: #999;
   cursor: not-allowed;
 }
+
 .btn-horario:not(:disabled):hover:not(.selected) {
   background: #e7e7e7;
 }
@@ -81,6 +88,7 @@
   gap: 1rem;
   margin-top: 2rem;
 }
+
 .btn-accion {
   padding: 0.7rem 2rem;
   font-size: 1rem;
@@ -90,14 +98,17 @@
   cursor: pointer;
   transition: background 0.25s, transform 0.06s;
 }
+
 .btn-accion.confirm {
   background: #a1c037;
   color: #ffffff;
 }
+
 .btn-accion.confirm:disabled {
   background: #cdd9a8;
   cursor: not-allowed;
 }
+
 .btn-accion.cancel {
   background: #e74c3c;
   color: #ffffff;
@@ -110,55 +121,36 @@
   text-align: center;
 }
 
-.popup {
-  position: sticky;
-  top: 0; 
-  margin-top: 1rem;
-  background: #a1c037;
-  color: #ffffff;
-  padding: 0.9rem 1.5rem;
-  border-radius: 12px;
-  font-weight: 700;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  text-align: center;
-  z-index: 5;
-  animation: fadeOut 8s ease-in forwards;
-  max-width: 90%;
-  width: fit-content;
-  margin-left: auto;
-  margin-right: auto;
-}
-
-@keyframes fadeOut {
-  0%, 80% { opacity: 1; }
-  100% { opacity: 0; }
-}
-
 .lista-citas {
   margin-top: 2.5rem;
   text-align: left;
 }
+
 .subtitulo {
   font-size: 1.3rem;
   font-weight: 800;
   color: #2f3b44;
   margin-bottom: 1rem;
 }
+
 .tabla-citas {
   width: 100%;
   border-collapse: collapse;
 }
+
 .tabla-citas thead {
   background: #ffffff;
   color: #2f3b44;
   border-bottom: 2px solid #a1c037;
 }
+
 .tabla-citas th,
 .tabla-citas td {
   border: 1px solid #dce3eb;
   padding: 0.8rem 1rem;
   text-align: center;
 }
+
 .tabla-citas tr:nth-child(even) {
   background: #f9f9f9;
 }
@@ -167,13 +159,16 @@
   color: #1f3a52;
   font-weight: 700;
 }
+
 .estado-completed {
   color: #6d851c;
   font-weight: 700;
 }
+
 .estado-canceled {
-  color: #e74c3c;
+  color: #d01414;
   font-weight: 700;
+  
 }
 
 .btn-editar,
@@ -185,12 +180,24 @@
   color: #fff;
   font-weight: 600;
   cursor: pointer;
+  transition: background 0.25s;
 }
+
 .btn-editar {
   background: #3498db;
+  margin-right: 0.5rem;
 }
+
+.btn-editar:hover {
+  background: #2d83c5;
+}
+
 .btn-cancelar {
   background: #e74c3c;
+}
+
+.btn-cancelar:hover {
+  background: #d84334;
 }
 
 .paginacion {
@@ -226,4 +233,41 @@
       color: #fff;
     }
   }
+}
+
+.no-citas {
+  margin-top: 2rem;
+  text-align: center;
+  color: #777;
+  font-size: 1rem;
+}
+
+.fila-proxima {
+  background: #eef8dc !important;
+  border-left: 5px solid #a1c037;
+  font-weight: 600;
+  transition: 0.3s ease;
+}
+
+.proxima-etiqueta {
+  font-size: 0.8rem;
+  color: #6b8e23;
+  font-weight: 700;
+  margin-top: 0.25rem;
+  animation: parpadeo 2s ease-in-out infinite;
+}
+
+@keyframes parpadeo {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.4;
+  }
+}
+
+.fila-pasada {
+  opacity: 0.6;
+  background: #f5f5f5 !important;
+  transition: 0.3s ease;
 }

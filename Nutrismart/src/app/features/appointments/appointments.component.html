@@ -41,25 +41,25 @@
       >
         {{ enEdicion ? 'Actualizar Cita' : 'Programar Cita' }}
       </button>
+
       <button
         *ngIf="enEdicion"
         type="button"
         class="btn-accion cancel"
         (click)="cancelarEdicion()"
       >
-         Cancelar Edición
+        Cancelar Edición
       </button>
     </div>
   </form>
 
   <div class="nota">
-    <strong>Nota:</strong> Puede editar o cancelar hasta 24 h antes.
+    <strong>Nota:</strong> Puede editar o cancelar su cita hasta 24 horas antes.
   </div>
-
-  <div *ngIf="showPopup" class="popup">{{ popupMessage }}</div>
 
   <div *ngIf="citasUsuario.length > 0" class="lista-citas">
     <h3 class="subtitulo">Mis Citas</h3>
+
     <table class="tabla-citas">
       <thead>
         <tr>
@@ -69,10 +69,24 @@
           <th>Acciones</th>
         </tr>
       </thead>
+
       <tbody>
-        <tr *ngFor="let c of citasPaginadas">
-          <td>{{ formateaFecha(c.datetime) }}</td>
+        <tr
+          *ngFor="let c of citasPaginadas"
+          [ngClass]="{
+            'fila-proxima': esProximaCita(c),
+            'fila-pasada': esCitaPasada(c) || c.status === 'canceled'
+          }"
+        >
+          <td>
+            {{ formateaFecha(c.datetime) }}
+            <div *ngIf="esProximaCita(c)" class="proxima-etiqueta">
+             Próxima cita
+            </div>
+          </td>
+
           <td>{{ formateaHora(c.datetime) }}</td>
+
           <td>
             <span
               [ngClass]="{
@@ -81,11 +95,16 @@
                 'estado-canceled': c.status === 'canceled'
               }"
             >
-              {{ c.status === 'confirmed' ? 'Confirmada'
-                : c.status === 'completed' ? 'Completada'
-                : 'Cancelada' }}
+              {{
+                c.status === 'confirmed'
+                  ? 'Confirmada'
+                  : c.status === 'completed'
+                  ? 'Completada'
+                  : 'Cancelada'
+              }}
             </span>
           </td>
+
           <td>
             <button
               *ngIf="c.status === 'confirmed' && puedeCancelar(c)"
@@ -94,6 +113,7 @@
             >
               Editar
             </button>
+
             <button
               *ngIf="c.status === 'confirmed' && puedeCancelar(c)"
               class="btn-cancelar"
@@ -102,10 +122,10 @@
               Cancelar
             </button>
           </td>
+        </tr>
       </tbody>
     </table>
 
-    <!-- PAGINACIÓN -->
     <div class="paginacion">
       <button (click)="cambiarPagina(-1)" [disabled]="paginaActual === 1">
         Anterior
@@ -131,5 +151,9 @@
         Siguiente
       </button>
     </div>
+  </div>
+
+  <div *ngIf="citasUsuario.length === 0" class="no-citas">
+    <p>No tienes citas programadas actualmente.</p>
   </div>
 </div>

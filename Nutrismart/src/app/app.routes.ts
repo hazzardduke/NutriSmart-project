@@ -20,7 +20,7 @@ import { LoyaltyCardNutricionistComponent } from './loyalty-card-nutricionist/lo
 import { AdminClientsComponent }      from './admin-clients/admin-clients.component';
 
 import { GoalsNutricionistComponent } from './features/goals-nutricionist/goals-nutricionist.component';
-import { ClientNutritionPlanService } from './services/client-nutrition-plan.service';
+
 import { ClientNutritionPlansComponent } from './features/client-nutrition-plans/client-nutrition-plans.component';
 
 export const routes: Routes = [

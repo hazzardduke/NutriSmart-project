@@ -7,7 +7,40 @@
   </div>
 
   <div class="dashboard-grid">
-    <section class="dashboard-card compo-card">
+    
+    <section
+      class="dashboard-card appointment-card clickable"
+      routerLink="/appoinments"
+    >
+      <h2 class="card-title">
+        <i class="fa fa-calendar-alt"></i>
+        Próximas Citas
+      </h2>
+
+      <ng-container *ngIf="appointments$ | async as appts">
+        <ng-container *ngIf="appts.length > 0; else noNext">
+          <div class="next-appointment">
+            <span class="label">Próxima cita:</span>
+            <span class="date">
+              {{ appts[0].datetime | date:'dd/MM/yyyy' }} a las
+              {{ appts[0].datetime | date:'HH:mm' }}
+            </span>
+          </div>
+        </ng-container>
+      </ng-container>
+
+      <ng-template #noNext>
+        <div class="next-appointment no-cita">
+          No tienes citas próximas.
+        </div>
+      </ng-template>
+    </section>
+
+    
+    <section
+      class="dashboard-card compo-card clickable"
+      routerLink="/profile"
+    >
       <h2 class="card-title">
         <i class="fa fa-tint"></i>
         Composición Corporal
@@ -22,59 +55,17 @@
       </ng-template>
     </section>
 
-    <section class="dashboard-card appointment-card">
-      <h2 class="card-title">
-        <i class="fa fa-calendar-alt"></i>
-        Próximas Citas
-      </h2>
-      <ng-container *ngIf="appointments$ | async as appts; else noAppts">
-        <ul>
-          <li *ngFor="let a of appts">
-            <span class="appointment-date">
-              {{ a.datetime | date:'dd/MM/yyyy' }} a las
-              {{ a.datetime | date:'HH:mm' }}
-            </span>
-            <span class="status-{{ a.status }}">
-              {{ translateStatus(a.status) }}
-            </span>
-          </li>
-        </ul>
-      </ng-container>
-      <ng-template #noAppts>
-        <p>No tienes citas en los próximos 7 días.</p>
-      </ng-template>
-    </section>
 
-    <section class="dashboard-card recs-card">
-      <h2 class="card-title">
-        <i class="fa fa-sticky-note"></i>
-        Recomendaciones Recientes
-      </h2>
-      <ng-container *ngIf="recs$ | async as recs; else noRecs">
-        <ul class="recs-list">
-          <li *ngFor="let r of recs">
-            <span class="text">{{ r.shortText }}</span>
-            <a
-              [routerLink]="['/profile','recommendations', r.id]"
-              class="detail-link"
-            >
-              Ver detalle
-            </a>
-          </li>
-        </ul>
-      </ng-container>
-      <ng-template #noRecs>
-        <p class="no-recs">Aún no tienes recomendaciones.</p>
-      </ng-template>
-    </section>
-
-    <section class="dashboard-card goals-card">
+    <section
+      class="dashboard-card goals-card clickable"
+      routerLink="/goals"
+    >
       <h2 class="card-title">
         <i class="fa fa-bullseye"></i>
-        Objetivos
+        Objetivos en progreso
       </h2>
       <ng-container *ngIf="goals$ | async as goals; else noGoals">
-        <ul class="goals-list">
+        <ul class="goals-list" *ngIf="goals.length > 0; else noGoals">
           <li *ngFor="let g of goals">
             <span>{{ g.tipo }}</span>
             <span class="goal-progress">{{ g.progreso }}%</span>
@@ -82,47 +73,65 @@
         </ul>
       </ng-container>
       <ng-template #noGoals>
-        <p>No tienes objetivos.</p>
+        <p>No tienes objetivos en progreso.</p>
       </ng-template>
     </section>
 
-    <section class="dashboard-card links-card">
-      <h2 class="card-title">
-        <i class="fa fa-link"></i>
-        Accesos Rápidos
+    <!-- ─────────────── RECOMENDACIONES ─────────────── -->
+    <section
+      class="dashboard-card recs-card clickable"
+      routerLink="/goals"
+    >
+      <h2 class="card-title recs-title">
+        <i class="fa fa-sticky-note"></i>
+        Recomendaciones Recientes
       </h2>
-      <div class="quick-links">
-        <a routerLink="/profile" class="quick-link">
-          <i class="fa fa-id-card"></i> Expediente
-        </a>
-        <a routerLink="/appoinments" class="quick-link">
-          <i class="fa fa-calendar-alt"></i> Citas
-        </a>
-      </div>
+
+      <ng-container *ngIf="recs$ | async as recs; else noRecs">
+        <ul class="recs-list" *ngIf="recs.length > 0; else noRecs">
+          <li *ngFor="let r of recs">
+            <div class="rec-item">
+              <span class="goal-type">{{ r.tipo }}</span>
+              <span class="text">
+                {{ r.comentario || r.detail || 'Sin detalle disponible' }}
+              </span>
+              <span class="date">
+                {{ r.fecha || r.createdAt | date:'dd/MM/yyyy' }}
+              </span>
+            </div>
+          </li>
+        </ul>
+      </ng-container>
+
+      <ng-template #noRecs>
+        <p class="no-recs">Aún no tienes recomendaciones.</p>
+      </ng-template>
     </section>
   </div>
 </div>
+
 
 <footer class="dashboard-footer">
   <div class="footer-social">
     <a
       href="https://www.instagram.com/nutritiontogo?igsh=dHdxb3hjaGc3OXZ4"
-      target="_blank" rel="noopener" aria-label="Instagram"
+      target="_blank"
     >
       <i class="fab fa-instagram"></i>
     </a>
     <a
       href="https://www.facebook.com/share/14DNuiXcWy1/?mibextid=wwXIfr"
-      target="_blank" rel="noopener" aria-label="Facebook"
+      target="_blank"
     >
       <i class="fab fa-facebook"></i>
     </a>
   </div>
+
   <div class="footer-contact">
-    <a href="tel:87296097" aria-label="Llamar">
+    <a href="tel:87296097">
       <i class="fa fa-phone"></i> 87296097
     </a>
-    <a href="mailto:info.nutritiontogo&#64;gmail.com" aria-label="Email">
+    <a href="mailto:info.nutritiontogo&#64;gmail.com">
       <i class="fa fa-envelope"></i> info.nutritiontogo&#64;gmail.com
     </a>
   </div>
