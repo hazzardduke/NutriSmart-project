@@ -1,8 +1,8 @@
-import { Component }    from '@angular/core';
+import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, NgForm } from '@angular/forms';
-import { Router }       from '@angular/router';
-import { RouterModule }     from '@angular/router'; 
+import { Router, RouterModule } from '@angular/router';
+import Swal from 'sweetalert2';
 import { AuthService, NewUserProfile } from '../../services/auth.service';
 
 @Component({
@@ -23,24 +23,40 @@ export class RegisterComponent {
     correo: '',
     password: ''
   };
-  mensaje = '';
-  error   = '';
+
+  maxDate: string = '';
 
   constructor(
     private auth: AuthService,
     private router: Router
-  ) {}
+  ) {
+  
+    const hoy = new Date();
+    hoy.setDate(hoy.getDate() - 1);
+    this.maxDate = hoy.toISOString().split('T')[0];
+  }
+
+
+  soloNumeros(event: Event) {
+    const input = event.target as HTMLInputElement;
+    input.value = input.value.replace(/[^0-9]/g, '');
+    const name = input.getAttribute('name');
+    if (name && this.form.hasOwnProperty(name)) {
+      (this.form as any)[name] = input.value;
+    }
+  }
 
   registrar(registroForm: NgForm) {
-    this.mensaje = '';
-    this.error   = '';
-
     if (!registroForm.valid) {
-      this.error = 'Por favor corrige los errores del formulario antes de enviar.';
+      Swal.fire({
+        icon: 'warning',
+        title: 'Formulario incompleto',
+        text: 'Por favor corrige los errores antes de continuar.',
+        confirmButtonColor: '#a1c037'
+      });
       return;
     }
 
-    // Preparamos el perfil con rol 'cliente' por defecto
     const profile: NewUserProfile = {
       ...this.form,
       role: 'cliente'
@@ -48,12 +64,61 @@ export class RegisterComponent {
 
     this.auth.register(profile, this.form.password)
       .then(() => {
-        this.mensaje = 'Cuenta creada correctamente.';
-        this.router.navigateByUrl('/verify-email'); //corregido para verificar 17
+        Swal.fire({
+          icon: 'success',
+          title: 'Cuenta creada correctamente',
+          text: 'Por favor verifica tu correo electrónico para activar tu cuenta.',
+          confirmButtonColor: '#a1c037'
+        }).then(() => {
+          this.router.navigateByUrl('/verify-email');
+        });
       })
       .catch(err => {
-        console.error('Error registrando:', err);
-        this.error = err.message || 'Ocurrió un error al crear la cuenta.';
+        console.error('Error completo de Firebase:', err);
+
+        let titulo = 'Error al registrar';
+        let mensaje = '';
+        let codigo = err?.code || 'desconocido';
+
+        if (codigo === 'desconocido' && err?.message?.includes('(auth/')) {
+          const match = err.message.match(/\(auth\/([^)]+)\)/);
+          if (match && match[1]) codigo = 'auth/' + match[1];
+        }
+
+        switch (codigo) {
+          case 'auth/email-already-in-use':
+            mensaje = 'Este correo ya está registrado. Intenta iniciar sesión o usa otro correo.';
+            break;
+          case 'auth/invalid-email':
+            mensaje = 'El formato del correo electrónico no es válido.';
+            break;
+          case 'auth/weak-password':
+            mensaje = 'La contraseña es demasiado débil. Usa al menos 8 caracteres.';
+            break;
+          case 'auth/missing-email':
+            mensaje = 'Debes ingresar un correo electrónico.';
+            break;
+          case 'auth/network-request-failed':
+            mensaje = 'Error de conexión. Verifica tu red e inténtalo de nuevo.';
+            break;
+          case 'auth/internal-error':
+            mensaje = 'Error interno del servidor. Intenta nuevamente en unos minutos.';
+            break;
+          default:
+            mensaje = err?.message || 'Ocurrió un error al crear la cuenta.';
+            break;
+        }
+
+        Swal.fire({
+          icon: 'error',
+          title: titulo,
+          html: `
+            <p style="font-weight: 500; color:#333;">${mensaje}</p>
+
+            
+          `,
+          confirmButtonColor: '#d9534f'
+        });
       });
   }
 }

@@ -1,9 +1,3 @@
-// Variables de color
-$verde-oliva:   #a1c037;
-$naranja:       #FF6600;
-$gris-texto:    #6b6b6b;
-
-/* src/app/core/register/register.component.scss */
 .register-wrapper {
   display: flex;
   justify-content: center;
@@ -102,17 +96,17 @@ $gris-texto:    #6b6b6b;
   margin-top: 1.5rem;
   
   small {
-    color: $gris-texto;
+    color: #6b6b6b;
 
     span {
-      color: $naranja;
+      color: #ff6600;
       font-weight: 500;
     }
   }
 }
 
 .login-link {
-  color: $verde-oliva;
+  color: #a1c037;
   font-weight: bold;
   margin-left: 5px;
   cursor: pointer;
@@ -120,7 +114,7 @@ $gris-texto:    #6b6b6b;
 
   &:hover {
     text-decoration: underline;
-    color: lighten($verde-oliva, 10%);
+    color: #b4d14e;
   }
 }
 

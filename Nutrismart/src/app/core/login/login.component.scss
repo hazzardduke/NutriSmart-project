@@ -1,13 +1,5 @@
-// Variables de color
-$verde-claro:   #d5e094;
-$verde-oliva:   #a1c037;
-$marron-oscuro: #3e372d;
-$marron-fondo:  #2e2a25;
-$naranja:       #FF6600;
-$gris-texto:    #6b6b6b;
-
 .login-wrapper {
-  background-color: $marron-fondo;
+  background-color: #2e2a25;
   min-height: 100vh;
   display: flex;
   justify-content: center;
@@ -24,7 +16,6 @@ $gris-texto:    #6b6b6b;
   max-width: 400px;
 }
 
-// Logo y cabecera siguen igual
 .login-logo {
   display: flex;
   justify-content: center;
@@ -42,18 +33,17 @@ $gris-texto:    #6b6b6b;
   text-align: center;
   
   h2 {
-    color: $marron-oscuro;
+    color: #3e372d;
     font-weight: 700;
     margin-bottom: 0.5rem;
   }
   
   p {
-    color: $gris-texto;
+    color: #6b6b6b;
     font-size: 0.9rem;
   }
 }
 
-// **Nuevo**: formulario de login
 .login-form {
   display: flex;
   flex-direction: column;
@@ -62,7 +52,7 @@ $gris-texto:    #6b6b6b;
 
   label {
     font-weight: 600;
-    color: $marron-oscuro;
+    color: #3e372d;
   }
 
   input {
@@ -73,17 +63,17 @@ $gris-texto:    #6b6b6b;
     transition: border 0.3s ease;
 
     &:focus {
-      border-color: $verde-oliva;
+      border-color: #a1c037;
       outline: none;
     }
   }
 
-.error small {
-  color: red;
-  text-align: center;
-  font-weight: bold;
-  display: block;
-}
+  .error small {
+    color: red;
+    text-align: center;
+    font-weight: bold;
+    display: block;
+  }
 
   .global-error {
     color: #d9534f;
@@ -93,9 +83,8 @@ $gris-texto:    #6b6b6b;
   }
 }
 
-// Botones de iniciar sesión y cerrar sesión
 .login-btn {
-  background-color: $verde-oliva;
+  background-color: #a1c037;
   color: #fff;
   font-weight: 600;
   padding: 0.75rem;
@@ -105,47 +94,46 @@ $gris-texto:    #6b6b6b;
   border: none;
 
   &:hover {
-    background-color: $naranja;
+    background-color: #FF6600;
     transform: scale(1.02);
   }
 
   &:disabled {
-    background-color: lighten($gris-texto, 40%);
+    background-color: #bfbfbf;
     cursor: not-allowed;
   }
 }
 
 .logout-btn {
   background-color: transparent;
-  border: 1px solid $marron-oscuro;
-  color: $marron-oscuro;
+  border: 1px solid #3e372d;
+  color: #3e372d;
   padding: 0.6rem 1rem;
   border-radius: 8px;
   transition: 0.3s ease;
 
   &:hover {
-    background-color: $marron-oscuro;
+    background-color: #3e372d;
     color: #fff;
   }
 }
 
-// Pie y enlace de registro
 .login-footer {
   text-align: center;
   margin-top: 1.5rem;
   
   small {
-    color: $gris-texto;
+    color: #6b6b6b;
 
     span {
-      color: $naranja;
+      color: #FF6600;
       font-weight: 500;
     }
   }
 }
 
 .register-link {
-  color: $verde-oliva;
+  color: #a1c037;
   font-weight: bold;
   margin-left: 5px;
   cursor: pointer;
@@ -153,13 +141,12 @@ $gris-texto:    #6b6b6b;
 
   &:hover {
     text-decoration: underline;
-    color: lighten($verde-oliva, 10%);
+    color: #b4d14e;
   }
 }
 
-
 .forgot-link {
-  color: $verde-oliva;
+  color: #41414c;
   font-weight: bold;
   margin-left: 5px;
   cursor: pointer;
@@ -167,7 +154,7 @@ $gris-texto:    #6b6b6b;
 
   &:hover {
     text-decoration: underline;
-    color: lighten($verde-oliva, 10%);
+    color: #5a5a66;
   }
 }
 
