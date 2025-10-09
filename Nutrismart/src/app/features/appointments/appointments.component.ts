@@ -25,11 +25,13 @@ export class AppointmentsComponent implements OnInit, OnDestroy {
   private userEmail = '';
   private userName = '';
   private subs = new Subscription();
+
   horarios = [
     '08:00 AM', '09:00 AM', '10:00 AM',
     '11:00 AM', '01:00 PM', '02:00 PM',
     '03:00 PM', '04:00 PM', '05:00 PM'
   ];
+
   enEdicion = false;
   citaEnEdicion?: Appointment;
   todosHorasPasaron = false;
@@ -115,7 +117,6 @@ export class AppointmentsComponent implements OnInit, OnDestroy {
     );
   }
 
-
   get proximaCitaId(): string | null {
     const ahora = Date.now();
     const futuras = this.citasUsuario
@@ -196,7 +197,7 @@ export class AppointmentsComponent implements OnInit, OnDestroy {
 
   cancelarCitaEspecifica(c: Appointment): void {
     if (!this.puedeCancelar(c)) {
-      Swal.fire('Aviso', '⚠️ Solo se permite cancelar con ≥24 h de antelación.', 'warning');
+      Swal.fire('Aviso', 'Solo se permite cancelar con ≥24 h de antelación.', 'warning');
       return;
     }
 
@@ -218,7 +219,12 @@ export class AppointmentsComponent implements OnInit, OnDestroy {
             ubicacion: 'Clínica NutriSmart'
           }))
           .then(() => {
-            Swal.fire('Cancelada', 'Tu cita ha sido cancelada correctamente.', 'success');
+            Swal.fire({
+              title: 'Cita cancelada',
+              text: 'Tu cita ha sido cancelada correctamente. <br> Se envió un correo con la confirmación de la cancelación.',
+              icon: 'success',
+              confirmButtonColor: '#a1c037'
+            });
             this.loadCitasDeUsuario();
           })
           .catch(() => Swal.fire('Error', 'Error al cancelar la cita.', 'error'));
@@ -232,9 +238,30 @@ export class AppointmentsComponent implements OnInit, OnDestroy {
       return;
     }
 
+    Swal.fire({
+      title: this.enEdicion ? 'Actualizando cita...' : 'Procesando tu cita...',
+      html: `
+        <img src="assets/images/logontg.png" alt="Nutrition To Go"
+             style="width: 90px; margin-bottom: 10px;">
+        <br><b>Por favor espera un momento</b>
+      `,
+      allowOutsideClick: false,
+      showConfirmButton: false,
+      didOpen: () => Swal.showLoading()
+    });
+
     const iso = new Date(`${this.fechaSeleccionada}T${this.to24h(this.horaSeleccionada)}:00`).toISOString();
-    const finish = (msg: string) => {
-      Swal.fire('Éxito', msg, 'success');
+
+    const finalizar = (msg: string, correo: boolean) => {
+      Swal.close();
+      Swal.fire({
+        title: 'Cita confirmada',
+        html: correo
+          ? `${msg}<br><br> Se envió un correo de confirmación con los detalles de la cita.`
+          : msg,
+        icon: 'success',
+        confirmButtonColor: '#a1c037'
+      });
       if (this.enEdicion) this.cancelarEdicion();
       else this.fechaSeleccionada = this.today;
       this.horaSeleccionada = '';
@@ -249,8 +276,11 @@ export class AppointmentsComponent implements OnInit, OnDestroy {
           hora: this.formateaHora(iso),
           ubicacion: 'Clínica NutriSmart'
         }))
-        .then(() => finish(`Cita reprogramada para ${this.formateaFecha(iso)} ${this.horaSeleccionada}.`))
-        .catch(() => Swal.fire('Error', 'Error al actualizar la cita.', 'error'));
+        .then(() => finalizar(`Tu cita fue reprogramada para ${this.formateaFecha(iso)} a las ${this.horaSeleccionada}.`, true))
+        .catch(() => {
+          Swal.close();
+          Swal.fire('Error', 'No se pudo actualizar la cita.', 'error');
+        });
     } else {
       this.apptService.createAppointment({ userId: this.uid, datetime: iso, status: 'confirmed' })
         .then(() => this.emailService.sendCitaConfirmada(this.userEmail, {
@@ -259,8 +289,11 @@ export class AppointmentsComponent implements OnInit, OnDestroy {
           hora: this.formateaHora(iso),
           ubicacion: 'Clínica NutriSmart'
         }))
-        .then(() => finish('Cita confirmada con éxito.'))
-        .catch(() => Swal.fire('Error', 'Error al crear la cita.', 'error'));
+        .then(() => finalizar(`Tu cita fue programada para ${this.formateaFecha(iso)} a las ${this.horaSeleccionada}.`, true))
+        .catch(() => {
+          Swal.close();
+          Swal.fire('Error', 'No se pudo crear la cita. Intenta nuevamente.', 'error');
+        });
     }
   }
 
@@ -308,15 +341,11 @@ export class AppointmentsComponent implements OnInit, OnDestroy {
 
   cambiarPagina(direccion: number): void {
     const nueva = this.paginaActual + direccion;
-    if (nueva >= 1 && nueva <= this.totalPaginas()) {
-      this.paginaActual = nueva;
-    }
+    if (nueva >= 1 && nueva <= this.totalPaginas()) this.paginaActual = nueva;
   }
 
   irAPagina(pagina: number): void {
-    if (pagina >= 1 && pagina <= this.totalPaginas()) {
-      this.paginaActual = pagina;
-    }
+    if (pagina >= 1 && pagina <= this.totalPaginas()) this.paginaActual = pagina;
   }
 
   get paginasVisibles(): number[] {
