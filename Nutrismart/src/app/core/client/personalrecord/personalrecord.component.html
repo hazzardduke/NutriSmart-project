@@ -1,6 +1,6 @@
 <form [formGroup]="profileForm" class="expediente container">
 
-  <!-- Popup -->
+
   <div class="popup-overlay" *ngIf="showPopup">
     <div class="popup-window" [ngClass]="popupType">
       <p>{{ popupMessage }}</p>
@@ -8,7 +8,7 @@
     </div>
   </div>
 
-  <!-- Tabs -->
+
   <nav class="seg-tabs" role="tablist" aria-label="Secciones del expediente">
     <button type="button" role="tab"
             class="seg-tab"
@@ -38,7 +38,7 @@
 
   <section class="section">
 
-    <!-- FOTO -->
+
     <article *ngIf="currentSection==='photo'" class="panel">
       <header class="panel-header">
         <h3 class="panel-title">Foto de Perfil</h3>

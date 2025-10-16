@@ -2,7 +2,7 @@
   <div class="nutrition-plan-card">
     <h2 class="card-title">Planes Nutricionales</h2>
 
-    <!-- Tabs -->
+
     <div class="tabs">
       <button [class.active]="currentTab==='create'" (click)="setTab('create')">
         Nuevo Plan
@@ -12,7 +12,7 @@
       </button>
     </div>
 
-    <!-- NUEVO PLAN -->
+
     <section *ngIf="currentTab==='create'" class="create-tab">
       <div class="client-select relative">
         <label for="clientSearch">Buscar Cliente</label>
@@ -100,7 +100,7 @@
       </form>
     </section>
 
-    <!-- HISTÓRICO -->
+
     <section *ngIf="currentTab==='history'" class="history-tab">
       <div class="client-select relative">
         <label for="filterClient">Filtrar Cliente</label>
@@ -144,7 +144,7 @@
               </tr>
             </thead>
             <tbody>
-              <tr *ngFor="let p of plans">
+              <tr *ngFor="let p of paginatedPlans">
                 <td>{{ p.client.name }}</td>
                 <td>{{ p.client.date }}</td>
                 <td class="actions">
@@ -164,6 +164,28 @@
               </tr>
             </tbody>
           </table>
+
+
+          <div class="pagination">
+            <button (click)="prevPage()" [disabled]="currentPage === 1">
+              Anterior
+            </button>
+
+            <button
+              *ngFor="let page of totalPagesArray"
+              (click)="goToPage(page)"
+              [class.active]="page === currentPage"
+            >
+              {{ page }}
+            </button>
+
+            <button
+              (click)="nextPage()"
+              [disabled]="currentPage === totalPages"
+            >
+              Siguiente
+            </button>
+          </div>
         </ng-container>
       </ng-container>
 
@@ -176,7 +198,7 @@
   </div>
 </div>
 
-<!-- MODAL -->
+
 <div class="modal-overlay" *ngIf="modalPlan as mp">
   <div class="modal">
     <div class="modal-header">

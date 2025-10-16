@@ -1,71 +1,74 @@
 <nav class="tab-bar">
-  <button
-    [class.active]="activeTab==='card'"
-    (click)="activeTab='card'"
-  >Tarjeta</button>
-  <button
-    [class.active]="activeTab==='history'"
-    (click)="activeTab='history'"
-  >Historial</button>
+  <button [class.active]="activeTab==='card'" (click)="activeTab='card'">Tarjeta</button>
+  <button [class.active]="activeTab==='history'" (click)="activeTab='history'">Historial</button>
 </nav>
 
-<!-- PESTAÑA TARJETA -->
+
 <div class="loyalty-wrapper" *ngIf="activeTab==='card'">
   <div class="card-header">
-    <!-- Logo en lugar de texto -->
     <img src="assets/images/logontg.png" alt="Nutrition To Go" class="company-logo" />
     <h3 class="card-title">Tarjeta NutriFidelidad</h3>
   </div>
+
   <div class="stamps">
     <div
       class="stamp"
       *ngFor="let _ of stars; let i = index"
-      [class.filled]="(card$ | async)?.stamps! > i"
-    >
+      [class.filled]="(card$ | async)?.stamps! > i">
       <img src="assets/images/hoja.png" alt="hoja" class="leaf-icon" />
     </div>
   </div>
+
   <p class="footer-text">¡Acumula 7 sellos y canjea una cita nutricional gratis!</p>
-  <button
-    class="btn redeem-btn"
-    [disabled]="(card$ | async)?.stamps! < 7"
-    (click)="redeem()"
-  >
+
+  <button class="btn redeem-btn" [disabled]="(card$ | async)?.stamps! < 7" (click)="redeem()">
     Canjear Recompensa
   </button>
 
-  <!-- Banner del canje -->
-  <div *ngIf="successMessage" class="redeem-banner">
-    {{ successMessage }}
-  </div>
+  <div *ngIf="successMessage" class="redeem-banner">{{ successMessage }}</div>
 </div>
 
-<!-- PESTAÑA HISTORIAL -->
+
 <div class="loyalty-wrapper" *ngIf="activeTab==='history'">
   <div class="card-header">
     <h2>Historial de Recompensas</h2>
-    <br>
+    <br />
     <h3 class="card-title2">
-      <ng-container *ngIf="history$ | async as hist">
-       
-        <ng-container *ngIf="hist.length === 1">
-          Haz canjeado 1 cita gratis
-        </ng-container>
-        <ng-container *ngIf="hist.length > 1">
-          Haz canjeado {{ hist.length }} veces citas gratis
-        </ng-container>
+      <ng-container *ngIf="history.length === 1">
+        Has canjeado 1 cita gratis
+      </ng-container>
+      <ng-container *ngIf="history.length > 1">
+        Has canjeado {{ history.length }} veces citas gratis
       </ng-container>
     </h3>
   </div>
 
   <ul class="history-list">
-    
-    <li *ngFor="let entry of history$ | async">
-      <span class="date">{{ entry.date | date:'dd-MM-yyyy' }}</span>
+    <li *ngFor="let entry of paginatedHistory">
+      <span class="date">{{ entry.date | date: 'dd-MM-yyyy' }}</span>
       <span class="msg">{{ entry.message }}</span>
     </li>
-    <li *ngIf="(history$ | async)?.length === 0">
-      Aún no has canjeado recompensas.
-    </li>
+    <li *ngIf="history.length === 0">Aún no has canjeado recompensas.</li>
   </ul>
+
+
+  <div class="pagination" *ngIf="totalPages > 0">
+    <button class="prev" (click)="prevPage()" [disabled]="currentPage === 1">Anterior</button>
+
+    <ng-container *ngFor="let p of pagesToShow">
+      <button
+        *ngIf="p !== '...'; else dots"
+        (click)="goToPage(+p)"
+        [class.active]="currentPage === p">
+        {{ p }}
+      </button>
+      <ng-template #dots>
+        <button class="ellipsis" disabled>...</button>
+      </ng-template>
+    </ng-container>
+
+    <button class="next" (click)="nextPage()" [disabled]="currentPage === totalPages">
+      Siguiente
+    </button>
+  </div>
 </div>

@@ -1,7 +1,3 @@
-/* ===== GESTIÓN DE OBJETIVOS NUTRICIONALES ===== */
-/* Nota: si usas Tailwind `.container`, considera cambiar este selector a algo
-   más específico (por ej. `.objetivos-container`) para evitar colisiones. */
-
 .container {
   max-width: 900px;
   margin: auto;
@@ -10,7 +6,6 @@
   line-height: 1.35;
 }
 
-/* ---------- Tabs ---------- */
 .tabs {
   display: flex;
   list-style: none;
@@ -42,16 +37,9 @@
       background: #e2eaee;
       color: #1f3a52;
     }
-
-    &:focus-visible {
-      outline: none;
-      box-shadow: 0 0 0 2px rgba(31, 58, 82, 0.25);
-    }
   }
 }
 
-
-/* ---------- Contenido de pestañas ---------- */
 .tab-content {
   margin-top: 1rem;
   background: #fafafa;
@@ -60,10 +48,6 @@
   box-shadow: 0 2px 8px rgba(15, 23, 42, 0.06);
 }
 
-/* ---------- Títulos ---------- */
-h1.text-2xl {
-  color: #2f3b44;
-}
 .section-title {
   font-size: 1.25rem;
   font-weight: 800;
@@ -71,13 +55,13 @@ h1.text-2xl {
   margin-bottom: 1rem;
 }
 
-/* ---------- Formularios ---------- */
 label {
   display: block;
   font-weight: 700;
   color: #2f3b44;
   margin-bottom: 0.4rem;
 }
+
 .input,
 select {
   width: 100%;
@@ -89,14 +73,17 @@ select {
   transition: border 0.2s, box-shadow 0.2s;
   outline: none;
 }
+
 .input:focus,
 select:focus {
   border-color: #1f3a52;
   box-shadow: 0 0 0 2px rgba(31, 58, 82, 0.15);
 }
-.actions-form { margin-top: 1.25rem; }
 
-/* Botón guardar (verde base) */
+.actions-form {
+  margin-top: 1.25rem;
+}
+
 .btn-save {
   background: #a1c037;
   color: #ffffff;
@@ -106,24 +93,12 @@ select:focus {
   cursor: pointer;
   font-weight: 700;
   transition: filter 0.2s, transform 0.06s, box-shadow 0.2s;
-}
-.btn-save:hover { filter: brightness(0.97); }
-.btn-save:focus-visible { box-shadow: 0 0 0 2px rgba(31, 58, 82, 0.25); }
 
-
-.btn-close {
-  background: #b01313;
-  color: #ffffff;
-  padding: 0.75rem 1.5rem;
-  border: none;
-  border-radius: 10px;
-  cursor: pointer;
-  font-weight: 700;
-  transition: filter 0.2s, transform 0.06s, box-shadow 0.2s;
+  &:hover {
+    filter: brightness(0.97);
+  }
 }
-.btn-save:hover { filter: brightness(0.97); }
-.btn-save:focus-visible { box-shadow: 0 0 0 2px rgba(31, 58, 82, 0.25); }
-/* ---------- Popup inline (coherente con otros módulos) ---------- */
+
 .popup {
   position: sticky;
   top: 0;
@@ -131,41 +106,42 @@ select:focus {
   display: flex;
   justify-content: center;
   z-index: 5;
-}
-.popup .popup-content {
-  background: #a1c037;
-  color: #ffffff;
-  padding: 0.85rem 1.25rem;
-  border-radius: 12px;
-  font-weight: 700;
-  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.12);
-  display: inline-flex;
-  align-items: center;
-  gap: 0.75rem;
-  animation: fadeOutObj 8s ease-in forwards;
-  max-width: 90%;
-}
-.close-btn {
-  appearance: none;
-  border: none;
-  background: #ffffff;
-  color: #2f3b44;
-  width: 28px;
-  height: 28px;
-  border-radius: 999px;
-  font-size: 18px;
-  font-weight: 700;
-  cursor: pointer;
-  line-height: 1;
-  display: grid;
-  place-items: center;
-}
-@keyframes fadeOutObj {
-  0%, 80% { opacity: 1; }
-  100%    { opacity: 0; }
+
+  .popup-content {
+    background: #a1c037;
+    color: #ffffff;
+    padding: 0.85rem 1.25rem;
+    border-radius: 12px;
+    font-weight: 700;
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.12);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    animation: fadeOutObj 8s ease-in forwards;
+    max-width: 90%;
+  }
+
+  .close-btn {
+    border: none;
+    background: #ffffff;
+    color: #2f3b44;
+    width: 28px;
+    height: 28px;
+    border-radius: 999px;
+    font-size: 18px;
+    font-weight: 700;
+    cursor: pointer;
+    line-height: 1;
+    display: grid;
+    place-items: center;
+  }
 }
 
-/* ---------- Tarjetas (en progreso / histórico / recs) ---------- */
+@keyframes fadeOutObj {
+  0%, 80% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
 .objetivo-card,
 .hist-card,
 .rec-card {
@@ -176,26 +152,27 @@ select:focus {
   box-shadow: 0 2px 6px rgba(15, 23, 42, 0.08);
   border: 1px solid #e6ebf1;
 }
+
 .card-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 0.6rem;
 }
+
 .card-header h4 {
   font-size: 1.15rem;
   font-weight: 800;
   color: #2f3b44;
 }
-.text-gray-mid { color: #6b7785; }
 
-/* ---------- Progreso ---------- */
 .progress-display {
   display: flex;
   align-items: center;
   gap: 0.75rem;
   margin: 0.5rem 0 0.2rem;
 }
+
 .progress-bar-wrapper {
   flex: 1;
   background: #f1f3f6;
@@ -204,41 +181,29 @@ select:focus {
   border-radius: 999px;
   overflow: hidden;
 }
+
 .indicator {
-  background: #1f3a52; /* verde base */
+  background: #1f3a52;
   height: 100%;
   transition: width 0.3s ease;
 }
+
 .progress-text {
   font-size: 0.875rem;
   font-weight: 700;
-  color: #1f3a52; /* acento azul sutil */
+  color: #1f3a52;
   width: 3rem;
   text-align: right;
 }
 
-/* ---------- Acciones ---------- */
 .actions {
   display: flex;
   justify-content: flex-end;
   gap: 0.5rem;
 }
-.btn-primary {
-  background: #a1c037;
-  color: #ffffff;
-  padding: 0.55rem 1rem;
-  border: none;
-  border-radius: 10px;
-  cursor: pointer;
-  font-weight: 700;
-  transition: filter 0.2s, transform 0.06s, box-shadow 0.2s;
-}
-.btn-primary:hover { filter: brightness(0.97); }
-.btn-primary:focus-visible { box-shadow: 0 0 0 2px rgba(31, 58, 82, 0.25); }
 
-/* Mantener el naranja nativo para recomendaciones */
 .btn-recomendations {
-  background: #ff6600; /* naranja del proyecto */
+  background: #ff6600;
   color: #ffffff;
   padding: 0.55rem 1rem;
   border: none;
@@ -246,21 +211,27 @@ select:focus {
   cursor: pointer;
   font-weight: 700;
   transition: filter 0.2s, transform 0.06s;
-}
-.btn-recomendations:hover { filter: brightness(0.98); }
 
-/* ---------- Histórico ---------- */
-.hist-card {
-  border-left: 4px solid #ff6600; /* respetar naranja */
+  &:hover {
+    filter: brightness(0.98);
+  }
 }
+
+.hist-card {
+  border-left: 4px solid #ff6600;
+}
+
 .hist-header {
   font-size: 1.15rem;
   font-weight: 800;
   color: #2f3b44;
 }
-.hist-date { font-size: 0.9rem; color: #6b7785; }
 
-/* ---------- Modal de recomendaciones ---------- */
+.hist-date {
+  font-size: 0.9rem;
+  color: #6b7785;
+}
+
 .modal-bg {
   position: fixed;
   inset: 0;
@@ -270,6 +241,7 @@ select:focus {
   justify-content: center;
   z-index: 1000;
 }
+
 .rec-modal {
   background: #ffffff;
   border-radius: 14px;
@@ -279,6 +251,7 @@ select:focus {
   box-shadow: 0 12px 28px rgba(15, 23, 42, 0.25);
   border: 1px solid #e6ebf1;
 }
+
 .rec-title {
   font-size: 1.4rem;
   font-weight: 800;
@@ -286,44 +259,118 @@ select:focus {
   margin-bottom: 0.4rem;
   color: #2f3b44;
 }
+
 .rec-subtitle {
   text-align: center;
   color: #47525c;
   margin-bottom: 1.2rem;
   font-size: 1rem;
 }
+
 .rec-card {
-  border-left: 4px solid #ff6600; /* respetar naranja */
+  border-left: 4px solid #ff6600;
 }
+
 .rec-date {
   font-size: 0.875rem;
   color: #6b7785;
   margin-bottom: 0.4rem;
 }
+
 .rec-text {
   font-size: 1rem;
   color: #2f3b44;
   line-height: 1.45;
 }
+
 .no-recs {
   text-align: center;
   color: #6b7785;
   font-style: italic;
   margin: 1.25rem 0;
 }
+
 .modal-actions {
   display: flex;
   justify-content: center;
   margin-top: 1rem;
 }
 
-/* ---------- Utilidades ---------- */
+.btn-close {
+  background: #b01313;
+  color: #ffffff;
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: 700;
+  transition: filter 0.2s, transform 0.06s, box-shadow 0.2s;
+
+  &:hover {
+    filter: brightness(0.97);
+  }
+}
+
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 1.5rem;
+  font-size: 0.95rem;
+
+  button {
+    border: none;
+    min-width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    background: #f5f6f7;
+    color: #2c3e50;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+    font-size: 0.95rem;
+
+    &:hover:not(:disabled):not(.ellipsis) {
+      background: #e0e2e4;
+    }
+
+    &.active {
+      background: #a1c037;
+      color: #fff;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+      transform: scale(0.98);
+    }
+
+    &.disabled {
+      background: #d1d1d1;
+      color: #777;
+      cursor: not-allowed;
+    }
+  }
+
+  .ellipsis {
+    background: transparent;
+    cursor: default;
+    color: #777;
+    font-weight: bold;
+    pointer-events: none;
+  }
+
+  .prev,
+  .next {
+    padding: 0 1.2rem;
+    min-width: auto;
+  }
+}
+
 .text-center { text-align: center; }
 .mb-4 { margin-bottom: 1rem; }
 .mb-6 { margin-bottom: 1.5rem; }
 .p-4 { padding: 1rem; }
 
-/* ---------- Responsivo ---------- */
 @media (min-width: 768px) {
   .tab-content { padding: 1.75rem; }
 }

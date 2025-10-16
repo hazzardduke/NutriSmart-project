@@ -1,22 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import Swal from 'sweetalert2';
 import { CommonModule } from '@angular/common';
-import {
-  ReactiveFormsModule,
-  FormsModule,
-  FormBuilder,
-  FormGroup,
-  FormControl
-} from '@angular/forms';
-import {
-  Firestore,
-  collection,
-  collectionData,
-  query,
-  orderBy,
-  serverTimestamp,
-  addDoc
-} from '@angular/fire/firestore';
+import { ReactiveFormsModule, FormsModule, FormBuilder, FormGroup, FormControl } from '@angular/forms';
+import { Firestore, collection, collectionData, query, orderBy, serverTimestamp, addDoc } from '@angular/fire/firestore';
 import { Observable, combineLatest, Subscription } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 import { TDocumentDefinitions } from 'pdfmake/interfaces';
@@ -46,23 +32,26 @@ export interface SavedPlan {
   templateUrl: './nutrition-plan-form.component.html',
   styleUrls: ['./nutrition-plan-form.component.scss']
 })
-export class NutritionPlanFormComponent implements OnInit {
+export class NutritionPlanFormComponent implements OnInit, OnDestroy {
   clients: ClientProfile[] = [];
   filteredClients: ClientProfile[] = [];
   searchTerm = '';
   selectedClient?: ClientProfile;
-
   portionsForm!: FormGroup;
-  categories = ['Lácteos','Vegetales','Frutas','Harinas','Proteínas','Grasas'];
+  categories = ['Lácteos', 'Vegetales', 'Frutas', 'Harinas', 'Proteínas', 'Grasas'];
   numbers = Array.from({ length: 11 }, (_, i) => i);
   currentTab: 'create' | 'history' = 'create';
-
   plans$!: Observable<SavedPlan[]>;
   filteredPlans$!: Observable<SavedPlan[]>;
   filterControl = new FormControl('');
-
   modalPlan: SavedPlan | null = null;
   private subs = new Subscription();
+
+  currentPage = 1;
+  itemsPerPage = 5;
+  paginatedPlans: SavedPlan[] = [];
+  totalPages = 1;
+  totalPagesArray: number[] = [];
 
   constructor(
     private fb: FormBuilder,
@@ -90,15 +79,21 @@ export class NutritionPlanFormComponent implements OnInit {
         !clientId ? plans : plans.filter(p => p.clientId === clientId)
       )
     );
+
+    this.subs.add(
+      this.filteredPlans$.subscribe(plans => {
+        this.currentPage = 1;
+        this.updatePagination(plans);
+      })
+    );
   }
 
   ngOnDestroy(): void {
     this.subs.unsubscribe();
   }
 
-  // --- Buscador dinámico ---
   onSearchFocus(): void {
-    this.filteredClients = this.clients.slice(); // mostrar todos al hacer focus
+    this.filteredClients = this.clients.slice();
   }
 
   onSearchChange(): void {
@@ -124,10 +119,8 @@ export class NutritionPlanFormComponent implements OnInit {
     this.portionsForm.reset();
   }
 
-  // --- Crear plan ---
   onClientSelected(): void {
     if (!this.selectedClient) return;
-
     const group: Record<string, FormGroup> = {};
     this.categories.forEach(cat => {
       group[cat] = this.fb.group({
@@ -135,7 +128,7 @@ export class NutritionPlanFormComponent implements OnInit {
         merienda1: [0],
         almuerzo: [0],
         merienda2: [0],
-        cena: [0],
+        cena: [0]
       });
     });
     this.portionsForm = this.fb.group(group);
@@ -143,7 +136,7 @@ export class NutritionPlanFormComponent implements OnInit {
 
   computePorciones(cat: string): number {
     const fg = this.portionsForm.get(cat) as FormGroup;
-    return ['desayuno','merienda1','almuerzo','merienda2','cena']
+    return ['desayuno', 'merienda1', 'almuerzo', 'merienda2', 'cena']
       .map(k => Number(fg.get(k)!.value))
       .reduce((a, b) => a + b, 0);
   }
@@ -151,24 +144,24 @@ export class NutritionPlanFormComponent implements OnInit {
   async onExportTablaYRecomendaciones(): Promise<void> {
     if (!this.selectedClient) return;
     const client = this.selectedClient;
-    const name   = `${client.nombre}_${client.apellido}`.replace(/\s+/g, '_');
+    const name = `${client.nombre}_${client.apellido}`.replace(/\s+/g, '_');
     const cedula = client.cedula;
-    const now    = new Date();
-    const dd     = String(now.getDate()).padStart(2,'0');
-    const mm     = String(now.getMonth()+1).padStart(2,'0');
-    const yyyy   = now.getFullYear();
-    const date   = `${dd}-${mm}-${yyyy}`;
+    const now = new Date();
+    const dd = String(now.getDate()).padStart(2, '0');
+    const mm = String(now.getMonth() + 1).padStart(2, '0');
+    const yyyy = now.getFullYear();
+    const date = `${dd}-${mm}-${yyyy}`;
 
     const raw = this.portionsForm.value as Record<string, any>;
     const portionsData: SavedPlan['portions'] = {};
     this.categories.forEach(cat => {
       const r = raw[cat] || {};
       portionsData[cat] = {
-        desayuno:  Number(r.desayuno)  || 0,
+        desayuno: Number(r.desayuno) || 0,
         merienda1: Number(r.merienda1) || 0,
-        almuerzo:  Number(r.almuerzo)  || 0,
+        almuerzo: Number(r.almuerzo) || 0,
         merienda2: Number(r.merienda2) || 0,
-        cena:      Number(r.cena)      || 0,
+        cena: Number(r.cena) || 0
       };
     });
 
@@ -230,15 +223,42 @@ export class NutritionPlanFormComponent implements OnInit {
     this.modalPlan = null;
   }
 
+  private updatePagination(plans: SavedPlan[]) {
+    this.totalPages = Math.ceil(plans.length / this.itemsPerPage);
+    const start = (this.currentPage - 1) * this.itemsPerPage;
+    const end = start + this.itemsPerPage;
+    this.paginatedPlans = plans.slice(start, end);
+    this.totalPagesArray = Array.from({ length: this.totalPages }, (_, i) => i + 1);
+  }
+
+  prevPage() {
+    if (this.currentPage > 1) {
+      this.currentPage--;
+      this.filteredPlans$.subscribe(plans => this.updatePagination(plans));
+    }
+  }
+
+  nextPage() {
+    if (this.currentPage < this.totalPages) {
+      this.currentPage++;
+      this.filteredPlans$.subscribe(plans => this.updatePagination(plans));
+    }
+  }
+
+  goToPage(page: number) {
+    this.currentPage = page;
+    this.filteredPlans$.subscribe(plans => this.updatePagination(plans));
+  }
+
   private buildTableDocDef(portions: SavedPlan['portions']): TDocumentDefinitions {
     const header = [
       { text: 'Alimentos', style: 'tableHeader' },
       { text: 'Porciones', style: 'tableHeader' },
-      { text: 'Desayuno',  style: 'tableHeader' },
+      { text: 'Desayuno', style: 'tableHeader' },
       { text: 'Merienda #1', style: 'tableHeader' },
-      { text: 'Almuerzo',  style: 'tableHeader' },
+      { text: 'Almuerzo', style: 'tableHeader' },
       { text: 'Merienda #2', style: 'tableHeader' },
-      { text: 'Cena',      style: 'tableHeader' },
+      { text: 'Cena', style: 'tableHeader' }
     ];
 
     const rows = this.categories.map(cat => {
@@ -251,7 +271,7 @@ export class NutritionPlanFormComponent implements OnInit {
         { text: r.merienda1.toString(), style: 'tableCell' },
         { text: r.almuerzo.toString(), style: 'tableCell' },
         { text: r.merienda2.toString(), style: 'tableCell' },
-        { text: r.cena.toString(), style: 'tableCell' },
+        { text: r.cena.toString(), style: 'tableCell' }
       ];
     });
 
@@ -262,7 +282,7 @@ export class NutritionPlanFormComponent implements OnInit {
         {
           table: {
             headerRows: 1,
-            widths: ['*','*','*','*','*','*','*'],
+            widths: ['*', '*', '*', '*', '*', '*', '*'],
             body: [header, ...rows]
           },
           layout: {
@@ -272,9 +292,9 @@ export class NutritionPlanFormComponent implements OnInit {
         }
       ],
       styles: {
-        tableHeader: { fontSize:12, bold:true, color:'#fff', alignment:'center' },
-        tableFirstCell: { fontSize:11, bold:true, alignment:'left' },
-        tableCell: { fontSize:10, alignment:'center' }
+        tableHeader: { fontSize: 12, bold: true, color: '#fff', alignment: 'center' },
+        tableFirstCell: { fontSize: 11, bold: true, alignment: 'left' },
+        tableCell: { fontSize: 10, alignment: 'center' }
       },
       defaultStyle: { fontSize: 10 }
     };

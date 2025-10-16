@@ -41,6 +41,16 @@ export class GoalsNutricionistComponent implements OnInit, OnDestroy {
   filteredClients: UserSummary[] = [];
   showAllHist = false;
 
+  itemsPerPageObj = 4;
+  currentPageObj = 1;
+  totalPagesObj = 1;
+  paginatedObjetivos: Goal[] = [];
+
+  itemsPerPageHist = 4;
+  currentPageHist = 1;
+  totalPagesHist = 1;
+  paginatedHistorico: Goal[] = [];
+
   private subs = new Subscription();
 
   constructor(private svc: GoalsNutricionistService) {}
@@ -65,6 +75,9 @@ export class GoalsNutricionistComponent implements OnInit, OnDestroy {
     this.searchTerm = '';
     this.filteredClients = [];
     this.showAllHist = false;
+    this.currentPageObj = 1;
+    this.currentPageHist = 1;
+    this.updatePagination();
   }
 
   onSearchFocus(): void {
@@ -89,6 +102,8 @@ export class GoalsNutricionistComponent implements OnInit, OnDestroy {
     this.searchTerm = this.selectedClientName;
     this.filteredClients = [];
     this.showAllHist = false;
+    this.currentPageObj = 1;
+    this.currentPageHist = 1;
     this.onClientSelect();
   }
 
@@ -98,6 +113,7 @@ export class GoalsNutricionistComponent implements OnInit, OnDestroy {
     this.showAllHist = true;
     this.searchTerm = this.selectedClientName;
     this.filteredClients = [];
+    this.currentPageHist = 1;
     this.loadAllHistoric();
   }
 
@@ -106,6 +122,7 @@ export class GoalsNutricionistComponent implements OnInit, OnDestroy {
       this.objetivos = [];
       this.historico = [];
       this.recomendaciones = [];
+      this.updatePagination();
       return;
     }
 
@@ -122,18 +139,23 @@ export class GoalsNutricionistComponent implements OnInit, OnDestroy {
         if (this.subTab === 'recomendaciones') {
           this.loadRecs();
         }
+        this.currentPageObj = 1;
+        this.currentPageHist = 1;
+        this.updatePagination();
       })
     );
   }
 
   private loadAllHistoric(): void {
     this.historico = [];
+    this.updatePaginatedHistorico();
     this.clients.forEach(c => {
       this.subs.add(
         this.svc.getGoals(c.uid).subscribe(all => {
           const completos = all.filter(o => o.estado === 'completado');
           this.historico.push(...completos);
           this.historico.sort((a, b) => new Date(b.fecha).getTime() - new Date(a.fecha).getTime());
+          this.updatePaginatedHistorico();
         })
       );
     });
@@ -141,10 +163,12 @@ export class GoalsNutricionistComponent implements OnInit, OnDestroy {
 
   guardarObjetivo(): void {
     if (!this.selectedClientUid) {
-      return this.toast('Selecciona un cliente.', 'warning');
+      this.toast('Selecciona un cliente.', 'warning');
+      return;
     }
     if (!this.nuevoObjetivo.tipo || !this.nuevoObjetivo.meta || this.nuevoObjetivo.meses == null) {
-      return this.toast('Completa todos los campos del objetivo.', 'warning');
+      this.toast('Completa todos los campos del objetivo.', 'warning');
+      return;
     }
 
     const fechaMeta = this.addMonths(new Date(), this.nuevoObjetivo.meses)
@@ -167,10 +191,8 @@ export class GoalsNutricionistComponent implements OnInit, OnDestroy {
 
   updateProgreso(o: Goal): void {
     if (!this.selectedClientUid) return;
-
     const id = o.id!;
     const valor = Math.max(0, Math.min(100, this.progresoTemp[id] ?? o.progreso));
-
     this.svc
       .updateGoal(this.selectedClientUid, id, { progreso: valor })
       .then(() => this.toast('Progreso actualizado', 'success'))
@@ -196,7 +218,6 @@ export class GoalsNutricionistComponent implements OnInit, OnDestroy {
 
   completarObjetivo(o: Goal): void {
     if (!this.selectedClientUid) return;
-
     const hoy = new Date().toISOString().split('T')[0];
     this.svc
       .updateGoal(this.selectedClientUid!, o.id!, {
@@ -213,9 +234,7 @@ export class GoalsNutricionistComponent implements OnInit, OnDestroy {
         });
         this.onClientSelect();
       })
-      .catch(() =>
-        this.modal('Error', 'No se pudo completar el objetivo.', 'error')
-      );
+      .catch(() => this.modal('Error', 'No se pudo completar el objetivo.', 'error'));
   }
 
   switchSub(tab: 'objetivos' | 'recomendaciones'): void {
@@ -234,7 +253,8 @@ export class GoalsNutricionistComponent implements OnInit, OnDestroy {
   saveRecomendacion(): void {
     if (!this.selectedClientUid) return;
     if (!this.newComentario.trim()) {
-      return this.toast('Escribe tu recomendación.', 'warning');
+      this.toast('Escribe tu recomendación.', 'warning');
+      return;
     }
 
     this.svc
@@ -267,14 +287,14 @@ export class GoalsNutricionistComponent implements OnInit, OnDestroy {
   }
 
   private addMonths(d: Date, m: number): Date {
-    const y0 = d.getFullYear(),
-      m0 = d.getMonth(),
-      d0 = d.getDate();
-    const total = m0 + m,
-      y1 = y0 + Math.floor(total / 12),
-      m1 = total % 12;
-    const last = new Date(y1, m1 + 1, 0).getDate(),
-      d1 = Math.min(d0, last);
+    const y0 = d.getFullYear();
+    const m0 = d.getMonth();
+    const d0 = d.getDate();
+    const total = m0 + m;
+    const y1 = y0 + Math.floor(total / 12);
+    const m1 = total % 12;
+    const last = new Date(y1, m1 + 1, 0).getDate();
+    const d1 = Math.min(d0, last);
     return new Date(y1, m1, d1);
   }
 
@@ -298,5 +318,106 @@ export class GoalsNutricionistComponent implements OnInit, OnDestroy {
       timerProgressBar: true
     });
     Toast.fire({ icon, title });
+  }
+
+  updatePagination(): void {
+    this.updatePaginatedObjetivos();
+    this.updatePaginatedHistorico();
+  }
+
+  updatePaginatedObjetivos(): void {
+    this.totalPagesObj = Math.ceil(this.objetivos.length / this.itemsPerPageObj) || 1;
+    const start = (this.currentPageObj - 1) * this.itemsPerPageObj;
+    this.paginatedObjetivos = this.objetivos.slice(start, start + this.itemsPerPageObj);
+  }
+
+  updatePaginatedHistorico(): void {
+    this.totalPagesHist = Math.ceil(this.historico.length / this.itemsPerPageHist) || 1;
+    const start = (this.currentPageHist - 1) * this.itemsPerPageHist;
+    this.paginatedHistorico = this.historico.slice(start, start + this.itemsPerPageHist);
+  }
+
+  prevPageObj(): void {
+    if (this.currentPageObj > 1) {
+      this.currentPageObj--;
+      this.updatePaginatedObjetivos();
+    }
+  }
+
+  nextPageObj(): void {
+    if (this.currentPageObj < this.totalPagesObj) {
+      this.currentPageObj++;
+      this.updatePaginatedObjetivos();
+    }
+  }
+
+  goToPageObj(page: number | string): void {
+    if (typeof page === 'string') return;
+    this.currentPageObj = page;
+    this.updatePaginatedObjetivos();
+  }
+
+  get totalPagesArrayObj(): (number | string)[] {
+    const total = this.totalPagesObj;
+    const current = this.currentPageObj;
+    const maxVisible = 10;
+    if (total <= maxVisible) return Array.from({ length: total }, (_, i) => i + 1);
+    const pages: (number | string)[] = [];
+    const showLeftDots = current > 6;
+    const showRightDots = current < total - 5;
+    if (!showLeftDots) {
+      for (let i = 1; i <= maxVisible - 2; i++) pages.push(i);
+      pages.push('...', total);
+    } else if (!showRightDots) {
+      pages.push(1, '...');
+      for (let i = total - (maxVisible - 3); i <= total; i++) pages.push(i);
+    } else {
+      pages.push(1, '...');
+      for (let i = current - 3; i <= current + 3; i++) pages.push(i);
+      pages.push('...', total);
+    }
+    return pages;
+  }
+
+  prevPageHist(): void {
+    if (this.currentPageHist > 1) {
+      this.currentPageHist--;
+      this.updatePaginatedHistorico();
+    }
+  }
+
+  nextPageHist(): void {
+    if (this.currentPageHist < this.totalPagesHist) {
+      this.currentPageHist++;
+      this.updatePaginatedHistorico();
+    }
+  }
+
+  goToPageHist(page: number | string): void {
+    if (typeof page === 'string') return;
+    this.currentPageHist = page;
+    this.updatePaginatedHistorico();
+  }
+
+  get totalPagesArrayHist(): (number | string)[] {
+    const total = this.totalPagesHist;
+    const current = this.currentPageHist;
+    const maxVisible = 10;
+    if (total <= maxVisible) return Array.from({ length: total }, (_, i) => i + 1);
+    const pages: (number | string)[] = [];
+    const showLeftDots = current > 6;
+    const showRightDots = current < total - 5;
+    if (!showLeftDots) {
+      for (let i = 1; i <= maxVisible - 2; i++) pages.push(i);
+      pages.push('...', total);
+    } else if (!showRightDots) {
+      pages.push(1, '...');
+      for (let i = total - (maxVisible - 3); i <= total; i++) pages.push(i);
+    } else {
+      pages.push(1, '...');
+      for (let i = current - 3; i <= current + 3; i++) pages.push(i);
+      pages.push('...', total);
+    }
+    return pages;
   }
 }

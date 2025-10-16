@@ -76,7 +76,7 @@
             {{ selectedClient.stamps ?? 0 }} / 7
           </span>
 
-          
+
         </p>
         <span
             *ngIf="(selectedClient.stamps ?? 0) >= 7"
@@ -117,7 +117,7 @@
               [class.maxed]="c.stamps >= 7"
               >{{ c.stamps }} / 7</span
             >
-            
+
           </td>
         </tr>
 
@@ -130,9 +130,7 @@
     <ng-container *ngIf="(totalItems$ | async) as total">
       <ng-container *ngIf="(totalPages$ | async) as pages">
         <div class="pagination">
-          <div class="pagination-info">
-            {{ total }} registros • Página {{ pageIndex + 1 }} de {{ pages }}
-          </div>
+
 
           <div class="pagination-controls">
             <button

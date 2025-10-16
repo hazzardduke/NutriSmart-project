@@ -1,9 +1,9 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { CommonModule }                  from '@angular/common';
-import { FormsModule }                   from '@angular/forms';
-import { Subscription }                  from 'rxjs';
-import Swal                              from 'sweetalert2';
-import { AuthService }                   from '../../services/auth.service';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { Subscription } from 'rxjs';
+import Swal from 'sweetalert2';
+import { AuthService } from '../../services/auth.service';
 import {
   GoalsService,
   Goal,
@@ -23,11 +23,24 @@ export class GoalsComponent implements OnInit, OnDestroy {
   objetivos: Goal[] = [];
   mesesOptions = [1, 2, 3, 4, 5, 6];
   nuevoObjetivo = { tipo: '', meta: '', meses: null as number | null };
-  progresoTemp: Record<string, number> = {};
   showPopup = false;
   mensajeService = '';
 
-  // Recomendaciones
+
+  itemsPerPage = 5;
+
+  currentPageProgreso = 1;
+  totalPagesProgreso = 1;
+  objetivosProgresoPaginados: Goal[] = [];
+  pagesProgreso: (number | string)[] = [];
+
+
+  currentPageHistorico = 1;
+  totalPagesHistorico = 1;
+  objetivosHistoricoPaginados: Goal[] = [];
+  pagesHistorico: (number | string)[] = [];
+
+
   selectedRecs: Recommendation[] = [];
   showRecModal = false;
   currentGoalTipo = '';
@@ -58,23 +71,100 @@ export class GoalsComponent implements OnInit, OnDestroy {
 
   private loadGoals(): void {
     this.subs.add(
-      this.goalsSvc.getGoals(this.uid)
-        .subscribe(list => {
-          this.objetivos = list;
-          this.objetivos.forEach(g => {
-            if (g.id) this.progresoTemp[g.id] = g.progreso;
-          });
-        })
+      this.goalsSvc.getGoals(this.uid).subscribe(list => {
+        this.objetivos = list;
+        this.updatePaginationProgreso();
+        this.updatePaginationHistorico();
+      })
     );
   }
+
 
   get objetivosEnProgreso(): Goal[] {
     return this.objetivos.filter(g => g.estado === 'en progreso');
   }
 
+  private updatePaginationProgreso(): void {
+    const data = this.objetivosEnProgreso;
+    this.totalPagesProgreso = Math.ceil(data.length / this.itemsPerPage);
+    const start = (this.currentPageProgreso - 1) * this.itemsPerPage;
+    this.objetivosProgresoPaginados = data.slice(start, start + this.itemsPerPage);
+    this.pagesProgreso = this.buildPages(this.currentPageProgreso, this.totalPagesProgreso);
+  }
+
+  nextProgreso(): void {
+    if (this.currentPageProgreso < this.totalPagesProgreso) {
+      this.currentPageProgreso++;
+      this.updatePaginationProgreso();
+    }
+  }
+
+  prevProgreso(): void {
+    if (this.currentPageProgreso > 1) {
+      this.currentPageProgreso--;
+      this.updatePaginationProgreso();
+    }
+  }
+
+  goToPageProgreso(page: number | string): void {
+    if (typeof page === 'number' && page >= 1 && page <= this.totalPagesProgreso) {
+      this.currentPageProgreso = page;
+      this.updatePaginationProgreso();
+    }
+  }
+
+
   get objetivosCompletados(): Goal[] {
     return this.objetivos.filter(g => g.estado === 'completado');
   }
+
+  private updatePaginationHistorico(): void {
+    const data = this.objetivosCompletados;
+    this.totalPagesHistorico = Math.ceil(data.length / this.itemsPerPage);
+    const start = (this.currentPageHistorico - 1) * this.itemsPerPage;
+    this.objetivosHistoricoPaginados = data.slice(start, start + this.itemsPerPage);
+    this.pagesHistorico = this.buildPages(this.currentPageHistorico, this.totalPagesHistorico);
+  }
+
+  nextHistorico(): void {
+    if (this.currentPageHistorico < this.totalPagesHistorico) {
+      this.currentPageHistorico++;
+      this.updatePaginationHistorico();
+    }
+  }
+
+  prevHistorico(): void {
+    if (this.currentPageHistorico > 1) {
+      this.currentPageHistorico--;
+      this.updatePaginationHistorico();
+    }
+  }
+
+  goToPageHistorico(page: number | string): void {
+    if (typeof page === 'number' && page >= 1 && page <= this.totalPagesHistorico) {
+      this.currentPageHistorico = page;
+      this.updatePaginationHistorico();
+    }
+  }
+
+
+  private buildPages(current: number, total: number): (number | string)[] {
+    const visible = 7;
+    const range: (number | string)[] = [];
+    if (total <= visible) {
+      for (let i = 1; i <= total; i++) range.push(i);
+    } else {
+      const left = Math.max(2, current - 2);
+      const right = Math.min(total - 1, current + 2);
+      range.push(1);
+      if (left > 2) range.push('...');
+      for (let i = left; i <= right; i++) range.push(i);
+      if (right < total - 1) range.push('...');
+      range.push(total);
+    }
+    return range;
+  }
+
 
   guardarObjetivo(): void {
     if (!this.nuevoObjetivo.tipo || !this.nuevoObjetivo.meta || this.nuevoObjetivo.meses == null) {
@@ -84,6 +174,7 @@ export class GoalsComponent implements OnInit, OnDestroy {
     if (isNaN(m) || m < 1 || m > 6) {
       return this.alert('Selecciona un número válido de meses.');
     }
+
     const futura = this.addMonths(new Date(), m);
     const isoDate = futura.toISOString().split('T')[0];
     const toSave: Omit<Goal, 'id' | 'createdAt'> = {
@@ -93,10 +184,10 @@ export class GoalsComponent implements OnInit, OnDestroy {
       progreso: 0,
       estado: 'en progreso'
     };
+
     this.goalsSvc.addGoal(this.uid, toSave)
       .then(() => {
         this.nuevoObjetivo = { tipo: '', meta: '', meses: null };
-
         Swal.fire({
           icon: 'success',
           title: '¡Objetivo creado!',
@@ -109,8 +200,7 @@ export class GoalsComponent implements OnInit, OnDestroy {
           this.loadGoals();
         });
       })
-      .catch(err => {
-        console.error(err);
+      .catch(() => {
         Swal.fire({
           icon: 'error',
           title: 'Error',
@@ -120,6 +210,7 @@ export class GoalsComponent implements OnInit, OnDestroy {
         });
       });
   }
+
 
   abrirRecs(goal: Goal): void {
     this.currentGoalTipo = goal.tipo;

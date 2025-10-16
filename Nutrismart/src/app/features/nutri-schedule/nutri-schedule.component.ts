@@ -51,6 +51,11 @@ export class NutriScheduleComponent implements OnInit, OnDestroy {
   ];
   private subs = new Subscription();
 
+  itemsPerPage = 6;
+  currentPage = 1;
+  totalPages = 1;
+  paginatedHistory: Appointment[] = [];
+
   constructor(
     private profileService: ProfileService,
     private apptService: AppointmentsService,
@@ -61,20 +66,27 @@ export class NutriScheduleComponent implements OnInit, OnDestroy {
     this.today = this.getToday();
     this.fechaSeleccionada = this.today;
     this.calendarOptions.validRange = { start: this.today };
+
     this.subs.add(this.profileService.getClients().subscribe(list => (this.clients = list)));
+
     this.subs.add(
       this.apptService.getAllAppointments().subscribe(apps => {
         const now = Date.now();
+
+        // Actualizar citas pasadas a "completed"
         apps.forEach(c => {
           const startMs = new Date(c.datetime).getTime();
           if (c.status === 'confirmed' && startMs + 3600000 < now) {
             this.apptService.updateAppointment(c.id!, { status: 'completed' });
           }
         });
+
         this.allCitas = apps;
         this.citas = apps.filter(c => c.status === 'confirmed');
         this.canceledCitas = apps.filter(c => c.status === 'canceled');
         this.completedCitas = apps.filter(c => c.status === 'completed');
+
+        this.updatePaginatedHistory();
         this.loadCalendarEvents();
       })
     );
@@ -84,6 +96,13 @@ export class NutriScheduleComponent implements OnInit, OnDestroy {
     this.subs.unsubscribe();
   }
 
+  // --- FILTRO DE CLIENTE ---
+  onFilterChange(): void {
+    this.currentPage = 1;
+    this.updatePaginatedHistory();
+  }
+
+  // --- CONFIGURACIÓN DE CALENDARIO ---
   calendarOptions: CalendarOptions = {
     plugins: [timeGridPlugin, interactionPlugin],
     locale: 'es',
@@ -118,6 +137,7 @@ export class NutriScheduleComponent implements OnInit, OnDestroy {
 
   private renderEventButtons(arg: any): void {
     if (arg.event.extendedProps.status === 'completed') return;
+
     const el = arg.el as HTMLElement;
     const edit = document.createElement('img');
     edit.src = '/assets/images/edit-icon.png';
@@ -127,6 +147,7 @@ export class NutriScheduleComponent implements OnInit, OnDestroy {
       ev.stopPropagation();
       this.startEdit(arg.event.id!);
     });
+
     const cancel = document.createElement('img');
     cancel.src = '/assets/images/cancel-icon.png';
     cancel.classList.add('event-btn-icon');
@@ -135,9 +156,11 @@ export class NutriScheduleComponent implements OnInit, OnDestroy {
       ev.stopPropagation();
       this.cancelAppointment(arg.event.id!);
     });
+
     el.querySelector('.fc-event-title')?.append(edit, cancel);
   }
 
+  // --- CREAR O ACTUALIZAR CITA ---
   async scheduleCita(): Promise<void> {
     if (!this.selectedClientId || !this.fechaSeleccionada || !this.horaSeleccionada) {
       await Swal.fire('Campos incompletos', 'Por favor selecciona cliente, fecha y hora.', 'warning');
@@ -175,10 +198,7 @@ export class NutriScheduleComponent implements OnInit, OnDestroy {
         Swal.close();
         await Swal.fire({
           title: 'Cita actualizada',
-          html: `
-            La cita se actualizó correctamente.<br><br>
-            📧 Se envió un correo al cliente con la confirmación de los cambios.
-          `,
+          html: `La cita se actualizó correctamente.<br><br>📧 Se envió un correo al cliente con la confirmación.`,
           icon: 'success',
           confirmButtonColor: '#a1c037'
         });
@@ -192,10 +212,7 @@ export class NutriScheduleComponent implements OnInit, OnDestroy {
         Swal.close();
         await Swal.fire({
           title: 'Cita creada',
-          html: `
-            La cita se programó exitosamente.<br><br>
-            📧 Se envió un correo al cliente con los detalles de la cita.
-          `,
+          html: `La cita se programó exitosamente.<br><br>📧 Se envió un correo al cliente con los detalles.`,
           icon: 'success',
           confirmButtonColor: '#a1c037'
         });
@@ -208,6 +225,7 @@ export class NutriScheduleComponent implements OnInit, OnDestroy {
     }
   }
 
+  // --- CANCELAR CITA ---
   async cancelAppointment(id: string): Promise<void> {
     const confirm = await Swal.fire({
       title: '¿Cancelar cita?',
@@ -234,19 +252,18 @@ export class NutriScheduleComponent implements OnInit, OnDestroy {
       await this.emailService.sendCitaCancelada(cliente.correo, mailData);
       await Swal.fire({
         title: 'Cita cancelada',
-        html: `
-          La cita ha sido cancelada correctamente.<br><br>
-          📧 Se envió un correo al cliente notificando la cancelación.
-        `,
+        html: `La cita ha sido cancelada correctamente.<br><br>📧 Se envió un correo al cliente notificando la cancelación.`,
         icon: 'info',
         confirmButtonColor: '#a1c037'
       });
       this.loadCalendarEvents();
+      this.updatePaginatedHistory();
     } catch {
       await Swal.fire('Error', 'No se pudo cancelar la cita.', 'error');
     }
   }
 
+  // --- EDITAR CITA ---
   async startEdit(id: string): Promise<void> {
     const appt = this.citas.find(c => c.id === id)!;
     this.editingId = id;
@@ -256,6 +273,7 @@ export class NutriScheduleComponent implements OnInit, OnDestroy {
     const h24 = d.getHours(), m = String(d.getMinutes()).padStart(2, '0');
     const ampm = h24 >= 12 ? 'PM' : 'AM', h12 = h24 % 12 || 12;
     this.horaSeleccionada = `${String(h12).padStart(2, '0')}:${m} ${ampm}`;
+
     const confirm = await Swal.fire({
       title: 'Editar cita',
       text: '¿Deseas modificar esta cita?',
@@ -269,19 +287,100 @@ export class NutriScheduleComponent implements OnInit, OnDestroy {
     else this.finishEdit();
   }
 
+  // --- FINALIZAR EDICIÓN ---
   finishEdit(): void {
     this.editingId = null;
     this.selectedClientId = '';
     this.fechaSeleccionada = this.today;
     this.horaSeleccionada = '';
+    this.updatePaginatedHistory();
     this.loadCalendarEvents();
   }
 
+  // --- PAGINACIÓN ---
+  updatePaginatedHistory(): void {
+    const filtered = this.filteredHistoryAppointments;
+    this.totalPages = Math.ceil(filtered.length / this.itemsPerPage);
+    const start = (this.currentPage - 1) * this.itemsPerPage;
+    this.paginatedHistory = filtered.slice(start, start + this.itemsPerPage);
+  }
+
+  prevPage(): void {
+    if (this.currentPage > 1) {
+      this.currentPage--;
+      this.updatePaginatedHistory();
+    }
+  }
+
+  nextPage(): void {
+    if (this.currentPage < this.totalPages) {
+      this.currentPage++;
+      this.updatePaginatedHistory();
+    }
+  }
+
+  get totalPagesArray(): (number | string)[] {
+    const total = this.totalPages;
+    const current = this.currentPage;
+    const maxVisible = 10;
+
+    if (total <= maxVisible) {
+      return Array.from({ length: total }, (_, i) => i + 1);
+    }
+
+    const pages: (number | string)[] = [];
+    const showLeftDots = current > 6;
+    const showRightDots = current < total - 5;
+
+    if (!showLeftDots) {
+      for (let i = 1; i <= maxVisible - 2; i++) pages.push(i);
+      pages.push('...');
+      pages.push(total);
+    } else if (!showRightDots) {
+      pages.push(1);
+      pages.push('...');
+      for (let i = total - (maxVisible - 3); i <= total; i++) pages.push(i);
+    } else {
+      pages.push(1);
+      pages.push('...');
+      for (let i = current - 3; i <= current + 3; i++) pages.push(i);
+      pages.push('...');
+      pages.push(total);
+    }
+
+    return pages;
+  }
+
+  goToPage(page: number | string): void {
+    if (typeof page === 'string') return;
+    this.currentPage = page;
+    this.updatePaginatedHistory();
+  }
+
+  // --- UTILIDADES ---
   get filteredHistoryAppointments(): Appointment[] {
     return this.allCitas
       .filter(c => c.status === 'canceled' || c.status === 'completed')
       .filter(c => !this.historyClientId || c.userId === this.historyClientId)
       .sort((a, b) => new Date(b.datetime).getTime() - new Date(a.datetime).getTime());
+  }
+
+  formateaHora(iso: string): string {
+    const d = new Date(iso);
+    const h24 = d.getHours(), min = String(d.getMinutes()).padStart(2, '0');
+    const ampm = h24 >= 12 ? 'PM' : 'AM', h12 = h24 % 12 || 12;
+    return `${String(h12).padStart(2, '0')}:${min} ${ampm}`;
+  }
+
+  formatFullDate(iso: string): string {
+    return new Date(iso).toLocaleDateString('es-ES', {
+      day: 'numeric', month: 'long', year: 'numeric'
+    });
+  }
+
+  getClientName(uid: string): string {
+    const c = this.clients.find(x => x.id === uid);
+    return c ? `${c.nombre} ${c.apellido}` : uid;
   }
 
   getToday(): string {
@@ -297,9 +396,7 @@ export class NutriScheduleComponent implements OnInit, OnDestroy {
     if (!this.fechaSeleccionada) return false;
     const sel = new Date(`${this.fechaSeleccionada}T00:00:00`);
     const now = new Date();
-    if (this.esHoy(sel) && this.horaEnMinutos(h) <= now.getHours() * 60 + now.getMinutes()) {
-      return false;
-    }
+    if (this.esHoy(sel) && this.horaEnMinutos(h) <= now.getHours() * 60 + now.getMinutes()) return false;
     const iso = new Date(`${this.fechaSeleccionada}T${this.to24h(h)}:00`).toISOString();
     return !this.allCitas.some(c => c.datetime === iso && c.status === 'confirmed');
   }
@@ -325,24 +422,6 @@ export class NutriScheduleComponent implements OnInit, OnDestroy {
     return d.getFullYear() === n.getFullYear() &&
            d.getMonth() === n.getMonth() &&
            d.getDate() === n.getDate();
-  }
-
-  formateaHora(iso: string): string {
-    const d = new Date(iso);
-    const h24 = d.getHours(), min = String(d.getMinutes()).padStart(2, '0');
-    const ampm = h24 >= 12 ? 'PM' : 'AM', h12 = h24 % 12 || 12;
-    return `${String(h12).padStart(2, '0')}:${min} ${ampm}`;
-  }
-
-  formatFullDate(iso: string): string {
-    return new Date(iso).toLocaleDateString('es-ES', {
-      day: 'numeric', month: 'long', year: 'numeric'
-    });
-  }
-
-  getClientName(uid: string): string {
-    const c = this.clients.find(x => x.id === uid);
-    return c ? `${c.nombre} ${c.apellido}` : uid;
   }
 
   onDateChange(): void {

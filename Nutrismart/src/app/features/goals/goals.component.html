@@ -49,8 +49,8 @@
 
   <section *ngIf="tab==='en-progreso'" class="tab-content">
     <h2 class="section-title mb-4">Objetivos en Progreso</h2>
-    <ng-container *ngIf="objetivosEnProgreso.length; else sinProgreso">
-      <div class="objetivo-card" *ngFor="let obj of objetivosEnProgreso">
+    <ng-container *ngIf="objetivosProgresoPaginados.length; else sinProgreso">
+      <div class="objetivo-card" *ngFor="let obj of objetivosProgresoPaginados">
         <div class="card-header">
           <h4>{{ obj.tipo }}</h4>
         </div>
@@ -66,19 +66,50 @@
           <button class="btn-recomendations" (click)="abrirRecs(obj)">Recomendaciones</button>
         </div>
       </div>
+
+      <div class="pagination" *ngIf="totalPagesProgreso > 1">
+        <button class="prev" (click)="prevProgreso()" [disabled]="currentPageProgreso === 1">Anterior</button>
+        <ng-container *ngFor="let p of pagesProgreso">
+          <button
+            *ngIf="p !== '...'; else dotsP"
+            (click)="goToPageProgreso(p)"
+            [class.active]="currentPageProgreso === p">
+            {{ p }}
+          </button>
+          <ng-template #dotsP>
+            <button class="ellipsis" disabled>...</button>
+          </ng-template>
+        </ng-container>
+        <button class="next" (click)="nextProgreso()" [disabled]="currentPageProgreso === totalPagesProgreso">Siguiente</button>
+      </div>
     </ng-container>
     <ng-template #sinProgreso>
       <p class="text-center text-gray-mid">No hay objetivos en progreso.</p>
     </ng-template>
   </section>
 
-
   <section *ngIf="tab==='historico'" class="tab-content">
     <h2 class="section-title mb-4">Histórico de Objetivos Completados</h2>
-    <ng-container *ngIf="objetivosCompletados.length; else sinHistorico">
-      <div class="hist-card" *ngFor="let obj of objetivosCompletados">
+    <ng-container *ngIf="objetivosHistoricoPaginados.length; else sinHistorico">
+      <div class="hist-card" *ngFor="let obj of objetivosHistoricoPaginados">
         <h4 class="hist-header">{{ obj.tipo }} (Meta: {{ obj.meta }})</h4>
         <p class="hist-date">Fecha: {{ obj.fecha | date:'dd-MM-yyyy' }}</p>
+      </div>
+
+      <div class="pagination" *ngIf="totalPagesHistorico > 1">
+        <button class="prev" (click)="prevHistorico()" [disabled]="currentPageHistorico === 1">Anterior</button>
+        <ng-container *ngFor="let p of pagesHistorico">
+          <button
+            *ngIf="p !== '...'; else dotsH"
+            (click)="goToPageHistorico(p)"
+            [class.active]="currentPageHistorico === p">
+            {{ p }}
+          </button>
+          <ng-template #dotsH>
+            <button class="ellipsis" disabled>...</button>
+          </ng-template>
+        </ng-container>
+        <button class="next" (click)="nextHistorico()" [disabled]="currentPageHistorico === totalPagesHistorico">Siguiente</button>
       </div>
     </ng-container>
     <ng-template #sinHistorico>
@@ -86,7 +117,6 @@
     </ng-template>
   </section>
 </div>
-
 
 <div class="modal-bg" *ngIf="showRecModal">
   <div class="rec-modal">

@@ -1,87 +1,60 @@
-<!-- ===============================
-     CONTENEDOR PRINCIPAL
-=============================== -->
 <div class="schedule-container">
-  <h2 class="title">Horario del nutricionista</h2>
+  <h1 class="schedule-title">Horario del nutricionista</h1>
 
-  <!-- Tabs -->
-  <ul class="tabs">
-    <li [class.active]="activeTab==='new'" (click)="activeTab='new'">Nuevas citas</li>
-    <li [class.active]="activeTab==='calendar'" (click)="activeTab='calendar'">Calendario</li>
-    <li [class.active]="activeTab==='history'" (click)="activeTab='history'">Histórico</li>
-  </ul>
+  <nav class="tab-bar">
+    <button [class.active]="activeTab==='new'" (click)="activeTab='new'">Nuevas citas</button>
+    <button [class.active]="activeTab==='calendar'" (click)="activeTab='calendar'">Calendario</button>
+    <button [class.active]="activeTab==='history'" (click)="activeTab='history'">Histórico</button>
+  </nav>
 
-  <!-- ===============================
-       NUEVAS CITAS
-  ================================ -->
-  <section *ngIf="activeTab==='new'" class="new-tab">
-    <form class="form-schedule" (ngSubmit)="scheduleCita()">
-      <div class="form-group">
-        <label for="client">Cliente</label>
-        <select id="client" name="client" [(ngModel)]="selectedClientId" required>
-          <option value="" disabled>-- Seleccionar cliente --</option>
-          <option *ngFor="let c of clients" [value]="c.id">
-            {{ c.nombre }} {{ c.apellido }} ({{ c.cedula }})
-          </option>
-        </select>
-      </div>
+  <!-- NUEVA CITA -->
+  <section *ngIf="activeTab==='new'" class="new-appointment">
+    <div class="form-group">
+      <label>Seleccionar cliente:</label>
+      <select [(ngModel)]="selectedClientId">
+        <option value="">-- Selecciona un cliente --</option>
+        <option *ngFor="let c of clients" [value]="c.id">
+          {{ c.nombre }} {{ c.apellido }}
+        </option>
+      </select>
+    </div>
 
-      <div class="form-group">
-        <label for="date">Fecha</label>
-        <input
-          type="date"
-          id="date"
-          name="date"
-          [(ngModel)]="fechaSeleccionada"
-          [min]="today"
-          (ngModelChange)="onDateChange()"
-          required
-        />
-      </div>
+    <div class="form-group">
+      <label>Fecha:</label>
+      <input type="date" [(ngModel)]="fechaSeleccionada" [min]="today" (change)="onDateChange()" />
+    </div>
 
-      <div class="form-group">
-        <label>Franja horaria</label>
-        <div class="horarios">
-          <button
-            *ngFor="let h of horarios"
-            type="button"
-            (click)="horaSeleccionada = h"
-            [disabled]="!isHorarioDisponible(h)"
-            [class.selected]="h === horaSeleccionada"
-          >
-            {{ h }}
-          </button>
-        </div>
-      </div>
-
-      <div class="form-group" style="text-align: center;">
+    <div class="form-group">
+      <label>Hora:</label>
+      <div class="horarios">
         <button
-          type="submit"
-          class="btn-schedule"
-          [disabled]="!selectedClientId || !horaSeleccionada"
-        >
-          Programar cita
+          *ngFor="let h of horarios"
+          [disabled]="!isHorarioDisponible(h)"
+          [ngClass]="{ 'selected': horaSeleccionada === h }"
+          (click)="horaSeleccionada = h">
+          {{ h }}
         </button>
       </div>
-    </form>
-  </section>
+    </div>
 
-  <!-- ===============================
-       CALENDARIO
-  ================================ -->
-  <section *ngIf="activeTab==='calendar'" class="calendar-tab">
-    <div class="fullcalendar-wrapper">
-      <full-calendar [options]="calendarOptions"></full-calendar>
+    <div class="form-actions">
+      <button class="btn-primary" (click)="scheduleCita()">
+        {{ editingId ? 'Actualizar Cita' : 'Programar Cita' }}
+      </button>
+      <button *ngIf="editingId" class="btn-cancel" (click)="finishEdit()">Cancelar edición</button>
     </div>
   </section>
 
-  <!-- ===============================
-       HISTÓRICO
-  ================================ -->
+  <!-- CALENDARIO -->
+  <section *ngIf="activeTab==='calendar'" class="calendar-section">
+    <full-calendar [options]="calendarOptions"></full-calendar>
+  </section>
+
+  <!-- HISTÓRICO -->
   <section *ngIf="activeTab==='history'" class="history-list-tab">
     <div class="history-filter">
       <label for="historyClient">Filtrar por cliente:</label>
-      <select id="historyClient" [(ngModel)]="historyClientId" class="form-control">
+      <select id="historyClient" [(ngModel)]="historyClientId" (change)="onFilterChange()" class="form-control">
         <option value="">-- Todos los clientes --</option>
         <option *ngFor="let c of clients" [value]="c.id">
           {{ c.nombre }} {{ c.apellido }}
@@ -89,34 +62,55 @@
       </select>
     </div>
 
-    <table class="history-table">
-      <thead>
-        <tr>
-          <th>Cliente</th>
-          <th>Fecha</th>
-          <th>Hora</th>
-          <th>Estado</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr
-          *ngFor="let c of filteredHistoryAppointments"
-          [ngClass]="{
-            'row-confirmada': c.status === 'confirmed',
-            'row-cancelada':  c.status === 'canceled'
-          }"
-        >
-          <td>{{ getClientName(c.userId) }}</td>
-          <td>{{ formatFullDate(c.datetime) }}</td>
-          <td>{{ formateaHora(c.datetime) }}</td>
-          <td [ngClass]="c.status === 'canceled' ? 'cancelada' : 'completada'">
-            {{ c.status === 'canceled' ? 'Cancelada' : 'Completada' }}
-          </td>
-        </tr>
-        <tr *ngIf="filteredHistoryAppointments.length === 0">
-          <td colspan="4" class="no-data">No hay registros para este cliente.</td>
-        </tr>
-      </tbody>
-    </table>
+    <div class="history-table-wrapper">
+      <table class="history-table">
+        <thead>
+          <tr>
+            <th>Cliente</th>
+            <th>Fecha</th>
+            <th>Hora</th>
+            <th>Estado</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr
+            *ngFor="let c of paginatedHistory"
+            [ngClass]="{
+              'row-confirmada': c.status === 'confirmed',
+              'row-cancelada':  c.status === 'canceled'
+            }"
+          >
+            <td>{{ getClientName(c.userId) }}</td>
+            <td>{{ formatFullDate(c.datetime) }}</td>
+            <td>{{ formateaHora(c.datetime) }}</td>
+            <td [ngClass]="c.status === 'canceled' ? 'cancelada' : 'completada'">
+              {{ c.status === 'canceled' ? 'Cancelada' : 'Completada' }}
+            </td>
+          </tr>
+          <tr *ngIf="paginatedHistory.length === 0">
+            <td colspan="4" class="no-data">No hay registros para este cliente.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="pagination">
+      <button class="nav-btn prev" (click)="prevPage()" [disabled]="currentPage === 1">
+        Anterior
+      </button>
+
+      <button
+        *ngFor="let page of totalPagesArray"
+        class="page-btn"
+        [disabled]="page === '...'"
+        (click)="goToPage(page)"
+        [ngClass]="{ 'active': currentPage === page }">
+        {{ page }}
+      </button>
+
+      <button class="nav-btn next" (click)="nextPage()" [disabled]="currentPage === totalPages">
+        Siguiente
+      </button>
+    </div>
   </section>
 </div>

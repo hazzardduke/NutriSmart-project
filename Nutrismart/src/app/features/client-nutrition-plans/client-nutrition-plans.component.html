@@ -19,7 +19,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let plan of plans; trackBy: trackByPlanId">
+          <tr *ngFor="let plan of paginatedPlans; trackBy: trackByPlanId">
             <td>{{ displayDate(plan.createdAt) }}</td>
             <td class="actions">
               <button class="btn primary" type="button" (click)="openModal(plan)">
@@ -40,6 +40,41 @@
           </tr>
         </tbody>
       </table>
+
+
+      <div class="pagination" *ngIf="totalPages > 1" role="navigation" aria-label="Paginación">
+        <button
+          class="prev"
+          [disabled]="currentPage === 1"
+          [class.disabled]="currentPage === 1"
+          (click)="prevPage()"
+          aria-label="Página anterior">
+          Anterior
+        </button>
+
+        <ng-container *ngFor="let p of pagesToShow">
+          <button
+            *ngIf="p !== '...'; else dots"
+            (click)="goToPage(p)"
+            [class.active]="currentPage === p"
+            [attr.aria-current]="currentPage === p ? 'page' : null"
+            class="page-number">
+            {{ p }}
+          </button>
+          <ng-template #dots>
+            <button class="ellipsis" disabled aria-hidden="true">…</button>
+          </ng-template>
+        </ng-container>
+
+        <button
+          class="next"
+          [disabled]="currentPage === totalPages"
+          [class.disabled]="currentPage === totalPages"
+          (click)="nextPage()"
+          aria-label="Página siguiente">
+          Siguiente
+        </button>
+      </div>
     </div>
   </ng-container>
 
@@ -48,7 +83,7 @@
   </ng-template>
 </div>
 
-<!-- Modal -->
+
 <div
   class="modal-backdrop"
   *ngIf="showModal && selectedPlan"

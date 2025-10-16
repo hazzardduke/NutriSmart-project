@@ -16,11 +16,16 @@ import { AuthService } from '../services/auth.service';
 })
 export class LoyaltyCardClientComponent implements OnInit {
   card$!: Observable<LoyaltyCard | null>;
-  history$!: Observable<RedeemEntry[]>;
   stars = Array(7);
   activeTab: 'card' | 'history' = 'card';
   successMessage = '';
-  private redeemTimeout?: any;
+
+  history: RedeemEntry[] = [];
+  paginatedHistory: RedeemEntry[] = [];
+  currentPage = 1;
+  itemsPerPage = 4;
+  totalPages = 0;
+  pagesToShow: (number | string)[] = [];
 
   constructor(
     private loyaltySvc: LoyaltyCardService,
@@ -29,15 +34,51 @@ export class LoyaltyCardClientComponent implements OnInit {
     private authSvc: AuthService
   ) {}
 
-  ngOnInit(): void {
+  async ngOnInit(): Promise<void> {
     this.card$ = this.loyaltySvc.getMyCard();
-    this.history$ = this.loyaltySvc.getRedeemHistory();
+    this.history = await firstValueFrom(this.loyaltySvc.getRedeemHistory());
+    this.updatePagination();
   }
 
-  createCard(): void {
-    this.loyaltySvc.createCard()
-      .then(() => (this.card$ = this.loyaltySvc.getMyCard()))
-      .catch((err: any) => console.error(err));
+  updatePagination(): void {
+    this.totalPages = Math.ceil(this.history.length / this.itemsPerPage);
+    const start = (this.currentPage - 1) * this.itemsPerPage;
+    const end = start + this.itemsPerPage;
+    this.paginatedHistory = this.history.slice(start, end);
+    this.pagesToShow = this.generatePageRange(this.currentPage, this.totalPages);
+  }
+
+  generatePageRange(current: number, total: number): (number | string)[] {
+    const range: (number | string)[] = [];
+    if (total <= 5) {
+      for (let i = 1; i <= total; i++) range.push(i);
+    } else {
+      if (current > 2) range.push(1, '...');
+      const start = Math.max(2, current - 1);
+      const end = Math.min(total - 1, current + 1);
+      for (let i = start; i <= end; i++) range.push(i);
+      if (current < total - 1) range.push('...', total);
+    }
+    return range;
+  }
+
+  nextPage(): void {
+    if (this.currentPage < this.totalPages) {
+      this.currentPage++;
+      this.updatePagination();
+    }
+  }
+
+  prevPage(): void {
+    if (this.currentPage > 1) {
+      this.currentPage--;
+      this.updatePagination();
+    }
+  }
+
+  goToPage(page: number): void {
+    this.currentPage = page;
+    this.updatePagination();
   }
 
   async redeem(): Promise<void> {
@@ -55,15 +96,14 @@ export class LoyaltyCardClientComponent implements OnInit {
 
       await this.loyaltySvc.redeem();
       this.card$ = this.loyaltySvc.getMyCard();
-      this.history$ = this.loyaltySvc.getRedeemHistory();
-      
+      this.history = await firstValueFrom(this.loyaltySvc.getRedeemHistory());
+      this.updatePagination();
 
       const currentUser = await firstValueFrom(this.authSvc.user$);
       const uid = currentUser?.uid;
       if (!uid) throw new Error('No se pudo obtener el UID del usuario.');
 
       const userProfile: UserProfileData = await firstValueFrom(this.profileSvc.getProfile(uid));
-
       if (userProfile?.correo && userProfile?.nombre) {
         await this.emailSvc.sendCitaGratis(userProfile.correo, { nombre: userProfile.nombre });
         Swal.fire({
@@ -72,8 +112,6 @@ export class LoyaltyCardClientComponent implements OnInit {
           text: 'Te hemos enviado un correo con tu cita gratis. ¡Preséntalo en tu próxima visita!',
           confirmButtonColor: '#a1c037'
         });
-      } else {
-        console.warn('El perfil del usuario no contiene nombre o correo.');
       }
     } catch (err: any) {
       Swal.fire({
@@ -84,6 +122,4 @@ export class LoyaltyCardClientComponent implements OnInit {
       });
     }
   }
-
-  
 }

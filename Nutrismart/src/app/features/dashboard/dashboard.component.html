@@ -7,11 +7,8 @@
   </div>
 
   <div class="dashboard-grid">
-    
-    <section
-      class="dashboard-card appointment-card clickable"
-      routerLink="/appoinments"
-    >
+
+    <section class="dashboard-card appointment-card clickable" routerLink="/appoinments">
       <h2 class="card-title">
         <i class="fa fa-calendar-alt"></i>
         Próximas Citas
@@ -36,71 +33,105 @@
       </ng-template>
     </section>
 
-    
-    <section
-      class="dashboard-card compo-card clickable"
-      routerLink="/profile"
-    >
+
+    <section class="dashboard-card compo-card clickable" routerLink="/profile">
       <h2 class="card-title">
         <i class="fa fa-tint"></i>
         Composición Corporal
       </h2>
+
       <ng-container *ngIf="profile$ | async as p; else noProfile">
         <p>Agua: {{ p.porcentajeAgua }}%</p>
         <p>Grasa: {{ p.porcentajeGrasa }}%</p>
         <p>Músculo: {{ p.porcentajeMusculo }}%</p>
       </ng-container>
+
       <ng-template #noProfile>
         <p>No hay datos de composición.</p>
       </ng-template>
     </section>
 
-
-    <section
-      class="dashboard-card goals-card clickable"
-      routerLink="/goals"
-    >
+    <section class="dashboard-card goals-card clickable" >
       <h2 class="card-title">
         <i class="fa fa-bullseye"></i>
         Objetivos en progreso
       </h2>
-      <ng-container *ngIf="goals$ | async as goals; else noGoals">
-        <ul class="goals-list" *ngIf="goals.length > 0; else noGoals">
-          <li *ngFor="let g of goals">
+
+      <ng-container *ngIf="paginatedGoals.length > 0; else noGoals">
+        <ul class="goals-list">
+          <li *ngFor="let g of paginatedGoals">
             <span>{{ g.tipo }}</span>
             <span class="goal-progress">{{ g.progreso }}%</span>
           </li>
         </ul>
+
+        <div class="pagination" *ngIf="paginatedGoals.length > 0">
+          <button class="prev" (click)="prevGoalPage()" [disabled]="currentGoalPage === 1">
+            Anterior
+          </button>
+
+          <ng-container *ngFor="let p of goalPagesToShow">
+            <button
+              *ngIf="p !== '...'; else goalDots"
+              (click)="goToGoalPage(p)"
+              [class.active]="currentGoalPage === p">
+              {{ p }}
+            </button>
+            <ng-template #goalDots>
+              <button class="ellipsis" disabled>...</button>
+            </ng-template>
+          </ng-container>
+
+          <button class="next" (click)="nextGoalPage()" [disabled]="currentGoalPage === totalGoalPages">
+            Siguiente
+          </button>
+        </div>
       </ng-container>
+
       <ng-template #noGoals>
         <p>No tienes objetivos en progreso.</p>
       </ng-template>
     </section>
 
-    <!-- ─────────────── RECOMENDACIONES ─────────────── -->
-    <section
-      class="dashboard-card recs-card clickable"
-      routerLink="/goals"
-    >
+    <section class="dashboard-card recs-card clickable" >
       <h2 class="card-title recs-title">
         <i class="fa fa-sticky-note"></i>
         Recomendaciones Recientes
       </h2>
 
-      <ng-container *ngIf="recs$ | async as recs; else noRecs">
-        <ul class="recs-list" *ngIf="recs.length > 0; else noRecs">
-          <li *ngFor="let r of recs">
+      <ng-container *ngIf="paginatedRecs.length > 0; else noRecs">
+        <ul class="recs-list">
+          <li *ngFor="let r of paginatedRecs">
             <div class="rec-item">
               <span class="goal-type">{{ r.tipo }}</span>
-              <span class="text">
-                {{ r.comentario || r.detail || 'Sin detalle disponible' }}
-              </span>
-              <span class="date">
-                {{ r.fecha || r.createdAt | date:'dd/MM/yyyy' }}
-              </span>
+              <span class="text">{{ r.comentario || r.detail || 'Sin detalle disponible' }}</span>
+              <span class="date">{{ r.fecha || r.createdAt | date:'dd/MM/yyyy' }}</span>
             </div>
           </li>
         </ul>
+
+
+        <div class="pagination" *ngIf="paginatedRecs.length > 0">
+          <button class="prev" (click)="prevRecPage()" [disabled]="currentRecPage === 1">
+            Anterior
+          </button>
+
+          <ng-container *ngFor="let p of recPagesToShow">
+            <button
+              *ngIf="p !== '...'; else recDots"
+              (click)="goToRecPage(p)"
+              [class.active]="currentRecPage === p">
+              {{ p }}
+            </button>
+            <ng-template #recDots>
+              <button class="ellipsis" disabled>...</button>
+            </ng-template>
+          </ng-container>
+
+          <button class="next" (click)="nextRecPage()" [disabled]="currentRecPage === totalRecPages">
+            Siguiente
+          </button>
+        </div>
       </ng-container>
 
       <ng-template #noRecs>
@@ -113,24 +144,16 @@
 
 <footer class="dashboard-footer">
   <div class="footer-social">
-    <a
-      href="https://www.instagram.com/nutritiontogo?igsh=dHdxb3hjaGc3OXZ4"
-      target="_blank"
-    >
+    <a href="https://www.instagram.com/nutritiontogo?igsh=dHdxb3hjaGc3OXZ4" target="_blank">
       <i class="fab fa-instagram"></i>
     </a>
-    <a
-      href="https://www.facebook.com/share/14DNuiXcWy1/?mibextid=wwXIfr"
-      target="_blank"
-    >
+    <a href="https://www.facebook.com/share/14DNuiXcWy1/?mibextid=wwXIfr" target="_blank">
       <i class="fab fa-facebook"></i>
     </a>
   </div>
 
   <div class="footer-contact">
-    <a href="tel:87296097">
-      <i class="fa fa-phone"></i> 87296097
-    </a>
+    <a href="tel:87296097"><i class="fa fa-phone"></i> 87296097</a>
     <a href="mailto:info.nutritiontogo&#64;gmail.com">
       <i class="fa fa-envelope"></i> info.nutritiontogo&#64;gmail.com
     </a>
