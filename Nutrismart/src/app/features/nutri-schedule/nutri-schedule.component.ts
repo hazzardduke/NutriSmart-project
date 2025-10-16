@@ -198,7 +198,7 @@ export class NutriScheduleComponent implements OnInit, OnDestroy {
         Swal.close();
         await Swal.fire({
           title: 'Cita actualizada',
-          html: `La cita se actualizó correctamente.<br><br>📧 Se envió un correo al cliente con la confirmación.`,
+          html: `La cita se actualizó correctamente.<br><br> Se envió un correo al cliente con la confirmación.`,
           icon: 'success',
           confirmButtonColor: '#a1c037'
         });
@@ -212,7 +212,7 @@ export class NutriScheduleComponent implements OnInit, OnDestroy {
         Swal.close();
         await Swal.fire({
           title: 'Cita creada',
-          html: `La cita se programó exitosamente.<br><br>📧 Se envió un correo al cliente con los detalles.`,
+          html: `La cita se programó exitosamente.<br><br>Se envió un correo al cliente con los detalles.`,
           icon: 'success',
           confirmButtonColor: '#a1c037'
         });
@@ -252,7 +252,7 @@ export class NutriScheduleComponent implements OnInit, OnDestroy {
       await this.emailService.sendCitaCancelada(cliente.correo, mailData);
       await Swal.fire({
         title: 'Cita cancelada',
-        html: `La cita ha sido cancelada correctamente.<br><br>📧 Se envió un correo al cliente notificando la cancelación.`,
+        html: `La cita ha sido cancelada correctamente.<br><br>Se envió un correo al cliente notificando la cancelación.`,
         icon: 'info',
         confirmButtonColor: '#a1c037'
       });

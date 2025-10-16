@@ -26,7 +26,7 @@
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
     display: flex;
     flex-direction: column;
-    
+
     h2 {
       margin: 0 0 1rem;
       font-size: 1.4rem;
@@ -78,7 +78,6 @@
         }
       }
 
-      /* Column widths */
       tr > th:first-child,
       tr > td:first-child {
         width: 40%;
@@ -102,13 +101,15 @@
   }
 
   .clients-card {
-    margin-top: 0; 
+    margin-top: 0;
+
     .clients-list {
       display: flex;
       flex-direction: column;
       gap: 0.75rem;
       margin-top: 1rem;
     }
+
     .client-item {
       padding: 0.75rem 1rem;
       background: #fdfdfd;
@@ -116,6 +117,47 @@
       border-radius: 8px;
       color: #2c3e50;
       font-weight: 500;
+      transition: all 0.2s ease-in-out;
+
+      &:hover {
+        background: #eef5e0;
+        border-color: #a1c037;
+        transform: translateY(-1px);
+      }
+    }
+
+    .pagination-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 0.5rem;
+      margin-top: 1.2rem;
+
+      button {
+        background: #f5f6f7;
+        color: #2c3e50;
+        border: none;
+        border-radius: 8px;
+        padding: 0.5rem 0.9rem;
+        font-size: 0.95rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+
+        &:hover:not(:disabled) {
+          background: #a1c037;
+        }
+
+        &.active {
+          background: #2c3e50;
+          color: #fff;
+        }
+
+        &:disabled {
+          opacity: 0.6;
+          cursor: not-allowed;
+        }
+      }
     }
   }
 }

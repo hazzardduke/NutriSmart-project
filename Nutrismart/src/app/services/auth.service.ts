@@ -46,7 +46,7 @@ export class AuthService {
   isAuthenticated$: Observable<boolean> = authState(this.auth).pipe(map(u => !!u));
 
   idTokenResult$: Observable<IdTokenResult | null> = this.user$.pipe(
-    switchMap(u => u ? from(u.getIdTokenResult()) : of(null))
+    switchMap(u => (u ? from(u.getIdTokenResult()) : of(null)))
   );
 
   login(email: string, password: string): Promise<void> {
@@ -79,6 +79,7 @@ export class AuthService {
         telefono,
         correo,
         role: 'cliente',
+        active: true,
         createdAt: serverTimestamp()
       });
 

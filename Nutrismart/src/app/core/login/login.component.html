@@ -1,4 +1,3 @@
-<!-- src/app/core/login/login.component.html -->
 <div class="login-wrapper">
   <div class="login-card">
 
@@ -13,7 +12,7 @@
       <br>
     </div>
 
-    <!-- Si NO está autenticado, mostramos el formulario -->
+
     <form
     *ngIf="!isAuthenticated"
     #loginForm="ngForm"
@@ -21,8 +20,8 @@
     novalidate
     class="login-form"
   >
-    
-   
+
+
     <input
       placeholder="Correo Electrónico"
       type="email"
@@ -31,8 +30,8 @@
       required
       email
     />
-  
-   
+
+
     <input
      placeholder="Contraseña"
       type="password"
@@ -41,23 +40,23 @@
       required
       minlength="8"
     />
-  
+
     <button type="submit" class="btn login-btn" [disabled]="loginForm.invalid">
       Iniciar Sesión
     </button>
-  
-      <!-- Mensaje de error -->
+
+
       <div *ngIf="error" class="error global-error">
         {{ error }}
       </div>
-      <!-- Mensaje de info (para admin) -->
+
       <div *ngIf="infoMessage" class="info global-info center">
         {{ infoMessage }}
       </div>
   </form>
-  
 
-    
+
+
     <div *ngIf="isAuthenticated" class="login-actions">
       <p>¡Bienvenido!</p>
       <button class="btn logout-btn" (click)="logout()">Cerrar Sesión</button>

@@ -2,7 +2,6 @@
   <h1>Panel de Nutricionista</h1>
 
   <div class="dashboard-grid">
-
     <div class="card appt-card">
       <h2>Citas de Hoy</h2>
 
@@ -33,17 +32,28 @@
       </ng-template>
     </div>
 
-
     <div class="card clients-card">
       <h2>Mis Pacientes</h2>
 
-      <ng-container *ngIf="activeClients$ | async as clients; else noClients">
+      <ng-container *ngIf="clientesPaginados.length > 0; else noClients">
         <div class="clients-list">
-          <div class="client-item" *ngFor="let c of clients">
+          <div class="client-item" *ngFor="let c of clientesPaginados">
             {{ c.name }}
           </div>
         </div>
+
+        <div class="pagination-container">
+          <button (click)="anterior()" [disabled]="paginaActual === 1">Anterior</button>
+          <button
+            *ngFor="let p of paginas"
+            [class.active]="p === paginaActual"
+            (click)="irAPagina(p)">
+            {{ p }}
+          </button>
+          <button (click)="siguiente()" [disabled]="paginaActual === totalPaginas">Siguiente</button>
+        </div>
       </ng-container>
+
       <ng-template #noClients>
         <p class="no-data">No hay pacientes activos.</p>
       </ng-template>

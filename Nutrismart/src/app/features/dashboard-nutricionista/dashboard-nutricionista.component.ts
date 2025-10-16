@@ -30,13 +30,23 @@ import { Observable } from 'rxjs';
 })
 export class DashboardNutricionistaComponent implements OnInit {
   todayAppointments$!: Observable<AppointmentWithClient[]>;
-  activeClients$!: Observable<ClientSummary[]>;
+  clientesTotales: ClientSummary[] = [];
+  clientesPaginados: ClientSummary[] = [];
+  paginaActual = 1;
+  pacientesPorPagina = 4;
+  totalPaginas = 1;
+  paginas: number[] = [];
 
   constructor(private svc: DashboardNutricionistaService) {}
 
   ngOnInit(): void {
     this.todayAppointments$ = this.svc.getTodaysWithClient();
-    this.activeClients$     = this.svc.getActiveClients();
+    this.svc.getActiveClients().subscribe(list => {
+      this.clientesTotales = list;
+      this.totalPaginas = Math.ceil(this.clientesTotales.length / this.pacientesPorPagina);
+      this.paginas = Array.from({ length: this.totalPaginas }, (_, i) => i + 1);
+      this.actualizarPaginacion();
+    });
   }
 
   translateStatus(s: string): string {
@@ -45,6 +55,31 @@ export class DashboardNutricionistaComponent implements OnInit {
       case 'canceled':  return 'Cancelada';
       case 'completed': return 'Completada';
       default:          return s;
+    }
+  }
+
+  actualizarPaginacion(): void {
+    const inicio = (this.paginaActual - 1) * this.pacientesPorPagina;
+    const fin = inicio + this.pacientesPorPagina;
+    this.clientesPaginados = this.clientesTotales.slice(inicio, fin);
+  }
+
+  irAPagina(pagina: number): void {
+    this.paginaActual = pagina;
+    this.actualizarPaginacion();
+  }
+
+  siguiente(): void {
+    if (this.paginaActual < this.totalPaginas) {
+      this.paginaActual++;
+      this.actualizarPaginacion();
+    }
+  }
+
+  anterior(): void {
+    if (this.paginaActual > 1) {
+      this.paginaActual--;
+      this.actualizarPaginacion();
     }
   }
 }

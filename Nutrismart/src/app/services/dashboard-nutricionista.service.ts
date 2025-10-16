@@ -37,22 +37,22 @@ export class DashboardNutricionistaService {
   private fs   = inject(Firestore);
   private auth = inject(AuthService);
 
-  /** 1) RAW: citas de hoy (00:00–23:59) */
+  /** 1) Citas de hoy (00:00–23:59) */
   private getTodayRaw(): Observable<Appointment[]> {
     return this.auth.user$.pipe(
       switchMap(u => {
         if (!u) return of([]);
-        const start    = new Date(); start.setHours(0,0,0,0);
-        const end      = new Date(); end.setHours(23,59,59,999);
+        const start    = new Date(); start.setHours(0, 0, 0, 0);
+        const end      = new Date(); end.setHours(23, 59, 59, 999);
         const isoStart = start.toISOString();
         const isoEnd   = end.toISOString();
 
         const col = collection(this.fs, 'appointments');
         const q   = query(
           col,
-          where('datetime','>=', isoStart),
-          where('datetime','<=', isoEnd),
-          orderBy('datetime','asc')
+          where('datetime', '>=', isoStart),
+          where('datetime', '<=', isoEnd),
+          orderBy('datetime', 'asc')
         );
         return collectionData(q, { idField: 'id' }) as Observable<Appointment[]>;
       })
@@ -69,40 +69,40 @@ export class DashboardNutricionistaService {
           id:         a.id,
           datetime:   a.datetime,
           status:     a.status,
-          clientName: `${u.nombre} ${u.apellidos}`  // ajusta a tus campos reales
+          clientName: `${u.nombre} ${u.apellidos}`
         }))
       );
     });
     return combineLatest(streams);
   }
 
-  /** 3) Public: citas de hoy ya enriquecidas */
+  /** 3) Público: citas de hoy enriquecidas */
   getTodaysWithClient(): Observable<AppointmentWithClient[]> {
     return this.getTodayRaw().pipe(
       switchMap(raw => this.enrichWithClient(raw))
     );
   }
 
-  /** 4) Public: clientes activos */
+  /** 4) Público: clientes activos (sin orderBy para evitar necesidad de índice) */
   getActiveClients(): Observable<ClientSummary[]> {
     return this.auth.user$.pipe(
       switchMap(u => {
         if (!u) return of<ClientSummary[]>([]);
+
         const col = collection(this.fs, 'users');
-        const q   = query(
+        const q = query(
           col,
-          where('role','==','cliente'),
-          orderBy('nombre','asc')
+          where('role', '==', 'cliente'),
+          where('active', '==', true)
         );
+
         return collectionData(q, { idField: 'id' }) as Observable<any[]>;
       }),
       map(users =>
-        users
-          .filter(u => u.active === true)
-          .map(u => ({
-            id:   u.id,
-            name: `${u.nombre} ${u.apellidos}`
-          }))
+        users.map(u => ({
+          id: u.id,
+          name: `${u.nombre} ${u.apellidos}`
+        }))
       )
     );
   }

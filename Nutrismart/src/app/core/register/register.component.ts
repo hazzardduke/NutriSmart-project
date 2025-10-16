@@ -26,16 +26,11 @@ export class RegisterComponent {
 
   maxDate: string = '';
 
-  constructor(
-    private auth: AuthService,
-    private router: Router
-  ) {
-  
+  constructor(private auth: AuthService, private router: Router) {
     const hoy = new Date();
     hoy.setDate(hoy.getDate() - 1);
     this.maxDate = hoy.toISOString().split('T')[0];
   }
-
 
   soloNumeros(event: Event) {
     const input = event.target as HTMLInputElement;
@@ -62,20 +57,38 @@ export class RegisterComponent {
       role: 'cliente'
     };
 
+
+    Swal.fire({
+      title: 'Creando cuenta...',
+      html: `
+        <img src="assets/images/logontg.png" alt="Nutrition To Go" style="width:90px; margin-bottom:10px;">
+        <br><b>Por favor espera un momento</b>
+      `,
+      allowOutsideClick: false,
+      showConfirmButton: false,
+      didOpen: () => Swal.showLoading()
+    });
+
     this.auth.register(profile, this.form.password)
       .then(() => {
+        Swal.close();
+
         Swal.fire({
           icon: 'success',
           title: 'Cuenta creada correctamente',
-          text: 'Por favor verifica tu correo electrónico para activar tu cuenta.',
+          html: `
+            <p>Por favor verifica tu correo electrónico para activar tu cuenta.</p>
+
+          `,
           confirmButtonColor: '#a1c037'
         }).then(() => {
           this.router.navigateByUrl('/verify-email');
         });
       })
       .catch(err => {
-        console.error('Error completo de Firebase:', err);
+        Swal.close();
 
+        console.error('Error completo de Firebase:', err);
         let titulo = 'Error al registrar';
         let mensaje = '';
         let codigo = err?.code || 'desconocido';
@@ -115,7 +128,6 @@ export class RegisterComponent {
           html: `
             <p style="font-weight: 500; color:#333;">${mensaje}</p>
 
-            
           `,
           confirmButtonColor: '#d9534f'
         });

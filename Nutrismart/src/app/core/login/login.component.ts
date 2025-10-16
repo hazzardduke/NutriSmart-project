@@ -27,7 +27,7 @@ export class LoginComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
-    // 1) Si venimos de un magic link pendiente
+
     if ( this.auth.isSignInLink(window.location.href) ) {
       let email = window.localStorage.getItem('emailForSignIn') || '';
       if (!email) {
@@ -36,14 +36,14 @@ export class LoginComponent implements OnInit, OnDestroy {
       this.auth.completeSignInWithLink(email, window.location.href)
         .then(() => {
           window.localStorage.removeItem('emailForSignIn');
-          // Forzar recarga para inicializar la app ya autentificada
+
           window.location.href = '/admin-clients';
         })
         .catch((e: any) => this.error = e.message);
       return;
     }
 
-    // 2) Observamos el estado de autenticación para mostrar el formulario
+
     this.sub = this.auth.isAuthenticated$.subscribe(
       logged => this.isAuthenticated = logged
     );
@@ -63,26 +63,25 @@ export class LoginComponent implements OnInit, OnDestroy {
     }
 
     try {
-      // Obtenemos el perfil (incluye el role)
+
       const profile: NewUserProfile =
         await this.auth.getUserProfileByEmail(this.form.correo);
 
       if (profile.role === 'admin') {
-        // Magic link para admin
+
         window.localStorage.setItem('emailForSignIn', this.form.correo);
         await this.auth.sendSignInLink(this.form.correo);
         this.infoMessage = 'Eres admin: revisa tu correo para el enlace mágico.';
         return;
       }
 
-      // Login normal (cliente o nutricionista)
       await this.auth.login(this.form.correo, this.form.password);
 
-      // Redirigimos según el rol
+
       if (profile.role === 'nutricionista') {
         this.router.navigate(['/dashboard-nutricionista']);
       } else {
-        // cliente
+
         this.router.navigate(['/']);
       }
     } catch (err: any) {
