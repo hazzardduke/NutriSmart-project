@@ -1,16 +1,13 @@
 <header class="header">
   <div class="header-left">
     <div class="breadcrumb">
-      <!-- Aquí podrías poner tu título o rutas -->
+
     </div>
   </div>
 
   <div class="header-right">
-    <!-- Buscador -->
-    <div class="search-box">
-      <i class="fas fa-search"></i>
-      <input type="text" placeholder="Buscar...">
-    </div>
+
+
 
 
     <!-- Perfil de usuario -->
@@ -23,7 +20,7 @@
       <i class="fas fa-chevron-down"></i>
 
       <div class="user-menu" [class.active]="isUserMenuOpen">
-       
+
 
         <!-- Cliente -->
         <ng-container *ngIf="userRole==='cliente'">
@@ -55,11 +52,11 @@
           <ng-container *ngIf="userRole==='nutricionista'">
           <a routerLink="/loyalty-card-nutricionist"  class="menu-item"><i class="fas fa-star"></i>Tarjeta de Fidelidad</a>
         </ng-container>
-        
+
 
         <div class="menu-divider"></div>
         <a (click)="logout()" class="menu-item logout"><i class="fas fa-sign-out-alt"></i>Cerrar Sesión</a>
-        
+
       </div>
     </div>
   </div>

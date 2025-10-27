@@ -1,5 +1,4 @@
-// src/app/core/header/header.component.ts
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, HostListener, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
@@ -23,12 +22,13 @@ export class HeaderComponent implements OnInit, OnDestroy {
   constructor(
     private auth: AuthService,
     private router: Router,
-    private profileService: ProfileService
+    private profileService: ProfileService,
+    private eRef: ElementRef
   ) {}
 
   ngOnInit(): void {
     this.subs.add(
-      this.profileService.getProfileObservable().subscribe((p: UserProfileData|null) => {
+      this.profileService.getProfileObservable().subscribe((p: UserProfileData | null) => {
         this.photoURL = p?.fotoURL || 'assets/images/logo.jpeg';
         this.userName = p?.nombre || '';
         this.userRole = p?.role || '';
@@ -45,6 +45,13 @@ export class HeaderComponent implements OnInit, OnDestroy {
       this.isUserMenuOpen = false;
       this.router.navigate(['/login']);
     });
+  }
+
+  @HostListener('document:click', ['$event'])
+  clickOutside(event: Event) {
+    if (this.isUserMenuOpen && !this.eRef.nativeElement.contains(event.target)) {
+      this.isUserMenuOpen = false;
+    }
   }
 
   ngOnDestroy() {

@@ -8,7 +8,7 @@ import { ProfileService, UserProfileData } from '../../services/profile.service'
   standalone: true,
   imports: [
     CommonModule,
-    RouterModule    // necesario para routerLink y routerLinkActive
+    RouterModule
   ],
   templateUrl: './sidebar.component.html',
   styleUrls: ['./sidebar.component.scss']
