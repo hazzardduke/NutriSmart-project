@@ -1,16 +1,15 @@
-// src/app/core/client/personalrecord/personalrecord.component.ts
-
-import { Component, OnInit, OnDestroy, NgZone, ChangeDetectorRef, ViewChild, ElementRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Subscription, firstValueFrom } from 'rxjs';
+import Swal from 'sweetalert2';
 import { AuthService } from '../../../services/auth.service';
 import { ProfileService, UserProfileData } from '../../../services/profile.service';
 
 @Component({
   selector: 'app-personalrecord',
   standalone: true,
-  imports: [ CommonModule, ReactiveFormsModule ],
+  imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './personalrecord.component.html',
   styleUrls: ['./personalrecord.component.scss']
 })
@@ -18,16 +17,11 @@ export class PersonalrecordComponent implements OnInit, OnDestroy {
   @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
 
   profileForm: FormGroup;
-  photoURL: string | null = null;        // contiene Base64 escalado o URL
-  private uid!: string;
-  private subs = new Subscription();
-
+  photoURL: string | null = null;
+  uid!: string;
+  subs = new Subscription();
   currentSection: 'photo' | 'personal' | 'nutritional' | 'restrictions' = 'photo';
-  showPopup = false;
-  popupMessage = '';
-  popupType: 'success' | 'error' = 'success';
 
-  // Máximo ancho/alto para la imagen + calidad JPEG
   private readonly MAX_DIM = 500;
   private readonly QUALITY = 0.7;
 
@@ -42,173 +36,156 @@ export class PersonalrecordComponent implements OnInit, OnDestroy {
   constructor(
     private fb: FormBuilder,
     private auth: AuthService,
-    private profileService: ProfileService,
-    private zone: NgZone,
-    private cd: ChangeDetectorRef
+    private profileService: ProfileService
   ) {
     this.profileForm = this.fb.group({
-      direccion: ['', Validators.required],
+      nombre: ['', Validators.required],
+      apellidos: ['', Validators.required],
+      cedula: ['', [Validators.required, Validators.pattern(/^\d{9,12}$/)]],
       telefono: ['', [Validators.required, Validators.pattern(/^\d{8}$/)]],
       correo: ['', [Validators.required, Validators.email]],
-      peso: ['', Validators.required],
-      estatura: ['', Validators.required],
-      porcentajeGrasa: ['', Validators.required],
-      porcentajeMusculo: ['', Validators.required],
-      porcentajeAgua: ['', Validators.required],
+      direccion: ['', Validators.required],
+      peso: [''],
+      estatura: [''],
+      porcentajeGrasa: [''],
+      porcentajeMusculo: [''],
+      porcentajeAgua: [''],
       restricciones: ['']
     });
   }
 
-  ngOnInit(): void {
+  ngOnInit() {
     this.subs.add(
-      this.auth.user$.subscribe(user => {
+      this.auth.user$.subscribe(async user => {
         if (user) {
           this.uid = user.uid;
-          this.loadProfileOnce();
+          const data: UserProfileData = await firstValueFrom(this.profileService.getProfile(this.uid));
+          this.photoURL = data.fotoURL || null;
+          this.profileForm.patchValue({
+            nombre: data.nombre || '',
+            apellidos: data.apellidos || data.apellido || '',
+            cedula: data.cedula || '',
+            telefono: data.telefono || '',
+            correo: data.correo || '',
+            direccion: data.direccion || '',
+            peso: data.peso || '',
+            estatura: data.estatura || '',
+            porcentajeGrasa: data.porcentajeGrasa || '',
+            porcentajeMusculo: data.porcentajeMusculo || '',
+            porcentajeAgua: data.porcentajeAgua || '',
+            restricciones: data.restricciones || ''
+          });
         }
       })
     );
   }
 
-  private async loadProfileOnce(): Promise<void> {
-    try {
-      const data: UserProfileData = await firstValueFrom(
-        this.profileService.getProfile(this.uid)
-      );
-      this.zone.run(() => {
-        this.photoURL = data.fotoURL || null;
-        this.profileForm.patchValue({
-          direccion:       data.direccion       || '',
-          telefono:        data.telefono        || '',
-          correo:          data.correo          || '',
-          peso:            data.peso?.toString()            || '',
-          estatura:        data.estatura?.toString()        || '',
-          porcentajeGrasa: data.porcentajeGrasa?.toString() || '',
-          porcentajeMusculo: data.porcentajeMusculo?.toString() || '',
-          porcentajeAgua:  data.porcentajeAgua?.toString()  || '',
-          restricciones:   data.restricciones   || ''
-        });
-        this.cd.detectChanges();
-      });
-    } catch (err) {
-      console.error('Error cargando perfil:', err);
-      this.popup('No se pudo cargar los datos. Reintenta más tarde.', 'error');
-    }
-  }
-
-  selectSection(sec: 'photo'|'personal'|'nutritional'|'restrictions'): void {
+  selectSection(sec: 'photo'|'personal'|'nutritional'|'restrictions') {
     this.currentSection = sec;
   }
 
-  onPhotoSelected(event: Event): void {
-    const file = (event.target as HTMLInputElement).files?.[0] || null;
+  onPhotoSelected(event: Event) {
+    const file = (event.target as HTMLInputElement).files?.[0];
     if (!file) return;
 
     const reader = new FileReader();
     reader.onload = () => {
       const img = new Image();
       img.onload = () => {
-        const [w, h] = this.calculateSize(img.width, img.height);
+        const [w, h] = this.resizeImage(img.width, img.height);
         const canvas = document.createElement('canvas');
         canvas.width = w;
         canvas.height = h;
         const ctx = canvas.getContext('2d')!;
         ctx.drawImage(img, 0, 0, w, h);
-        this.zone.run(() => {
-          this.photoURL = canvas.toDataURL('image/jpeg', this.QUALITY);
-          this.cd.detectChanges();
-        });
+        this.photoURL = canvas.toDataURL('image/jpeg', this.QUALITY);
       };
       img.src = reader.result as string;
     };
     reader.readAsDataURL(file);
   }
 
-  private calculateSize(origW: number, origH: number): [number, number] {
-    let w = origW, h = origH;
+  private resizeImage(w: number, h: number): [number, number] {
     if (w > h && w > this.MAX_DIM) {
       h = Math.round(h * (this.MAX_DIM / w));
       w = this.MAX_DIM;
-    } else if (h >= w && h > this.MAX_DIM) {
+    } else if (h > this.MAX_DIM) {
       w = Math.round(w * (this.MAX_DIM / h));
       h = this.MAX_DIM;
     }
     return [w, h];
   }
 
-  async savePhoto(): Promise<void> {
-    if (!this.photoURL) {
-      this.popup('Selecciona una imagen primero.', 'error');
-      return;
-    }
-    try {
-      await this.profileService.updateProfile(this.uid, { fotoURL: this.photoURL });
-      this.popup('Foto guardada correctamente.', 'success');
-      this.fileInput.nativeElement.value = '';
-    } catch (err) {
-      console.error('Error guardando foto:', err);
-      this.popup('Error al guardar la foto.', 'error');
-    }
+  savePhoto() {
+    if (!this.photoURL) return this.showError('Selecciona una imagen antes de guardar.');
+
+    this.profileService.updateProfile(this.uid, { fotoURL: this.photoURL })
+      .then(() => {
+        Swal.fire({
+          title: '<img src="assets/images/logontg.png" style="width:90px; margin-bottom:10px;"><br>¡Foto actualizada!',
+          text: 'La foto de perfil se ha guardado correctamente.',
+          icon: 'success',
+          confirmButtonText: 'Aceptar',
+          confirmButtonColor: '#a1c037'
+        }).then(() => {
+          window.location.reload();
+        });
+      })
+      .catch(() => this.showError('Ocurrió un error al guardar la foto.'));
   }
 
-  async savePersonal(): Promise<void> {
-    const f = this.profileForm;
-    if (f.get('direccion')!.invalid || f.get('telefono')!.invalid || f.get('correo')!.invalid) {
-      this.popup('Corrige los campos obligatorios.', 'error');
-      return;
-    }
-    try {
-      const { direccion, telefono, correo } = f.value;
-      await this.profileService.updateProfile(this.uid, { direccion, telefono, correo });
-      this.popup('Datos personales guardados.', 'success');
-    } catch {
-      this.popup('Error al guardar datos personales.', 'error');
-    }
+  savePersonal() {
+    if (this.profileForm.invalid) return this.showError('Corrige los campos obligatorios.');
+
+    const { nombre, apellidos, cedula, telefono, correo, direccion } = this.profileForm.value;
+    this.profileService.updateProfile(this.uid, { nombre, apellidos, cedula, telefono, correo, direccion })
+      .then(() => {
+        this.showSuccess('Datos personales actualizados correctamente.');
+      })
+      .catch(() => this.showError('No se pudo actualizar la información.'));
   }
 
-  async saveNutritional(): Promise<void> {
-    const f = this.profileForm;
-    const ctrls = ['peso','estatura','porcentajeGrasa','porcentajeMusculo','porcentajeAgua'];
-    if (ctrls.some(c => f.get(c)!.invalid)) {
-      this.popup('Corrige los campos nutricionales.', 'error');
-      return;
-    }
-    try {
-      const { peso, estatura, porcentajeGrasa, porcentajeMusculo, porcentajeAgua } = f.value;
-      await this.profileService.updateProfile(this.uid, {
-        peso: +peso,
-        estatura: +estatura,
-        porcentajeGrasa: +porcentajeGrasa,
-        porcentajeMusculo: +porcentajeMusculo,
-        porcentajeAgua: +porcentajeAgua
-      });
-      this.popup('Datos nutricionales guardados.', 'success');
-    } catch {
-      this.popup('Error al guardar datos nutricionales.', 'error');
-    }
+  saveNutritional() {
+    const { peso, estatura, porcentajeGrasa, porcentajeMusculo, porcentajeAgua } = this.profileForm.value;
+    this.profileService.updateProfile(this.uid, {
+      peso: +peso,
+      estatura: +estatura,
+      porcentajeGrasa: +porcentajeGrasa,
+      porcentajeMusculo: +porcentajeMusculo,
+      porcentajeAgua: +porcentajeAgua
+    })
+      .then(() => this.showSuccess('Datos nutricionales guardados correctamente.'))
+      .catch(() => this.showError('Error al guardar los datos nutricionales.'));
   }
 
-  async saveRestrictions(): Promise<void> {
-    try {
-      const { restricciones } = this.profileForm.value;
-      await this.profileService.updateProfile(this.uid, { restricciones });
-      this.popup('Restricciones guardadas.', 'success');
-    } catch {
-      this.popup('Error al guardar restricciones.', 'error');
-    }
+  saveRestrictions() {
+    const { restricciones } = this.profileForm.value;
+    this.profileService.updateProfile(this.uid, { restricciones })
+      .then(() => this.showSuccess('Restricciones guardadas correctamente.'))
+      .catch(() => this.showError('Error al guardar restricciones.'));
   }
 
-  popup(message: string, type: 'success'|'error') {
-    this.zone.run(() => {
-      this.popupMessage = message;
-      this.popupType    = type;
-      this.showPopup    = true;
-      this.cd.detectChanges();
+  showSuccess(msg: string) {
+    Swal.fire({
+      title: '<img src="assets/images/logontg.png" style="width:90px; margin-bottom:10px;"><br>¡Éxito!',
+      text: msg,
+      icon: 'success',
+      confirmButtonText: 'Aceptar',
+      confirmButtonColor: '#a1c037'
     });
   }
-  closePopup() { this.showPopup = false; }
 
-  ngOnDestroy(): void {
+  showError(msg: string) {
+    Swal.fire({
+      title: '<img src="assets/images/logontg.png" style="width:90px; margin-bottom:10px;"><br>Error',
+      text: msg,
+      icon: 'error',
+      confirmButtonText: 'Aceptar',
+      confirmButtonColor: '#a1c037'
+    });
+  }
+
+  ngOnDestroy() {
     this.subs.unsubscribe();
   }
 }

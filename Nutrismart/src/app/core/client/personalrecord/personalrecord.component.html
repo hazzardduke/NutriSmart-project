@@ -1,14 +1,5 @@
 <form [formGroup]="profileForm" class="expediente container">
 
-
-  <div class="popup-overlay" *ngIf="showPopup">
-    <div class="popup-window" [ngClass]="popupType">
-      <p>{{ popupMessage }}</p>
-      <button (click)="closePopup()">Aceptar</button>
-    </div>
-  </div>
-
-
   <nav class="seg-tabs" role="tablist" aria-label="Secciones del expediente">
     <button type="button" role="tab"
             class="seg-tab"
@@ -38,7 +29,7 @@
 
   <section class="section">
 
-
+    <!-- FOTO DE PERFIL -->
     <article *ngIf="currentSection==='photo'" class="panel">
       <header class="panel-header">
         <h3 class="panel-title">Foto de Perfil</h3>
@@ -57,7 +48,7 @@
       </div>
     </article>
 
-    <!-- PERSONALES -->
+    <!-- DATOS PERSONALES -->
     <article *ngIf="currentSection==='personal'" class="panel">
       <header class="panel-header">
         <h3 class="panel-title">Datos Personales</h3>
@@ -65,10 +56,22 @@
 
       <div class="panel-body">
         <div class="form-grid">
-          <div class="form-field row-full">
-            <label for="direccion">Dirección</label>
-            <input id="direccion" type="text" formControlName="direccion" class="form-control">
-            <div class="invalid-feedback" *ngIf="profileForm.get('direccion')?.invalid && profileForm.get('direccion')?.touched">Campo requerido</div>
+          <div class="form-field">
+            <label for="nombre">Nombre</label>
+            <input id="nombre" type="text" formControlName="nombre" class="form-control">
+            <div class="invalid-feedback" *ngIf="profileForm.get('nombre')?.invalid && profileForm.get('nombre')?.touched">Campo requerido</div>
+          </div>
+
+          <div class="form-field">
+            <label for="apellidos">Apellidos</label>
+            <input id="apellidos" type="text" formControlName="apellidos" class="form-control">
+            <div class="invalid-feedback" *ngIf="profileForm.get('apellidos')?.invalid && profileForm.get('apellidos')?.touched">Campo requerido</div>
+          </div>
+
+          <div class="form-field">
+            <label for="cedula">Cédula</label>
+            <input id="cedula" type="text" formControlName="cedula" class="form-control">
+            <div class="invalid-feedback" *ngIf="profileForm.get('cedula')?.invalid && profileForm.get('cedula')?.touched">Formato inválido</div>
           </div>
 
           <div class="form-field">
@@ -82,6 +85,12 @@
             <input id="correo" type="email" formControlName="correo" class="form-control">
             <div class="invalid-feedback" *ngIf="profileForm.get('correo')?.invalid && profileForm.get('correo')?.touched">Formato inválido</div>
           </div>
+
+          <div class="form-field row-full">
+            <label for="direccion">Dirección</label>
+            <input id="direccion" type="text" formControlName="direccion" class="form-control">
+            <div class="invalid-feedback" *ngIf="profileForm.get('direccion')?.invalid && profileForm.get('direccion')?.touched">Campo requerido</div>
+          </div>
         </div>
       </div>
 
@@ -92,7 +101,7 @@
       </footer>
     </article>
 
-    <!-- NUTRICIONALES -->
+    <!-- DATOS NUTRICIONALES -->
     <article *ngIf="currentSection==='nutritional'" class="panel">
       <header class="panel-header">
         <h3 class="panel-title">Datos Nutricionales</h3>

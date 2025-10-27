@@ -1,4 +1,4 @@
-import { Injectable, inject } from '@angular/core';
+import { Injectable, inject, Injector, runInInjectionContext } from '@angular/core';
 import {
   Firestore,
   doc,
@@ -15,8 +15,8 @@ import { filter, switchMap, tap, map } from 'rxjs/operators';
 
 export interface UserProfileData {
   nombre?: string;
-  apellido?: string;   // nominaremos así internamente
-  apellidos?: string;  // puede venir así de Firestore
+  apellido?: string;
+  apellidos?: string;
   cedula?: string;
   direccion?: string;
   telefono?: string;
@@ -28,6 +28,7 @@ export interface UserProfileData {
   porcentajeAgua?: number;
   restricciones?: string;
   fotoURL?: string;
+  fechaNacimiento?: string;
   fechaActualizacion?: string;
   role?: 'cliente' | 'admin' | 'nutricionista';
 }
@@ -43,28 +44,32 @@ export interface ClientProfile {
 @Injectable({ providedIn: 'root' })
 export class ProfileService {
   private firestore = inject(Firestore);
-  private storage   = inject(Storage);
+  private storage = inject(Storage);
+  private injector = inject(Injector);
   private profileSubject = new BehaviorSubject<UserProfileData | null>(null);
 
-  /** Perfil actual */
   getProfileObservable() {
     return this.profileSubject.asObservable();
   }
 
+  /** ✅ Ejecuta docData dentro del contexto Angular */
   getProfile(uid: string): Observable<UserProfileData> {
     const refDoc = doc(this.firestore, `users/${uid}`);
-    return docData(refDoc).pipe(
-      filter((p): p is UserProfileData => !!p),
-      tap(p => this.profileSubject.next(p))
+    return runInInjectionContext(this.injector, () =>
+      docData(refDoc).pipe(
+        filter((p): p is UserProfileData => !!p),
+        tap(p => this.profileSubject.next(p))
+      )
     );
   }
 
+  /** ✅ Ejecuta setDoc dentro del contexto Angular */
   async updateProfile(uid: string, data: Partial<UserProfileData>) {
     const refDoc = doc(this.firestore, `users/${uid}`);
     const now = new Date().toISOString();
-    await setDoc(refDoc, { ...data, fechaActualizacion: now }, { merge: true });
-    const updated = await docData(refDoc).pipe(filter(Boolean)).toPromise();
-    this.profileSubject.next(updated as UserProfileData);
+    return runInInjectionContext(this.injector, async () => {
+      await setDoc(refDoc, { ...data, fechaActualizacion: now }, { merge: true });
+    });
   }
 
   uploadPhoto(uid: string, file: Blob): Observable<string> {
@@ -74,19 +79,20 @@ export class ProfileService {
     );
   }
 
- 
   getClients(): Observable<ClientProfile[]> {
     const usersColl = collection(this.firestore, 'users');
     const q = query(usersColl, where('role', '==', 'cliente'));
-    return collectionData(q, { idField: 'id' }).pipe(
-      map((list: any[]) =>
-        list.map(u => ({
-          id: u.id,
-          nombre: u.nombre,
-          apellido: u.apellidos ?? u.apellido ?? '',
-          cedula: u.cedula ?? '',
-          correo: u.correo ?? ''
-        }))
+    return runInInjectionContext(this.injector, () =>
+      collectionData(q, { idField: 'id' }).pipe(
+        map((list: any[]) =>
+          list.map(u => ({
+            id: u.id,
+            nombre: u.nombre,
+            apellido: u.apellidos ?? u.apellido ?? '',
+            cedula: u.cedula ?? '',
+            correo: u.correo ?? ''
+          }))
+        )
       )
     );
   }

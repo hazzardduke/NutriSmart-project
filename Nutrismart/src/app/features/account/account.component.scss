@@ -1,0 +1,138 @@
+.account-wrapper {
+  max-width: 800px;
+  margin: auto;
+  padding: 2rem;
+  background: #f5f7fa;
+  border-radius: 16px;
+  font-family: 'Segoe UI', sans-serif;
+  color: #2f3b44;
+}
+
+.tabs {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+
+  button {
+    flex: 1;
+    padding: 0.7rem 1rem;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    background: #eef3f6;
+    color: #205072;
+    border-radius: 8px 8px 0 0;
+    transition: 0.3s;
+
+    &.active {
+      background: #a1c037;
+      color: #fff;
+    }
+
+    &:hover:not(.active) {
+      background: #e2eaee;
+    }
+  }
+}
+
+.tab-content {
+  background: #fff;
+  border-radius: 0 0 12px 12px;
+  padding: 1.5rem;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+}
+
+.photo-section {
+  display: grid;
+  justify-items: center;
+  gap: 1rem;
+
+  .avatar {
+    width: 140px;
+    height: 140px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid #1f3a52;
+    box-shadow: 0 6px 14px rgba(0,0,0,0.2);
+  }
+
+  .btn-row {
+    display: flex;
+    gap: 0.6rem;
+    flex-wrap: wrap;
+  }
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1rem;
+
+  .form-field {
+    display: flex;
+    flex-direction: column;
+
+    label {
+      font-weight: 700;
+      margin-bottom: 0.4rem;
+    }
+
+    input {
+      padding: 0.6rem;
+      border: 1px solid #cfd6dd;
+      border-radius: 10px;
+    }
+  }
+
+  .row-full {
+    grid-column: 1 / -1;
+  }
+
+  .actions {
+    grid-column: 1 / -1;
+    display: flex;
+    justify-content: center;
+    margin-top: 1rem;
+  }
+}
+
+/* Popup */
+.popup-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  display: grid;
+  place-items: center;
+}
+.popup-window {
+  background: #fff;
+  padding: 1.3rem;
+  border-radius: 14px;
+  text-align: center;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+
+  &.success p { color: #155724; }
+  &.error p { color: #721c24; }
+
+  button {
+    margin-top: 1rem;
+    padding: 0.6rem 1.1rem;
+    border: none;
+    background: #a1c037;
+    color: #fff;
+    border-radius: 10px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+}
+
+.btn {
+  padding: 0.6rem 1.2rem;
+  border: none;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  &.btn-primary { background: #1887a6; color: #fff; }
+  &.btn-success { background: #a1c037; color: #fff; }
+  &:hover { opacity: 0.9; }
+}

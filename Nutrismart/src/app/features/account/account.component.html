@@ -1,0 +1,95 @@
+<div class="account-wrapper">
+  <!-- Tabs de navegación -->
+  <nav class="tabs">
+    <button (click)="selectTab('photo')" [class.active]="activeTab === 'photo'">
+      Foto de Perfil
+    </button>
+    <button (click)="selectTab('data')" [class.active]="activeTab === 'data'">
+      Datos Personales
+    </button>
+  </nav>
+
+  <section class="tab-content">
+    <!-- FOTO DE PERFIL -->
+    <div *ngIf="activeTab === 'photo'" class="photo-section">
+      <div class="avatar-wrap">
+        <img
+          [src]="photoURL || 'assets/images/logo.jpeg'"
+          class="avatar"
+          alt="Foto de perfil"
+        />
+      </div>
+
+      <div class="btn-row">
+        <input
+          #fileInput
+          type="file"
+          accept="image/*"
+          hidden
+          (change)="onPhotoSelected($event)"
+        />
+        <button class="btn btn-primary" (click)="fileInput.click()">
+          Elegir foto
+        </button>
+        <button class="btn btn-success" (click)="savePhoto()">
+          Guardar
+        </button>
+      </div>
+    </div>
+
+
+    <form
+      *ngIf="activeTab === 'data'"
+      [formGroup]="form"
+      class="form-grid"
+      autocomplete="off"
+    >
+      <div class="form-field">
+        <label>Nombre</label>
+        <input formControlName="nombre" type="text" />
+      </div>
+
+      <div class="form-field">
+        <label>Apellido</label>
+        <input formControlName="apellido" type="text" />
+      </div>
+
+      <div class="form-field">
+        <label>Correo</label>
+        <input formControlName="correo" type="email" />
+      </div>
+
+      <div class="form-field">
+        <label>Cédula</label>
+        <input formControlName="cedula" type="text" />
+      </div>
+
+      <div class="form-field">
+        <label>Teléfono</label>
+        <input formControlName="telefono" type="text" />
+      </div>
+
+      <div class="form-field row-full">
+        <label>Dirección</label>
+        <input formControlName="direccion" type="text" />
+      </div>
+
+      <div class="form-field">
+        <label>Fecha de Nacimiento</label>
+        <input formControlName="fechaNacimiento" type="date" />
+      </div>
+
+      <div class="actions">
+        <button type="button" class="btn btn-success" (click)="saveData()">
+          Guardar Cambios
+        </button>
+
+      </div>
+    </form>
+
+  </section>
+
+
+</div>
+
+

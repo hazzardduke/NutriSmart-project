@@ -22,6 +22,8 @@ import { AdminClientsComponent }      from './admin-clients/admin-clients.compon
 import { GoalsNutricionistComponent } from './features/goals-nutricionist/goals-nutricionist.component';
 
 import { ClientNutritionPlansComponent } from './features/client-nutrition-plans/client-nutrition-plans.component';
+import { AccountComponent } from './features/account/account.component';
+import { ChangePasswordComponent } from './core/changepassword/changepassword.component';
 
 export const routes: Routes = [
   { path: 'login',    component: LoginComponent },
@@ -64,6 +66,8 @@ export const routes: Routes = [
         canActivate: [ roleGuard ],
         data: { role: 'cliente' }
       },
+
+
        {
         path: 'loyaltycard',
         component: LoyaltyCardClientComponent,
@@ -72,7 +76,7 @@ export const routes: Routes = [
       },
 
       // Admin
-      
+
 
        {
         path: 'admin-clients',
@@ -106,8 +110,22 @@ export const routes: Routes = [
         canActivate: [ roleGuard ],
         data: { role: 'nutricionista' }
       },
-      
-  
+
+      {
+        path: 'account',
+        component:AccountComponent,
+        canActivate: [ roleGuard ],
+        data: { role: 'nutricionista' }
+      },
+
+       {
+          path: 'changepassword',
+          component: ChangePasswordComponent,
+          canActivate: [authGuard]
+        },
+
+
+
 
        {
         path: 'loyalty-card-nutricionist',
@@ -121,4 +139,6 @@ export const routes: Routes = [
 
   // fallback
   { path: '**', redirectTo: 'login' }
+
+
 ];

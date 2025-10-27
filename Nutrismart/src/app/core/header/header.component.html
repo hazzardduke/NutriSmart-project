@@ -24,33 +24,20 @@
 
         <!-- Cliente -->
         <ng-container *ngIf="userRole==='cliente'">
-          <a routerLink="/profile" class="menu-item"><i class="fas fa-user"></i>Mi Perfil</a>
-          <a routerLink="/appoinments" class="menu-item"><i class="fas fa-calendar-alt"></i>Citas</a>
-          <a routerLink="/goals" class="menu-item"><i class="fas fa-bullseye"></i>Objetivos</a>
-           <a routerLink="/client-plan"  class="menu-item"><i class="fas fa-apple-alt"></i>Planes Nutricionales</a>
-          <a routerLink="/loyaltycard"  class="menu-item"><i class="fas fa-star"></i>Tarjeta de Fidelidad</a>
+          <a routerLink="/profile" class="menu-item"><i class="fas fa-user"></i>Perfil</a>
+          <a routerLink="/changepassword" class="menu-item"><i class="fas fa-key"></i>Cambiar Contraseña</a>
         </ng-container>
 
         <!-- Admin -->
         <ng-container *ngIf="userRole==='admin'">
-          <a routerLink="/admin-clients" class="menu-item"><i class="fas fa-users-cog"></i>Gestionar Usuarios</a>
+          <a routerLink="/changepassword" class="menu-item"><i class="fas fa-key"></i>Cambiar Contraseña</a>
         </ng-container>
 
         <!-- Nutricionista -->
+
         <ng-container *ngIf="userRole==='nutricionista'">
-          <a routerLink="/dashboard-nutricionista" class="menu-item"><i class="fas fa-home"></i>Nutricionista</a>
-        </ng-container>
-        <ng-container *ngIf="userRole==='nutricionista'">
-          <a routerLink="/nutri-schedule" class="menu-item"><i class="fas fa-calendar-check"></i>Citas</a>
-        </ng-container>
-           <ng-container *ngIf="userRole==='nutricionista'">
-          <a routerLink="/goals-nutricionist"  class="menu-item"><i class="fas fa-bullseye"></i>Seguimiento de objetivos</a>
-        </ng-container>
-          <ng-container *ngIf="userRole==='nutricionista'">
-          <a routerLink="/nutri-plan"  class="menu-item"><i class="fas fa-apple-alt"></i>Planes Nutricionales</a>
-        </ng-container>
-          <ng-container *ngIf="userRole==='nutricionista'">
-          <a routerLink="/loyalty-card-nutricionist"  class="menu-item"><i class="fas fa-star"></i>Tarjeta de Fidelidad</a>
+           <a routerLink="/account" class="menu-item"><i class="fas fa-user"></i>Perfil</a>
+           <a routerLink="/changepassword" class="menu-item"><i class="fas fa-key"></i>Cambiar Contraseña</a>
         </ng-container>
 
 
