@@ -1,3 +1,4 @@
+
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import Swal from 'sweetalert2';
 import { CommonModule } from '@angular/common';
@@ -61,9 +62,7 @@ export class NutritionPlanFormComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
-    this.subs.add(
-      this.profileService.getClients().subscribe(list => (this.clients = list))
-    );
+    this.subs.add(this.profileService.getClients().subscribe(list => (this.clients = list)));
 
     this.portionsForm = this.fb.group({});
 
@@ -250,6 +249,7 @@ export class NutritionPlanFormComponent implements OnInit, OnDestroy {
     this.filteredPlans$.subscribe(plans => this.updatePagination(plans));
   }
 
+
   private buildTableDocDef(portions: SavedPlan['portions']): TDocumentDefinitions {
     const header = [
       { text: 'Alimentos', style: 'tableHeader' },
@@ -277,8 +277,9 @@ export class NutritionPlanFormComponent implements OnInit, OnDestroy {
 
     return {
       pageSize: 'A4',
-      pageMargins: [40, 60, 40, 60],
+      pageMargins: [40, 30, 40, 60],
       content: [
+
         {
           table: {
             headerRows: 1,
@@ -286,15 +287,34 @@ export class NutritionPlanFormComponent implements OnInit, OnDestroy {
             body: [header, ...rows]
           },
           layout: {
-            fillColor: (i: number) =>
-              i === 0 ? '#a1c037' : i % 2 === 0 ? '#F0F5F0' : null
+            fillColor: (i: number) => (i === 0 ? '#7ea230' : i % 2 === 0 ? '#f7faf2' : null),
+            hLineColor: () => '#d5e1bd',
+            vLineColor: () => '#d5e1bd',
+            hLineWidth: () => 0.5,
+            vLineWidth: () => 0.5,
+            paddingTop: () => 6,
+            paddingBottom: () => 6
           }
+        },
+        {
+          text: '\nRecomendaciones:',
+          style: 'subtitle',
+          margin: [0, 12, 0, 4]
+        },
+        {
+          text:
+            'Recuerde seguir el plan de alimentación según las porciones asignadas. ' +
+            'Mantenga una correcta hidratación y consulte ante cualquier duda con su nutricionista.',
+          style: 'bodyText'
         }
       ],
       styles: {
-        tableHeader: { fontSize: 12, bold: true, color: '#fff', alignment: 'center' },
-        tableFirstCell: { fontSize: 11, bold: true, alignment: 'left' },
-        tableCell: { fontSize: 10, alignment: 'center' }
+        title: { fontSize: 16, bold: true, color: '#2c3e50', alignment: 'center' },
+        subtitle: { fontSize: 12, bold: true, color: '#7ea230' },
+        bodyText: { fontSize: 10, color: '#333', alignment: 'justify', lineHeight: 1.3 },
+        tableHeader: { fontSize: 11, bold: true, color: '#fff', alignment: 'center' },
+        tableFirstCell: { fontSize: 10, bold: true, color: '#2c3e50', alignment: 'left', margin: [5, 3, 0, 3] },
+        tableCell: { fontSize: 10, color: '#333', alignment: 'center', margin: [0, 3, 0, 3] }
       },
       defaultStyle: { fontSize: 10 }
     };

@@ -1,4 +1,4 @@
-// src/app/features/client-nutrition-plans/client-nutrition-plans.component.ts
+
 import { Component, OnInit } from '@angular/core';
 import { CommonModule, formatDate } from '@angular/common';
 import { ClientNutritionPlanService, SavedPlan } from '../../services/client-nutrition-plan.service';
@@ -17,7 +17,6 @@ export class ClientNutritionPlansComponent implements OnInit {
   plans$!: Observable<SavedPlan[]>;
   allPlans: SavedPlan[] = [];
   paginatedPlans: SavedPlan[] = [];
-
   errorMessage: string | null = null;
   selectedPlan: SavedPlan | null = null;
   showModal = false;
@@ -25,7 +24,6 @@ export class ClientNutritionPlansComponent implements OnInit {
 
   private categories = ['Lácteos', 'Vegetales', 'Frutas', 'Harinas', 'Proteínas', 'Grasas'];
 
-  // 🔹 Paginación
   currentPage = 1;
   itemsPerPage = 5;
   totalPages = 1;
@@ -40,11 +38,9 @@ export class ClientNutritionPlansComponent implements OnInit {
     this.plans$ = this.planService.getMyPlans().pipe(
       catchError(err => {
         console.error('Error cargando planes:', err);
-        if (err?.message === 'permission-denied') {
-          this.errorMessage = 'No tienes permiso para ver tus planes. Verifica tu sesión.';
-        } else {
-          this.errorMessage = `Error cargando planes: ${err?.message || err}`;
-        }
+        this.errorMessage = err?.message === 'permission-denied'
+          ? 'No tienes permiso para ver tus planes. Verifica tu sesión.'
+          : `Error cargando planes: ${err?.message || err}`;
         return of([] as SavedPlan[]);
       })
     );
@@ -63,24 +59,18 @@ export class ClientNutritionPlansComponent implements OnInit {
     this.updatePagination();
   }
 
-  /** 🔹 Lógica avanzada de paginación con puntos suspensivos */
   updatePagination(): void {
     const total = this.totalPages;
     const current = this.currentPage;
-    const visiblePages = 7; // máximo de botones visibles (ajustable)
+    const visiblePages = 7;
     const range: (number | string)[] = [];
 
     if (total <= visiblePages) {
-      // Si hay pocas páginas, se muestran todas
-      for (let i = 1; i <= total; i++) {
-        range.push(i);
-      }
+      for (let i = 1; i <= total; i++) range.push(i);
     } else {
       const left = Math.max(2, current - 2);
       const right = Math.min(total - 1, current + 2);
-
       range.push(1);
-
       if (left > 2) range.push('...');
       for (let i = left; i <= right; i++) range.push(i);
       if (right < total - 1) range.push('...');
@@ -144,55 +134,82 @@ export class ClientNutritionPlansComponent implements OnInit {
     return plan.id;
   }
 
-  private buildTableDocDef(portions: any): any {
-    const header = [
-      { text: 'Alimentos', style: 'tableHeader' },
-      { text: 'Porciones', style: 'tableHeader' },
-      { text: 'Desayuno', style: 'tableHeader' },
-      { text: 'Merienda #1', style: 'tableHeader' },
-      { text: 'Almuerzo', style: 'tableHeader' },
-      { text: 'Merienda #2', style: 'tableHeader' },
-      { text: 'Cena', style: 'tableHeader' },
+
+ private buildTableDocDef(portions: any): any {
+  const header = [
+    { text: 'Alimentos', style: 'tableHeader' },
+    { text: 'Porciones', style: 'tableHeader' },
+    { text: 'Desayuno', style: 'tableHeader' },
+    { text: 'Merienda #1', style: 'tableHeader' },
+    { text: 'Almuerzo', style: 'tableHeader' },
+    { text: 'Merienda #2', style: 'tableHeader' },
+    { text: 'Cena', style: 'tableHeader' },
+  ];
+
+  const rows = this.categories.map(cat => {
+    const r = portions?.[cat] || { desayuno: 0, merienda1: 0, almuerzo: 0, merienda2: 0, cena: 0 };
+    const porc =
+      (r.desayuno || 0) +
+      (r.merienda1 || 0) +
+      (r.almuerzo || 0) +
+      (r.merienda2 || 0) +
+      (r.cena || 0);
+    return [
+      { text: cat, style: 'tableFirstCell' },
+      { text: porc.toString(), style: 'tableCell' },
+      { text: (r.desayuno || 0).toString(), style: 'tableCell' },
+      { text: (r.merienda1 || 0).toString(), style: 'tableCell' },
+      { text: (r.almuerzo || 0).toString(), style: 'tableCell' },
+      { text: (r.merienda2 || 0).toString(), style: 'tableCell' },
+      { text: (r.cena || 0).toString(), style: 'tableCell' },
     ];
+  });
 
-    const rows = this.categories.map(cat => {
-      const r = portions?.[cat] || { desayuno: 0, merienda1: 0, almuerzo: 0, merienda2: 0, cena: 0 };
-      const porc =
-        (r.desayuno || 0) +
-        (r.merienda1 || 0) +
-        (r.almuerzo || 0) +
-        (r.merienda2 || 0) +
-        (r.cena || 0);
-      return [
-        { text: cat, style: 'tableFirstCell' },
-        { text: porc.toString(), style: 'tableCell' },
-        { text: (r.desayuno || 0).toString(), style: 'tableCell' },
-        { text: (r.merienda1 || 0).toString(), style: 'tableCell' },
-        { text: (r.almuerzo || 0).toString(), style: 'tableCell' },
-        { text: (r.merienda2 || 0).toString(), style: 'tableCell' },
-        { text: (r.cena || 0).toString(), style: 'tableCell' },
-      ];
-    });
+  return {
+    pageSize: 'A4',
+    pageMargins: [40, 30, 40, 60],
+    content: [
 
-    return {
-      pageSize: 'A4',
-      pageMargins: [40, 60, 40, 60],
-      content: [
-        {
-          table: {
-            headerRows: 1,
-            widths: ['*', '*', '*', '*', '*', '*', '*'],
-            body: [header, ...rows],
-          },
+      {
+        table: {
+          headerRows: 1,
+          widths: ['*', '*', '*', '*', '*', '*', '*'],
+          body: [header, ...rows],
         },
-      ],
-      styles: {
-        tableHeader: { fontSize: 12, bold: true, color: '#fff', alignment: 'center' },
-        tableFirstCell: { fontSize: 11, bold: true, alignment: 'left' },
-        tableCell: { fontSize: 10, alignment: 'center' },
+        layout: {
+          fillColor: (i: number) => (i === 0 ? '#7ea230' : i % 2 === 0 ? '#f7faf2' : null),
+          hLineColor: () => '#d5e1bd',
+          vLineColor: () => '#d5e1bd',
+          hLineWidth: () => 0.5,
+          vLineWidth: () => 0.5,
+          paddingTop: () => 6,
+          paddingBottom: () => 6,
+        },
       },
-    };
-  }
+      {
+        text: '\nRecomendaciones:',
+        style: 'subtitle',
+        margin: [0, 12, 0, 4],
+      },
+      {
+        text:
+          'Recuerde seguir el plan de alimentación según las porciones asignadas. ' +
+          'Mantenga una correcta hidratación y consulte ante cualquier duda con su nutricionista.',
+        style: 'bodyText',
+      },
+    ],
+    styles: {
+      title: { fontSize: 16, bold: true, color: '#2c3e50', alignment: 'center' },
+      subtitle: { fontSize: 12, bold: true, color: '#7ea230' },
+      bodyText: { fontSize: 10, color: '#333', alignment: 'justify', lineHeight: 1.3 },
+      tableHeader: { fontSize: 11, bold: true, color: '#fff', alignment: 'center' },
+      tableFirstCell: { fontSize: 10, bold: true, color: '#2c3e50', alignment: 'left', margin: [5, 3, 0, 3] },
+      tableCell: { fontSize: 10, color: '#333', alignment: 'center', margin: [0, 3, 0, 3] },
+    },
+    defaultStyle: { fontSize: 10 },
+  };
+}
+
 
   private sanitizeFileName(name: string): string {
     return name.replace(/[^\w\-\.]/g, '_');
@@ -213,7 +230,7 @@ export class ClientNutritionPlansComponent implements OnInit {
         filename
       );
     } catch (err) {
-      console.error('Error regenerando el PDF en el cliente:', err);
+      console.error('Error generando el PDF:', err);
       this.errorMessage = 'Ocurrió un error al generar el PDF. Intenta de nuevo más tarde.';
     } finally {
       this.downloading[plan.id] = false;
