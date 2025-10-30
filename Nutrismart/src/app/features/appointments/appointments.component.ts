@@ -221,7 +221,7 @@ export class AppointmentsComponent implements OnInit, OnDestroy {
           .then(() => {
             Swal.fire({
               title: 'Cita cancelada',
-              text: 'Tu cita ha sido cancelada correctamente. <br> Se envió un correo con la confirmación de la cancelación.',
+              text: 'Tu cita ha sido cancelada correctamente. Se envió un correo con la confirmación de la cancelación.',
               icon: 'success',
               confirmButtonColor: '#a1c037'
             });
@@ -257,7 +257,7 @@ export class AppointmentsComponent implements OnInit, OnDestroy {
       Swal.fire({
         title: 'Cita confirmada',
         html: correo
-          ? `${msg}<br><br> Se envió un correo de confirmación con los detalles de la cita.`
+          ? `${msg}<br><br>Se envió un correo de confirmación con los detalles de la cita.`
           : msg,
         icon: 'success',
         confirmButtonColor: '#a1c037'
@@ -268,8 +268,11 @@ export class AppointmentsComponent implements OnInit, OnDestroy {
       this.loadCitasDeUsuario();
     };
 
-    if (this.enEdicion && this.citaEnEdicion?.id) {
-      this.apptService.updateAppointment(this.citaEnEdicion.id, { datetime: iso })
+    // === CASO 1: Reagendar cita existente ===
+    if (this.enEdicion && this.citaEnEdicion && this.citaEnEdicion.id) {
+      const citaAntiguaId = this.citaEnEdicion.id;
+
+      this.apptService.updateAppointment(citaAntiguaId, { datetime: iso })
         .then(() => this.emailService.sendCitaActualizada(this.userEmail, {
           nombre: this.userName,
           fecha: this.formatFullDate(iso),
@@ -281,19 +284,31 @@ export class AppointmentsComponent implements OnInit, OnDestroy {
           Swal.close();
           Swal.fire('Error', 'No se pudo actualizar la cita.', 'error');
         });
+
+    // === CASO 2: Nueva cita ===
     } else {
-      this.apptService.createAppointment({ userId: this.uid, datetime: iso, status: 'confirmed' })
-        .then(() => this.emailService.sendCitaConfirmada(this.userEmail, {
-          nombre: this.userName,
-          fecha: this.formatFullDate(iso),
-          hora: this.formateaHora(iso),
-          ubicacion: 'Clínica NutriSmart'
-        }))
-        .then(() => finalizar(`Tu cita fue programada para ${this.formateaFecha(iso)} a las ${this.horaSeleccionada}.`, true))
-        .catch(() => {
-          Swal.close();
-          Swal.fire('Error', 'No se pudo crear la cita. Intenta nuevamente.', 'error');
-        });
+      const activa = this.citasUsuario.find(c => c.status === 'confirmed' && !this.esCitaPasada(c));
+      const crearNueva = () => {
+        this.apptService.createAppointment({ userId: this.uid, datetime: iso, status: 'confirmed' })
+          .then(() => this.emailService.sendCitaConfirmada(this.userEmail, {
+            nombre: this.userName,
+            fecha: this.formatFullDate(iso),
+            hora: this.formateaHora(iso),
+            ubicacion: 'Clínica NutriSmart'
+          }))
+          .then(() => finalizar(`Tu cita fue programada para ${this.formateaFecha(iso)} a las ${this.horaSeleccionada}.`, true))
+          .catch(() => {
+            Swal.close();
+            Swal.fire('Error', 'No se pudo crear la cita. Intenta nuevamente.', 'error');
+          });
+      };
+
+      if (activa && activa.id) {
+        this.apptService.updateAppointment(activa.id, { status: 'canceled' })
+          .then(() => crearNueva());
+      } else {
+        crearNueva();
+      }
     }
   }
 
@@ -328,7 +343,6 @@ export class AppointmentsComponent implements OnInit, OnDestroy {
   formatFullDate(iso: string): string {
     return new Date(iso).toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' });
   }
-
 
   get citasPaginadas(): Appointment[] {
     const inicio = (this.paginaActual - 1) * this.citasPorPagina;
