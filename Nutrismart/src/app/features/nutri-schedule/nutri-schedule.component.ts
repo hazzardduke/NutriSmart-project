@@ -11,7 +11,7 @@ import {
   NgClass
 } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Subscription } from 'rxjs';
+import { Subscription, combineLatest } from 'rxjs';
 import Swal from 'sweetalert2';
 
 import { ProfileService, ClientProfile } from '../../services/profile.service';
@@ -67,13 +67,14 @@ export class NutriScheduleComponent implements OnInit, OnDestroy {
     this.fechaSeleccionada = this.today;
     this.calendarOptions.validRange = { start: this.today };
 
-    this.subs.add(this.profileService.getClients().subscribe(list => (this.clients = list)));
+    const clients$ = this.profileService.getClients();
+    const apps$ = this.apptService.getAllAppointments();
 
     this.subs.add(
-      this.apptService.getAllAppointments().subscribe(apps => {
+      combineLatest([clients$, apps$]).subscribe(([clients, apps]) => {
+        this.clients = clients;
         const now = Date.now();
 
-        // Actualizar citas pasadas a "completed"
         apps.forEach(c => {
           const startMs = new Date(c.datetime).getTime();
           if (c.status === 'confirmed' && startMs + 3600000 < now) {
@@ -96,13 +97,11 @@ export class NutriScheduleComponent implements OnInit, OnDestroy {
     this.subs.unsubscribe();
   }
 
-  // --- FILTRO DE CLIENTE ---
   onFilterChange(): void {
     this.currentPage = 1;
     this.updatePaginatedHistory();
   }
 
-  // --- CONFIGURACIÓN DE CALENDARIO ---
   calendarOptions: CalendarOptions = {
     plugins: [timeGridPlugin, interactionPlugin],
     locale: 'es',
@@ -119,7 +118,7 @@ export class NutriScheduleComponent implements OnInit, OnDestroy {
     eventTimeFormat: { hour: 'numeric', minute: '2-digit', hour12: true },
     events: [],
     dateClick: this.onDateClick.bind(this),
-    eventDidMount: this.renderEventButtons.bind(this)
+    eventContent: this.renderEventContent.bind(this)
   };
 
   private loadCalendarEvents(): void {
@@ -135,32 +134,59 @@ export class NutriScheduleComponent implements OnInit, OnDestroy {
     this.calendarOptions.events = eventos;
   }
 
-  private renderEventButtons(arg: any): void {
-    if (arg.event.extendedProps.status === 'completed') return;
+  private renderEventContent(arg: any): { domNodes: Node[] } {
+    const status: string = arg.event.extendedProps?.status || 'confirmed';
+    const name: string = arg.event.title || '';
+    const container = document.createElement('div');
+    container.className = 'fc-event-inner';
 
-    const el = arg.el as HTMLElement;
-    const edit = document.createElement('img');
-    edit.src = '/assets/images/edit-icon.png';
-    edit.classList.add('event-btn-icon');
-    edit.title = 'Editar cita';
-    edit.addEventListener('click', ev => {
-      ev.stopPropagation();
-      this.startEdit(arg.event.id!);
-    });
+    const top = document.createElement('div');
+    top.className = 'event-top';
 
-    const cancel = document.createElement('img');
-    cancel.src = '/assets/images/cancel-icon.png';
-    cancel.classList.add('event-btn-icon');
-    cancel.title = 'Cancelar cita';
-    cancel.addEventListener('click', ev => {
-      ev.stopPropagation();
-      this.cancelAppointment(arg.event.id!);
-    });
+    const pill = document.createElement('span');
+    pill.className = `status-pill ${status === 'completed' ? 'status-completed' : 'status-confirmed'}`;
+    pill.textContent = status === 'completed' ? 'Completada' : 'Confirmada';
 
-    el.querySelector('.fc-event-title')?.append(edit, cancel);
+    const title = document.createElement('div');
+    title.className = 'event-title';
+    title.textContent = name;
+
+    top.appendChild(pill);
+    top.appendChild(title);
+    container.appendChild(top);
+
+    const actions = document.createElement('div');
+    actions.className = 'event-actions';
+
+    if (status !== 'completed') {
+      const edit = document.createElement('img');
+      edit.src = '/assets/images/edit-icon.png';
+      edit.className = 'event-btn-icon';
+      edit.alt = 'Editar';
+      edit.title = 'Editar cita';
+      edit.addEventListener('click', (ev) => {
+        ev.stopPropagation();
+        this.startEdit(arg.event.id!);
+      });
+
+      const cancel = document.createElement('img');
+      cancel.src = '/assets/images/cancel-icon.png';
+      cancel.className = 'event-btn-icon';
+      cancel.alt = 'Cancelar';
+      cancel.title = 'Cancelar cita';
+      cancel.addEventListener('click', (ev) => {
+        ev.stopPropagation();
+        this.cancelAppointment(arg.event.id!);
+      });
+
+      actions.appendChild(edit);
+      actions.appendChild(cancel);
+    }
+
+    container.appendChild(actions);
+    return { domNodes: [container] };
   }
 
-  // --- CREAR O ACTUALIZAR CITA ---
   async scheduleCita(): Promise<void> {
     if (!this.selectedClientId || !this.fechaSeleccionada || !this.horaSeleccionada) {
       await Swal.fire('Campos incompletos', 'Por favor selecciona cliente, fecha y hora.', 'warning');
@@ -225,7 +251,6 @@ export class NutriScheduleComponent implements OnInit, OnDestroy {
     }
   }
 
-  // --- CANCELAR CITA ---
   async cancelAppointment(id: string): Promise<void> {
     const confirm = await Swal.fire({
       title: '¿Cancelar cita?',
@@ -234,7 +259,7 @@ export class NutriScheduleComponent implements OnInit, OnDestroy {
       showCancelButton: true,
       confirmButtonText: 'Sí, cancelar',
       cancelButtonText: 'No',
-      confirmButtonColor: '#a1c037'
+      confirmButtonColor: '#d21d1dff'
     });
     if (!confirm.isConfirmed) return;
 
@@ -263,7 +288,6 @@ export class NutriScheduleComponent implements OnInit, OnDestroy {
     }
   }
 
-  // --- EDITAR CITA ---
   async startEdit(id: string): Promise<void> {
     const appt = this.citas.find(c => c.id === id)!;
     this.editingId = id;
@@ -287,7 +311,6 @@ export class NutriScheduleComponent implements OnInit, OnDestroy {
     else this.finishEdit();
   }
 
-  // --- FINALIZAR EDICIÓN ---
   finishEdit(): void {
     this.editingId = null;
     this.selectedClientId = '';
@@ -297,7 +320,6 @@ export class NutriScheduleComponent implements OnInit, OnDestroy {
     this.loadCalendarEvents();
   }
 
-  // --- PAGINACIÓN ---
   updatePaginatedHistory(): void {
     const filtered = this.filteredHistoryAppointments;
     this.totalPages = Math.ceil(filtered.length / this.itemsPerPage);
@@ -357,7 +379,6 @@ export class NutriScheduleComponent implements OnInit, OnDestroy {
     this.updatePaginatedHistory();
   }
 
-  // --- UTILIDADES ---
   get filteredHistoryAppointments(): Appointment[] {
     return this.allCitas
       .filter(c => c.status === 'canceled' || c.status === 'completed')
