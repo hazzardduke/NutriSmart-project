@@ -129,9 +129,9 @@
   margin: 0.5rem 0;
 }
 
-/* Media Queries para Responsividad */
+
 @media (max-width: 768px) {
-  /* Distribución vertical en el header */
+
   .header {
     flex-direction: column;
     align-items: flex-start;
@@ -144,7 +144,7 @@
     justify-content: space-between;
   }
 
-  /* Reducir tamaño del título y ocultar la ruta actual */
+
   .header-left .breadcrumb h1 {
     font-size: 1.2rem;
   }
@@ -153,7 +153,7 @@
     display: none;
   }
 
-  /* Ajuste del buscador */
+
   .header-right .search-box input {
     width: 150px;
     padding: 0.5rem 1rem 0.5rem 2.5rem;
@@ -163,15 +163,10 @@
     width: 180px;
   }
 
-  /* Opcional: podrías ocultar algunos elementos para mayor simplicidad */
-  /* Ejemplo: ocultar notificaciones si el espacio es muy reducido */
-  /* .header-right .notifications {
-       display: none;
-  } */
 }
 
 @media (max-width: 480px) {
-  /* Ajustes adicionales para móviles */
+
   .header {
     padding: 1rem;
   }

@@ -14,24 +14,23 @@ export const roleGuard: CanActivateFn = (
   route: ActivatedRouteSnapshot,
   state: RouterStateSnapshot
 ) => {
-  const auth    = inject(AuthService);
+  const auth = inject(AuthService);
   const profile = inject(ProfileService);
-  const router  = inject(Router);
+  const router = inject(Router);
   const expectedRole = route.data['role'] as 'cliente' | 'admin' | 'nutricionista';
 
   return auth.user$.pipe(
     take(1),
     switchMap(user => {
-      if (!user) {
-        return of(router.parseUrl('/login'));
-      }
-      // Carga desde Firestore
+      if (!user) return of(router.parseUrl('/login'));
       return profile.getProfile(user.uid).pipe(
         take(1),
         map((p: UserProfileData) => {
-          return p.role === expectedRole
-            ? true
-            : router.parseUrl('/');
+          const verified2FA = localStorage.getItem('2faVerified') === 'true';
+          if (p.role === 'admin' && !verified2FA) {
+            return router.parseUrl('/auth-verify');
+          }
+          return p.role === expectedRole ? true : router.parseUrl('/');
         })
       );
     })

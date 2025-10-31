@@ -41,7 +41,6 @@ body {
   background: #f4f6f9;
 }
 
-/* Banner de verificación */
 .verify-notice {
   background-color: #fff3cd;
   border: 1px solid #ffeeba;
@@ -54,7 +53,15 @@ body {
   font-weight: 500;
 }
 
-/* Responsive */
+
+.overlay-block {
+  position: fixed;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(2px);
+  z-index: 9998;
+}
+
 @media (max-width: 768px) {
   .sidebar {
     margin-left: -250px;

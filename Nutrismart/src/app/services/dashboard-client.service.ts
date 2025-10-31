@@ -33,12 +33,12 @@ export interface Recommendation {
   shortText?: string;
   detail?: string;
   createdAt?: string;
-  tipo?: string;         // tipo de objetivo, ej. "Pérdida de peso", "Ganancia muscular"
-  comentario?: string;   // texto o mensaje de la recomendación
-  fecha?: string;        // fecha de creación (campo "fecha" de tus docs)
-  meta?: string;         // meta asociada si existe
-  goalId?: string;       // id del goal padre (útil para referencia)
-  userId?: string;       // id del usuario (si está guardado)
+  tipo?: string;
+  comentario?: string;
+  fecha?: string;
+  meta?: string;
+  goalId?: string;
+  userId?: string;
 }
 
 export interface Goal {

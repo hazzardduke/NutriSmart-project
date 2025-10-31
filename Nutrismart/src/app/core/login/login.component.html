@@ -1,6 +1,5 @@
 <div class="login-wrapper">
   <div class="login-card">
-
     <div class="login-logo">
       <img src="/assets/images/logontg.png" alt="Logo NutriSmart" />
     </div>
@@ -12,39 +11,33 @@
       <br>
     </div>
 
-
     <form
-    *ngIf="!isAuthenticated"
-    #loginForm="ngForm"
-    (ngSubmit)="login(loginForm)"
-    novalidate
-    class="login-form"
-  >
+      #loginForm="ngForm"
+      (ngSubmit)="login(loginForm)"
+      novalidate
+      class="login-form"
+    >
+      <input
+        placeholder="Correo Electrónico"
+        type="email"
+        name="correo"
+        [(ngModel)]="form.correo"
+        required
+        email
+      />
 
+      <input
+        placeholder="Contraseña"
+        type="password"
+        name="password"
+        [(ngModel)]="form.password"
+        required
+        minlength="8"
+      />
 
-    <input
-      placeholder="Correo Electrónico"
-      type="email"
-      name="correo"
-      [(ngModel)]="form.correo"
-      required
-      email
-    />
-
-
-    <input
-     placeholder="Contraseña"
-      type="password"
-      name="password"
-      [(ngModel)]="form.password"
-      required
-      minlength="8"
-    />
-
-    <button type="submit" class="btn login-btn" [disabled]="loginForm.invalid">
-      Iniciar Sesión
-    </button>
-
+      <button type="submit" class="btn login-btn" [disabled]="loginForm.invalid">
+        Iniciar Sesión
+      </button>
 
       <div *ngIf="error" class="error global-error">
         {{ error }}
@@ -53,14 +46,7 @@
       <div *ngIf="infoMessage" class="info global-info center">
         {{ infoMessage }}
       </div>
-  </form>
-
-
-
-    <div *ngIf="isAuthenticated" class="login-actions">
-      <p>¡Bienvenido!</p>
-      <button class="btn logout-btn" (click)="logout()">Cerrar Sesión</button>
-    </div>
+    </form>
 
     <div class="login-footer">
       <small>
@@ -69,9 +55,10 @@
       </small>
       <br>
       <small>
-        <a routerLink="/reset-password" class="forgot-link"> ¿Olvidaste tu contraseña?</a>
+        <a routerLink="/reset-password" class="forgot-link">
+          ¿Olvidaste tu contraseña?
+        </a>
       </small>
     </div>
-
   </div>
 </div>

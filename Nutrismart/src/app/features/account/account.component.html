@@ -1,5 +1,5 @@
 <div class="account-wrapper">
-  <!-- Tabs de navegación -->
+
   <nav class="tabs">
     <button (click)="selectTab('photo')" [class.active]="activeTab === 'photo'">
       Foto de Perfil
@@ -10,7 +10,6 @@
   </nav>
 
   <section class="tab-content">
-    <!-- FOTO DE PERFIL -->
     <div *ngIf="activeTab === 'photo'" class="photo-section">
       <div class="avatar-wrap">
         <img

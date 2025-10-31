@@ -1,9 +1,9 @@
-// Import the functions you need from the SDKs you need
-import { initializeApp } from "firebase/app";
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
 
-// Your web app's Firebase configuration
+import { initializeApp } from "firebase/app";
+
+
+
+
 export const firebaseConfig = {
   apiKey: "AIzaSyCTx3248BSOvmOcq0wi7_Hkrrren99q0Pk",
   authDomain: "nutrismart-8bbc6.firebaseapp.com",

@@ -1,144 +1,144 @@
 import { Routes } from '@angular/router';
 
+// Guards
 import { authGuard } from './guards/auth.guard';
 import { roleGuard } from './guards/role.guard';
+import { twoFactorGuard } from './guards/two-factor.guard';
+import { LoginRedirectGuard } from './guards/login-redirect.guard'; // 👈 nuevo guard
 
-import { LoginComponent }             from './core/login/login.component';
-import { RegisterComponent }          from './core/register/register.component';
-import { DashboardComponent }         from './features/dashboard/dashboard.component';        // tu dashboard cliente
-
-import { DashboardNutricionistaComponent } from './features/dashboard-nutricionista/dashboard-nutricionista.component';
-
-import { PersonalrecordComponent }    from './core/client/personalrecord/personalrecord.component';
-import { AppointmentsComponent }      from './features/appointments/appointments.component';
-import { GoalsComponent }             from './features/goals/goals.component';
+// Core
+import { LoginComponent } from './core/login/login.component';
+import { RegisterComponent } from './core/register/register.component';
 import { ResetPasswordRequestComponent } from './reset-password-request/reset-password-request.component';
+import { ChangePasswordComponent } from './core/changepassword/changepassword.component';
+import { AuthVerifyComponent } from './core/auth-verify/auth-verify.component';
+
+// Cliente
+import { DashboardComponent } from './features/dashboard/dashboard.component';
+import { PersonalrecordComponent } from './core/client/personalrecord/personalrecord.component';
+import { AppointmentsComponent } from './features/appointments/appointments.component';
+import { GoalsComponent } from './features/goals/goals.component';
+import { LoyaltyCardClientComponent } from './loyalty-card-client/loyalty-card-client.component';
+import { ClientNutritionPlansComponent } from './features/client-nutrition-plans/client-nutrition-plans.component';
+
+// Nutricionista
+import { DashboardNutricionistaComponent } from './features/dashboard-nutricionista/dashboard-nutricionista.component';
 import { NutriScheduleComponent } from './features/nutri-schedule/nutri-schedule.component';
 import { NutritionPlanFormComponent } from './features/nutrition-plan-form/nutrition-plan-form.component';
-import { LoyaltyCardClientComponent } from './loyalty-card-client/loyalty-card-client.component';
-import { LoyaltyCardNutricionistComponent } from './loyalty-card-nutricionist/loyalty-card-nutricionist.component';
-import { AdminClientsComponent }      from './admin-clients/admin-clients.component';
-
 import { GoalsNutricionistComponent } from './features/goals-nutricionist/goals-nutricionist.component';
-
-import { ClientNutritionPlansComponent } from './features/client-nutrition-plans/client-nutrition-plans.component';
 import { AccountComponent } from './features/account/account.component';
-import { ChangePasswordComponent } from './core/changepassword/changepassword.component';
+import { LoyaltyCardNutricionistComponent } from './loyalty-card-nutricionist/loyalty-card-nutricionist.component';
+
+// Admin
+import { AdminClientsComponent } from './admin-clients/admin-clients.component';
 
 export const routes: Routes = [
-  { path: 'login',    component: LoginComponent },
-  { path: 'register', component: RegisterComponent },
-  { path: 'reset-password', component: ResetPasswordRequestComponent },
+
+  { path: 'login', component: LoginComponent, canActivate: [LoginRedirectGuard] },
+  { path: 'register', component: RegisterComponent, canActivate: [LoginRedirectGuard] },
+  { path: 'reset-password', component: ResetPasswordRequestComponent, canActivate: [LoginRedirectGuard] },
+
+  // Doble factor
+  { path: 'auth-verify', component: AuthVerifyComponent, canActivate: [twoFactorGuard] },
+
 
   {
     path: '',
-    canActivate: [ authGuard ],
+    canActivate: [authGuard],
     children: [
-      // Cliente: tu DashboardComponent existente
+      // CLIENTE
       {
         path: '',
         component: DashboardComponent,
         pathMatch: 'full',
-        canActivate: [ roleGuard ],
+        canActivate: [roleGuard],
         data: { role: 'cliente' }
       },
       {
         path: 'profile',
         component: PersonalrecordComponent,
-        canActivate: [ roleGuard ],
+        canActivate: [roleGuard],
         data: { role: 'cliente' }
       },
       {
         path: 'appoinments',
         component: AppointmentsComponent,
-        canActivate: [ roleGuard ],
+        canActivate: [roleGuard],
         data: { role: 'cliente' }
       },
-       {
+      {
         path: 'client-plan',
         component: ClientNutritionPlansComponent,
-        canActivate: [ roleGuard ],
+        canActivate: [roleGuard],
         data: { role: 'cliente' }
       },
       {
         path: 'goals',
         component: GoalsComponent,
-        canActivate: [ roleGuard ],
+        canActivate: [roleGuard],
         data: { role: 'cliente' }
       },
-
-
-       {
+      {
         path: 'loyaltycard',
         component: LoyaltyCardClientComponent,
-        canActivate: [ roleGuard ],
+        canActivate: [roleGuard],
         data: { role: 'cliente' }
       },
 
-      // Admin
-
-
-       {
-        path: 'admin-clients',
-        component: AdminClientsComponent,
-        canActivate: [ roleGuard ],
-        data: { role: 'admin' }
-      },
-
-      // Nutricionista
+      // NUTRICIONISTA
       {
         path: 'dashboard-nutricionista',
         component: DashboardNutricionistaComponent,
-        canActivate: [ roleGuard ],
+        canActivate: [roleGuard],
         data: { role: 'nutricionista' }
       },
       {
         path: 'nutri-schedule',
         component: NutriScheduleComponent,
-        canActivate: [ roleGuard ],
+        canActivate: [roleGuard],
         data: { role: 'nutricionista' }
       },
-{
+      {
         path: 'nutri-plan',
         component: NutritionPlanFormComponent,
-        canActivate: [ roleGuard ],
+        canActivate: [roleGuard],
         data: { role: 'nutricionista' }
       },
       {
         path: 'goals-nutricionist',
         component: GoalsNutricionistComponent,
-        canActivate: [ roleGuard ],
+        canActivate: [roleGuard],
         data: { role: 'nutricionista' }
       },
-
       {
         path: 'account',
-        component:AccountComponent,
-        canActivate: [ roleGuard ],
+        component: AccountComponent,
+        canActivate: [roleGuard],
         data: { role: 'nutricionista' }
       },
-
-       {
-          path: 'changepassword',
-          component: ChangePasswordComponent,
-          canActivate: [authGuard]
-        },
-
-
-
-
-       {
+      {
         path: 'loyalty-card-nutricionist',
         component: LoyaltyCardNutricionistComponent,
-        canActivate: [ roleGuard ],
+        canActivate: [roleGuard],
         data: { role: 'nutricionista' }
       },
+
+      // ADMIN
+      {
+        path: 'admin-clients',
+        component: AdminClientsComponent,
+        canActivate: [roleGuard],
+        data: { role: 'admin' }
+      },
+
+      // CAMBIO DE CONTRASEÑA
+      {
+        path: 'changepassword',
+        component: ChangePasswordComponent,
+        canActivate: [authGuard]
+      }
     ]
   },
 
-
-  // fallback
   { path: '**', redirectTo: 'login' }
-
-
 ];

@@ -7,7 +7,7 @@
     <button [class.active]="activeTab==='history'" (click)="activeTab='history'">Histórico</button>
   </nav>
 
-  <!-- NUEVA CITA -->
+
   <section *ngIf="activeTab==='new'" class="new-appointment">
     <div class="form-group">
       <label>Seleccionar cliente:</label>
@@ -45,12 +45,12 @@
     </div>
   </section>
 
-  <!-- CALENDARIO -->
+
   <section *ngIf="activeTab==='calendar'" class="calendar-section">
     <full-calendar [options]="calendarOptions"></full-calendar>
   </section>
 
-  <!-- HISTÓRICO -->
+
   <section *ngIf="activeTab==='history'" class="history-list-tab">
     <div class="history-filter">
       <label for="historyClient">Filtrar por cliente:</label>

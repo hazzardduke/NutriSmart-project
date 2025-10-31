@@ -1,0 +1,135 @@
+.verify-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background: linear-gradient(135deg, #f5f7f9, #e6ebef);
+  font-family: 'Poppins', sans-serif;
+}
+
+.verify-box {
+  background: #fff;
+  padding: 2.5rem;
+  border-radius: 18px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+  width: 380px;
+  text-align: center;
+  animation: fadeIn 0.5s ease-in-out;
+
+  .title {
+    color: #1f3a52;
+    font-weight: 700;
+    font-size: 1.5rem;
+    margin-bottom: 0.4rem;
+  }
+
+  .subtitle {
+    font-size: 0.95rem;
+    color: #555;
+    margin-bottom: 1.8rem;
+
+    strong {
+      color: #1f3a52;
+    }
+  }
+
+  .input-code {
+    width: 100%;
+    padding: 0.8rem;
+    margin-bottom: 1.5rem;
+    border-radius: 10px;
+    border: 1.5px solid #cfd4da;
+    text-align: center;
+    font-size: 1.2rem;
+    letter-spacing: 3px;
+    transition: all 0.2s ease;
+
+    &:focus {
+      outline: none;
+      border-color: #a1c037;
+      box-shadow: 0 0 6px rgba(161, 192, 55, 0.4);
+    }
+  }
+
+  .actions {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 1.8rem;
+
+    .btn {
+      flex: 1;
+      border: none;
+      padding: 0.7rem 1rem;
+      border-radius: 10px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .btn-verify {
+      background: #a1c037;
+      color: #fff;
+
+      &:hover {
+        background: #91b233;
+      }
+    }
+
+    .btn-cancel {
+      background: #6c757d;
+      color: #fff;
+
+      &:hover {
+        background: #5b6369;
+      }
+    }
+  }
+
+  .resend-section {
+    margin-top: 1rem;
+
+    .no-code {
+      font-size: 0.9rem;
+      color: #666;
+      margin-bottom: 0.6rem;
+    }
+
+    .btn-resend {
+      background: transparent;
+      border: 1.5px solid #a1c037;
+      color: #a1c037;
+      padding: 0.6rem 1rem;
+      border-radius: 10px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      min-width: 230px;
+
+      &:hover:not(:disabled) {
+        background: #a1c037;
+        color: #fff;
+      }
+
+      &:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+      }
+
+      i {
+        margin-right: 6px;
+      }
+    }
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

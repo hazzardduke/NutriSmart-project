@@ -16,7 +16,7 @@ import { switchMap, map } from 'rxjs/operators';
 export interface Appointment {
   id?: string;
   userId: string;
-  datetime: string;    // ISO string
+  datetime: string;
   status: string;
 }
 
@@ -37,7 +37,7 @@ export class DashboardNutricionistaService {
   private fs   = inject(Firestore);
   private auth = inject(AuthService);
 
-  /** 1) Citas de hoy (00:00–23:59) */
+
   private getTodayRaw(): Observable<Appointment[]> {
     return this.auth.user$.pipe(
       switchMap(u => {
@@ -59,7 +59,7 @@ export class DashboardNutricionistaService {
     );
   }
 
-  /** 2) Enriquecer una lista de citas con el nombre del cliente */
+
   private enrichWithClient(appts: Appointment[]): Observable<AppointmentWithClient[]> {
     if (appts.length === 0) return of([]);
     const streams = appts.map(a => {
@@ -76,14 +76,14 @@ export class DashboardNutricionistaService {
     return combineLatest(streams);
   }
 
-  /** 3) Público: citas de hoy enriquecidas */
+
   getTodaysWithClient(): Observable<AppointmentWithClient[]> {
     return this.getTodayRaw().pipe(
       switchMap(raw => this.enrichWithClient(raw))
     );
   }
 
-  /** 4) Público: clientes activos (sin orderBy para evitar necesidad de índice) */
+
   getActiveClients(): Observable<ClientSummary[]> {
     return this.auth.user$.pipe(
       switchMap(u => {

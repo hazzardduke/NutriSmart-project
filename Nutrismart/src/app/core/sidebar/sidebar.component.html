@@ -7,7 +7,7 @@
   <nav class="sidebar-nav">
     <ul class="nav-list">
 
-      <!-- Cliente -->
+
       <li *ngIf="profile?.role==='cliente'" class="nav-item">
         <a
           routerLink="/"
@@ -50,8 +50,8 @@
         </a>
       </li>
 
-     
-      <!-- admin -->
+
+
       <li *ngIf="profile?.role==='admin'" class="nav-item">
         <a routerLink="/admin-clients" routerLinkActive="active" class="nav-link">
           <i class="fas fa-users-cog"></i>
@@ -59,7 +59,7 @@
         </a>
       </li>
 
-      <!-- Nutricionista -->
+
       <li *ngIf="profile?.role==='nutricionista'" class="nav-item">
         <a routerLink="/dashboard-nutricionista" routerLinkActive="active" class="nav-link">
           <i class="fas fa-home"></i>
@@ -90,7 +90,7 @@
           <span>Tarjeta de Fidelidad</span>
         </a>
       </li>
-      
+
 
     </ul>
   </nav>

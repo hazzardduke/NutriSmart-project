@@ -10,7 +10,7 @@
 
 
 
-    <!-- Perfil de usuario -->
+
     <div class="user-profile" (click)="toggleUserMenu()">
       <img [src]="photoURL || 'assets/images/logo.jpeg'" alt="Avatar" class="avatar">
       <div class="user-info">
@@ -22,18 +22,18 @@
       <div class="user-menu" [class.active]="isUserMenuOpen">
 
 
-        <!-- Cliente -->
+
         <ng-container *ngIf="userRole==='cliente'">
           <a routerLink="/profile" class="menu-item"><i class="fas fa-user"></i>Perfil</a>
           <a routerLink="/changepassword" class="menu-item"><i class="fas fa-key"></i>Cambiar Contraseña</a>
         </ng-container>
 
-        <!-- Admin -->
+
         <ng-container *ngIf="userRole==='admin'">
           <a routerLink="/changepassword" class="menu-item"><i class="fas fa-key"></i>Cambiar Contraseña</a>
         </ng-container>
 
-        <!-- Nutricionista -->
+
 
         <ng-container *ngIf="userRole==='nutricionista'">
            <a routerLink="/account" class="menu-item"><i class="fas fa-user"></i>Perfil</a>

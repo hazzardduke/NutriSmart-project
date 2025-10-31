@@ -1,4 +1,3 @@
-// src/app/services/client-nutrition-plan.service.ts
 import { Injectable } from '@angular/core';
 import {
   Firestore,
@@ -43,7 +42,7 @@ export class ClientNutritionPlanService {
 
   getMyPlans(): Observable<SavedPlan[]> {
     return user(this.auth).pipe(
-      filter(u => !!u), // espera a que el usuario esté definido
+      filter(u => !!u),
       take(1),
       switchMap(u => {
         const uid = u!.uid;

@@ -1,6 +1,5 @@
-// src/app/services/nutrition-plan.service.ts
 import { Injectable } from '@angular/core';
-import { pdfMake } from '../pdfmake-wrapper';   // ← aquí
+import { pdfMake } from '../pdfmake-wrapper';
 import {
   Firestore, collection, addDoc, updateDoc, doc
 } from '@angular/fire/firestore';

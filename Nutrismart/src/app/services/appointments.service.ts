@@ -1,4 +1,4 @@
-// src/app/services/appointments.service.ts
+
 import { Injectable, inject } from '@angular/core';
 import { Firestore, collection, addDoc, collectionData, updateDoc, doc, deleteDoc, query, where, orderBy, Query, DocumentReference } from '@angular/fire/firestore';
 import { Observable } from 'rxjs';
@@ -6,7 +6,7 @@ import { Observable } from 'rxjs';
 export interface Appointment {
   id?: string;
   userId: string;
-  datetime: string; // ISO string
+  datetime: string;
   status: 'confirmed' | 'canceled'| 'completed' ;
 }
 

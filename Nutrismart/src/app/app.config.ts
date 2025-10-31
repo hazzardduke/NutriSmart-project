@@ -1,4 +1,3 @@
-// src/app/app.config.ts
 import { ApplicationConfig, provideZoneChangeDetection } from '@angular/core';
 import { provideRouter, withComponentInputBinding } from '@angular/router';
 import { provideHttpClient } from '@angular/common/http';
@@ -30,18 +29,18 @@ export const appConfig: ApplicationConfig = {
     provideRouter(routes, withComponentInputBinding()),
     provideHttpClient(),
 
-    // Inicializa Firebase
+
     provideFirebaseApp(() => initializeApp(firebaseConfig)),
 
-    // Provee Auth
+
     provideAuth(() => getAuth()),
 
-    // Provee Firestore, Realtime Database y Storage
+
     provideFirestore(() => getFirestore()),
     provideDatabase(() => getDatabase()),
     provideStorage(() => getStorage()),
 
-    // Provee Functions para EmailService
+
     provideFunctions(() => getFunctions()),
   ]
 };

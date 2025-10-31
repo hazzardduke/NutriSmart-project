@@ -1,4 +1,3 @@
-// src/app/services/goals.service.ts
 import { Injectable, inject } from '@angular/core';
 import {
   Firestore,
@@ -37,14 +36,13 @@ export interface Recommendation {
 export class GoalsService {
   private fs = inject(Firestore);
 
-  /** Obtiene todos los objetivos ordenados por creación */
+
   getGoals(uid: string): Observable<Goal[]> {
     const col = collection(this.fs, `users/${uid}/goals`);
     const q = query(col, orderBy('createdAt', 'desc'));
     return collectionData(q, { idField: 'id' }) as Observable<Goal[]>;
   }
 
-  /** Crea un nuevo objetivo (estado inicial: en progreso) */
   addGoal(uid: string, goal: Omit<Goal, 'id' | 'createdAt'>): Promise<void> {
     const col = collection(this.fs, `users/${uid}/goals`);
     return addDoc(col, {
@@ -55,15 +53,15 @@ export class GoalsService {
     }).then(() => {});
   }
 
-  /** Actualiza campos específicos de un objetivo */
+
   updateGoal(uid: string, id: string, data: Partial<Goal>): Promise<void> {
     const ref = doc(this.fs, `users/${uid}/goals/${id}`);
     return updateDoc(ref, data);
   }
 
-  
 
-  /** Obtiene las recomendaciones desde la subcolección correcta */
+
+
   getRecommendations(uid: string, goalId: string): Observable<Recommendation[]> {
     const recCol = collection(
       this.fs,

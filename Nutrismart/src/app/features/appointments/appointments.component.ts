@@ -268,7 +268,7 @@ export class AppointmentsComponent implements OnInit, OnDestroy {
       this.loadCitasDeUsuario();
     };
 
-    // === CASO 1: Reagendar cita existente ===
+
     if (this.enEdicion && this.citaEnEdicion && this.citaEnEdicion.id) {
       const citaAntiguaId = this.citaEnEdicion.id;
 
@@ -285,7 +285,7 @@ export class AppointmentsComponent implements OnInit, OnDestroy {
           Swal.fire('Error', 'No se pudo actualizar la cita.', 'error');
         });
 
-    // === CASO 2: Nueva cita ===
+
     } else {
       const activa = this.citasUsuario.find(c => c.status === 'confirmed' && !this.esCitaPasada(c));
       const crearNueva = () => {

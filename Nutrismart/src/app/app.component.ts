@@ -1,11 +1,11 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { CommonModule }                  from '@angular/common';
-import { RouterModule }                  from '@angular/router';
-import { Subscription }                  from 'rxjs';
-import { AuthService }                   from './services/auth.service';
-import { SidebarComponent }              from './core/sidebar/sidebar.component';
-import { HeaderComponent }               from './core/header/header.component';
-import { VerifyEmailRequestComponent }   from './verify-email-request/verify-email-request.component';
+import { CommonModule } from '@angular/common';
+import { Router, RouterModule, NavigationEnd } from '@angular/router';
+import { Subscription, filter } from 'rxjs';
+import { AuthService } from './services/auth.service';
+import { SidebarComponent } from './core/sidebar/sidebar.component';
+import { HeaderComponent } from './core/header/header.component';
+import { VerifyEmailRequestComponent } from './verify-email-request/verify-email-request.component';
 import Swal from 'sweetalert2';
 
 @Component({
@@ -23,23 +23,49 @@ import Swal from 'sweetalert2';
 })
 export class AppComponent implements OnInit, OnDestroy {
   isAuthenticated = false;
-  isVerified      = false;
-  private sub     = new Subscription();
+  isVerified = false;
+  isSimpleRoute = false;
+  private sub = new Subscription();
 
-  constructor(public auth: AuthService) {}
+  constructor(private auth: AuthService, private router: Router) {}
 
   ngOnInit() {
-    this.showReloadAlert();
+    this.showInitialSplash();
+
+    this.sub.add(this.auth.isAuthenticated$.subscribe(v => this.isAuthenticated = v));
+    this.sub.add(this.auth.user$.subscribe(u => this.isVerified = !!u && u.emailVerified));
+
+
+    setTimeout(() => this.updateSimpleRoute(this.router.url), 0);
 
     this.sub.add(
-      this.auth.isAuthenticated$.subscribe(v => this.isAuthenticated = v)
+      this.router.events
+        .pipe(filter((e): e is NavigationEnd => e instanceof NavigationEnd))
+        .subscribe(e => this.updateSimpleRoute(e.urlAfterRedirects))
     );
-    this.sub.add(
-      this.auth.user$.subscribe(u => this.isVerified = !!u && u.emailVerified)
-    );
+
+
+    window.history.pushState(null, '', window.location.href);
+    window.addEventListener('popstate', () => {
+      if (this.isAuthenticated) {
+        window.history.pushState(null, '', window.location.href);
+      }
+    });
   }
 
-  showReloadAlert(): void {
+  updateSimpleRoute(url: string) {
+    const simpleRoutes = [
+      '/login',
+      '/register',
+      '/reset-password',
+      '/auth-verify',
+      '/forgot-password',
+      '/two-factor',
+    ];
+    this.isSimpleRoute = simpleRoutes.some(r => url.startsWith(r));
+  }
+
+  showInitialSplash(): void {
     Swal.fire({
       title: '',
       html: `
@@ -54,7 +80,7 @@ export class AppComponent implements OnInit, OnDestroy {
       background: '#ffffff',
       didOpen: () => {
         Swal.showLoading();
-        setTimeout(() => Swal.close(),500);
+        setTimeout(() => Swal.close(), 600);
       }
     });
   }

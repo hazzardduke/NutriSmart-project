@@ -52,7 +52,6 @@ export class ProfileService {
     return this.profileSubject.asObservable();
   }
 
-  /** ✅ Ejecuta docData dentro del contexto Angular */
   getProfile(uid: string): Observable<UserProfileData> {
     const refDoc = doc(this.firestore, `users/${uid}`);
     return runInInjectionContext(this.injector, () =>
@@ -63,7 +62,7 @@ export class ProfileService {
     );
   }
 
-  /** ✅ Ejecuta setDoc dentro del contexto Angular */
+
   async updateProfile(uid: string, data: Partial<UserProfileData>) {
     const refDoc = doc(this.firestore, `users/${uid}`);
     const now = new Date().toISOString();

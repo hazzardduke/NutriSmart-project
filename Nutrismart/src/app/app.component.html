@@ -1,6 +1,7 @@
-<ng-container *ngIf="isAuthenticated; else loginTpl">
 
-  <ng-container *ngIf="isVerified; else verifyTpl">
+<ng-container *ngIf="!isSimpleRoute; else simpleTpl">
+
+  <ng-container *ngIf="isAuthenticated && isVerified; else authTpl">
     <div class="wrapper">
       <nav id="sidebar" class="sidebar">
         <app-sidebar></app-sidebar>
@@ -9,22 +10,25 @@
         <app-header></app-header>
         <main class="main-content">
           <router-outlet></router-outlet>
-       
         </main>
       </div>
     </div>
   </ng-container>
-
 </ng-container>
 
-<ng-template #loginTpl>
+
+<ng-template #simpleTpl>
+  <router-outlet></router-outlet>
+</ng-template>
+
+<ng-template #authTpl>
   <router-outlet></router-outlet>
 </ng-template>
 
 
 <ng-template #verifyTpl>
   <div class="verify-notice">
-    ⚠️ Debes verificar tu correo antes de acceder al sistema.
+    Debes verificar tu correo antes de acceder al sistema.
   </div>
   <app-verify-email-request></app-verify-email-request>
 </ng-template>

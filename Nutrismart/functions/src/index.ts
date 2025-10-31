@@ -1,10 +1,9 @@
-// functions/src/index.ts
+
 import { onCall } from 'firebase-functions/v2/https';
 import { defineSecret } from 'firebase-functions/params';
 import * as admin from 'firebase-admin';
 import sgMail from '@sendgrid/mail';
 
-// ✅ Declaramos el secreto de SendGrid (se inyecta automáticamente por Firebase)
 const SENDGRID_API_KEY = defineSecret('SENDGRID_API_KEY');
 
 admin.initializeApp();
@@ -32,7 +31,7 @@ export const sendEmail = onCall(
 
     const apiKey = SENDGRID_API_KEY.value();
     if (!apiKey.startsWith('SG.')) {
-      console.error('❌ API key inválida o vacía:', apiKey);
+      console.error('API key inválida o vacía:', apiKey);
       throw new Error('API key inválida o no configurada en Firebase');
     }
 
@@ -59,14 +58,14 @@ export const sendEmail = onCall(
 
     try {
       const [response] = await sgMail.send(msg);
-      console.log('✅ Correo enviado', {
+      console.log('Correo enviado', {
         status: response.statusCode,
         headers: response.headers
       });
       return { success: true, status: response.statusCode };
     } catch (err: any) {
       const sgBody = err?.response?.body;
-      console.error('❌ Error SendGrid:', sgBody ?? err?.message ?? err);
+      console.error('Error SendGrid:', sgBody ?? err?.message ?? err);
       throw new Error(
         sgBody?.errors?.[0]?.message ??
         sgBody ??

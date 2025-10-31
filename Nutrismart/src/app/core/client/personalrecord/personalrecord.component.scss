@@ -1,4 +1,3 @@
-/* Base */
 .expediente {
   max-width: 1100px;
   margin: 0 auto;
@@ -8,7 +7,6 @@
   font-family: 'Segoe UI', sans-serif;
 }
 
-/* Tabs */
 .seg-tabs {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -29,40 +27,35 @@
   border-radius: 6px 6px 0 0;
   cursor: pointer;
   transition: background 0.3s, color 0.3s;
-
-  &.active {
-    background: #a1c037;
-    color: #fff;
-    border-bottom-color: #a1c037;
-    font-weight: 700;
-  }
-
-  &:not(.active):hover {
-    background: #e2eaee;
-    color: #1f3a52;
-  }
+}
+.seg-tab.active {
+  background: #a1c037;
+  color: #fff;
+  border-bottom-color: #a1c037;
+  font-weight: 700;
+}
+.seg-tab:not(.active):hover {
+  background: #e2eaee;
+  color: #1f3a52;
 }
 
-
-/* Panel */
 .panel {
   background: #ffffff;
   border-radius: 16px;
- 
   overflow: hidden;
 }
 .panel-header {
   display: flex;
   align-items: center;
   padding: 1rem 1.25rem;
-  background: #f3f7fb;         
+  background: #f3f7fb;
   border-bottom: 1px solid #e7edf2;
 }
 .panel-title {
   margin: 0;
   font-size: 1.25rem;
   font-weight: 800;
-  color: #1f3a52;               
+  color: #1f3a52;
 }
 .panel-body {
   padding: 1.25rem;
@@ -77,7 +70,6 @@
   gap: 0.6rem;
 }
 
-/* Foto */
 .photo-card {
   display: grid;
   justify-items: center;
@@ -99,7 +91,7 @@
   height: 132px;
   border-radius: 50%;
   object-fit: cover;
-  border: 3px solid #1f3a52;   
+  border: 3px solid #1f3a52;
   box-shadow: 0 10px 22px rgba(31, 58, 82, 0.20);
 }
 .btn-row {
@@ -107,7 +99,6 @@
   gap: 0.6rem;
   flex-wrap: wrap;
 }
-
 
 .form-grid {
   display: grid;
@@ -132,7 +123,7 @@
 }
 .form-control:focus {
   outline: none;
-  border-color: #1c6dd0; /* foco azul */
+  border-color: #1c6dd0;
   box-shadow: 0 0 0 3px rgba(28, 109, 208, 0.15);
 }
 .invalid-feedback {
@@ -141,12 +132,10 @@
   color: #dc3545;
 }
 
-/* Ancho completo sin “span” */
 .row-full {
   grid-column: 1 / -1;
 }
 
-/* Botones */
 .btn {
   display: inline-flex;
   align-items: center;
@@ -178,7 +167,7 @@
   font-size: 1rem;
   font-weight: 600;
   border-radius: 10px;
-  background:  #a1c037 ;
+  background: #a1c037;
   color: #ffffff;
   transition: background 0.25s, transform 0.1s, box-shadow 0.25s;
 }
@@ -197,7 +186,6 @@
   cursor: not-allowed;
 }
 
-/* Popup */
 .popup-overlay {
   position: fixed;
   inset: 0;
@@ -238,7 +226,6 @@
   background: #8aa72d;
 }
 
-/* Responsive */
 @media (max-width: 992px) {
   .seg-tabs { grid-template-columns: repeat(2, 1fr); }
 }

@@ -1,4 +1,4 @@
-// src/app/services/loyalty-card.service.ts
+
 import { Injectable, inject } from '@angular/core';
 import {
   Firestore,
@@ -33,7 +33,7 @@ export class LoyaltyCardService {
   private fs = inject(Firestore);
   private auth = inject(AuthService);
 
-  /** Obtener la tarjeta del usuario o null si no existe */
+
   getMyCard(): Observable<LoyaltyCard | null> {
     return this.auth.user$.pipe(
       switchMap(u => {
@@ -50,7 +50,7 @@ export class LoyaltyCardService {
     );
   }
 
-  /** Crear la tarjeta con 0 sellos si no existe */
+
   async createCard(): Promise<void> {
     const user = await firstValueFrom(this.auth.user$);
     if (!user) throw new Error('Usuario no autenticado');
@@ -70,12 +70,12 @@ export class LoyaltyCardService {
     );
   }
 
-  /** Canjear recompensa: resetear sellos y registrar en historial */
+
   async redeem(): Promise<void> {
     const user = await firstValueFrom(this.auth.user$);
     if (!user) throw new Error('Usuario no autenticado');
 
-    // Obtener carta actual
+
     const card = await firstValueFrom(
       this.getMyCard().pipe(take(1))
     );
@@ -83,7 +83,7 @@ export class LoyaltyCardService {
       throw new Error('No tienes suficientes sellos para canjear');
     }
 
-    // Resetear sellos
+
     const cardRef = doc(
       this.fs,
       `users/${user.uid}/loyaltyCards/${card.id}`
@@ -93,7 +93,7 @@ export class LoyaltyCardService {
       updatedAt: serverTimestamp()
     });
 
-    // Agregar entrada al historial
+
     const historyCol = collection(
       this.fs,
       `users/${user.uid}/loyaltyCards/${card.id}/history`
@@ -104,7 +104,7 @@ export class LoyaltyCardService {
     });
   }
 
-  /** Recuperar historial de canjes ordenado por fecha descendente */
+
   getRedeemHistory(): Observable<RedeemEntry[]> {
     return this.auth.user$.pipe(
       switchMap(u => {
