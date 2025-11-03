@@ -3,16 +3,11 @@
 
 
   <div class="tab-bar">
-    <button [class.active]="tabPrincipal === 'crear'" (click)="switchPrincipal('crear')">
-      Crear
-    </button>
-    <button [class.active]="tabPrincipal === 'objetivos'" (click)="switchPrincipal('objetivos')">
-      Objetivos
-    </button>
-    <button [class.active]="tabPrincipal === 'historico'" (click)="switchPrincipal('historico')">
-      Histórico
-    </button>
+    <button [class.active]="tabPrincipal === 'crear'" (click)="switchPrincipal('crear')">Crear</button>
+    <button [class.active]="tabPrincipal === 'objetivos'" (click)="switchPrincipal('objetivos')">Objetivos</button>
+    <button [class.active]="tabPrincipal === 'historico'" (click)="switchPrincipal('historico')">Histórico</button>
   </div>
+
 
   <ng-container *ngIf="tabPrincipal === 'crear'">
     <div class="client-section autocomplete">
@@ -28,7 +23,7 @@
         autocomplete="off"
       />
 
-      <ul *ngIf="filteredClients.length > 0" class="dropdown-results">
+      <ul *ngIf="filteredClients.length > 0" class="dropdown-results" (mousedown)="$event.stopPropagation()">
         <li
           *ngFor="let c of filteredClients"
           (click)="selectClient(c.uid)"
@@ -91,7 +86,7 @@
         autocomplete="off"
       />
 
-      <ul *ngIf="filteredClients.length > 0" class="dropdown-results">
+      <ul *ngIf="filteredClients.length > 0" class="dropdown-results" (mousedown)="$event.stopPropagation()">
         <li
           *ngFor="let c of filteredClients"
           (click)="selectClient(c.uid)"
@@ -102,9 +97,7 @@
       </ul>
     </div>
 
-    <div *ngIf="!selectedClientUid" class="no-data">
-      Selecciona un cliente para ver objetivos.
-    </div>
+    <div *ngIf="!selectedClientUid" class="no-data">Selecciona un cliente para ver objetivos.</div>
 
     <div *ngIf="selectedClientUid" class="card-centered">
       <h2>Objetivos en Progreso</h2>
@@ -122,7 +115,7 @@
           </div>
 
           <div class="goal-actions">
-            <button (click)="openRecomendacion(obj)">Recomendaciones</button>
+            <button (click)="openRecModal(obj)">Ver Recomendaciones</button>
           </div>
         </div>
 
@@ -159,20 +152,16 @@
         </div>
       </div>
 
-
       <div class="pagination">
-        <button (click)="prevPageObj()" [disabled]="currentPageObj===1">Anterior</button>
-
+        <button (click)="prevPageObj()" [disabled]="currentPageObj === 1">Anterior</button>
         <button
           *ngFor="let page of totalPagesArrayObj"
-          [disabled]="page==='...'"
           (click)="goToPageObj(page)"
-          [class.active]="page===currentPageObj"
+          [class.active]="page === currentPageObj"
         >
           {{ page }}
         </button>
-
-        <button (click)="nextPageObj()" [disabled]="currentPageObj===totalPagesObj">Siguiente</button>
+        <button (click)="nextPageObj()" [disabled]="currentPageObj === totalPagesObj">Siguiente</button>
       </div>
     </div>
   </ng-container>
@@ -192,7 +181,7 @@
         autocomplete="off"
       />
 
-      <ul *ngIf="filteredClients.length > 0" class="dropdown-results">
+      <ul *ngIf="filteredClients.length > 0" class="dropdown-results" (mousedown)="$event.stopPropagation()">
         <li
           *ngFor="let c of filteredClients"
           (click)="selectClient(c.uid)"
@@ -204,7 +193,7 @@
     </div>
 
     <div *ngIf="!selectedClientUid" class="no-data">
-      Selecciona un cliente para ver el histórico.
+      Selecciona un cliente para ver su histórico.
     </div>
 
     <div *ngIf="selectedClientUid" class="card-centered">
@@ -214,45 +203,86 @@
         No hay objetivos completados.
       </div>
 
-      <div *ngFor="let obj of paginatedHistorico" class="history-card-centered">
-        <h3>{{ obj.tipo }}</h3>
-        <p><strong>Meta:</strong> {{ obj.meta }}</p>
-        <p><strong>Fecha completado:</strong> {{ obj.fecha | date: 'dd-MM-yyyy' }}</p>
+      <div *ngFor="let h of paginatedHistorico" class="goal-card-centered" style="border-left-color:#28a745;">
+        <div class="goal-header">
+          <div class="goal-info">
+            <h3>{{ h.tipo }}</h3>
+            <p><strong>Meta:</strong> {{ h.meta }}</p>
+            <p><strong>Fecha completado:</strong> {{ h.fecha | date: 'dd-MM-yyyy' }}</p>
+          </div>
+          <div class="goal-actions">
+            <button (click)="openRecModal(h)">Ver Recomendaciones</button>
+          </div>
+        </div>
       </div>
 
-
       <div class="pagination">
-        <button (click)="prevPageHist()" [disabled]="currentPageHist===1">Anterior</button>
-
+        <button (click)="prevPageHist()" [disabled]="currentPageHist === 1">Anterior</button>
         <button
           *ngFor="let page of totalPagesArrayHist"
-          [disabled]="page==='...'"
           (click)="goToPageHist(page)"
-          [class.active]="page===currentPageHist"
+          [class.active]="page === currentPageHist"
         >
           {{ page }}
         </button>
-
-        <button (click)="nextPageHist()" [disabled]="currentPageHist===totalPagesHist">Siguiente</button>
+        <button (click)="nextPageHist()" [disabled]="currentPageHist === totalPagesHist">Siguiente</button>
       </div>
     </div>
   </ng-container>
 
 
   <div class="modal-bg" *ngIf="showRecModal">
-    <div class="modal">
-      <h3>Recomendación para {{ recModalGoal.tipo }}</h3>
-      <textarea
-        class="input"
-        rows="4"
-        placeholder="Escribe tu recomendación..."
-        [(ngModel)]="newComentario"
-      ></textarea>
+    <div class="modal" [class.edit-mode]="showInputRec">
+      <h3 *ngIf="!showInputRec">Recomendaciones para {{ recModalGoal.tipo }}</h3>
+      <h3 *ngIf="showInputRec">Nueva recomendación para {{ recModalGoal.tipo }}</h3>
 
-      <div class="modal-actions">
-        <button class="btn-primary" (click)="saveRecomendacion()">Guardar</button>
-        <button class="btn-cancel" (click)="showRecModal = false">Cancelar</button>
-      </div>
+      <ng-container *ngIf="!showInputRec; else addRecTemplate">
+        <div *ngIf="paginatedRecs.length === 0" class="no-data">
+          No hay recomendaciones registradas.
+        </div>
+
+
+        <ul class="rec-list" *ngIf="paginatedRecs.length > 0">
+          <li
+            *ngFor="let r of paginatedRecs; let i = index"
+            class="animate-item"
+            [style.animationDelay]="(i * 0.08) + 's'"
+          >
+            <span>{{ r.comentario }}</span>
+            <small>{{ r.fecha | date: 'dd/MM/yyyy' }}</small>
+          </li>
+        </ul>
+
+        <div class="pagination small" *ngIf="totalPagesRecs > 1">
+          <button (click)="prevPageRecs()" [disabled]="currentPageRecs === 1">Anterior</button>
+          <span>Página {{ currentPageRecs }} / {{ totalPagesRecs }}</span>
+          <button (click)="nextPageRecs()" [disabled]="currentPageRecs === totalPagesRecs">Siguiente</button>
+        </div>
+
+        <div class="modal-actions">
+          <button *ngIf="tabPrincipal !== 'historico'" class="btn-2" (click)="showInputRec = true">
+            Agregar nueva recomendación
+          </button>
+          <button class="btn-cancel" (click)="showRecModal = false">Cerrar</button>
+        </div>
+      </ng-container>
+
+
+      <ng-template #addRecTemplate>
+        <div class="add-rec-section">
+          <textarea
+            class="input"
+            rows="3"
+            placeholder="Escribe una nueva recomendación..."
+            [(ngModel)]="newComentario"
+          ></textarea>
+
+          <div class="modal-actions">
+            <button class="btn-primary" (click)="saveRecomendacion()">Guardar</button>
+            <button class="btn-cancel" (click)="cancelAddRec()">Cancelar</button>
+          </div>
+        </div>
+      </ng-template>
     </div>
   </div>
 </div>

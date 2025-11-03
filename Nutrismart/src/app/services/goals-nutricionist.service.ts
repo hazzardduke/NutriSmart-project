@@ -95,8 +95,8 @@ export class GoalsNutricionistService {
     const col = collection(this.fs,`users/${uid}/goals/${goalId}/recommendations`);
     return addDoc(col, {
       comentario: recommendation.comentario,
-      tipo:       recommendation.tipo,         
-      meta:       recommendation.meta,              
+      tipo:       recommendation.tipo,
+      meta:       recommendation.meta,
       fecha:      new Date().toISOString(),
       userId:     uid,
       goalId
@@ -115,7 +115,7 @@ export class GoalsNutricionistService {
           fecha:       goal.fecha,
           tipo:        goal.tipo,
           meta:        goal.meta,
-          goalId,      
+          goalId,
           userId:      uid
         }))
       )
