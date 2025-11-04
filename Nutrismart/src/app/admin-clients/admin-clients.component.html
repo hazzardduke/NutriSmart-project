@@ -76,9 +76,9 @@
   <button (click)="nextPage()" [disabled]="currentPage === totalPages()">»</button>
 </div>
 
-
-<div class="modal-overlay" *ngIf="isModalOpen">
-  <div class="modal-content">
+<!-- ===================== MODAL ===================== -->
+<div class="modal-overlay" *ngIf="isModalOpen" (click)="closeModal()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
     <button class="modal-close" (click)="closeModal()">
       <i class="fas fa-times"></i>
     </button>
