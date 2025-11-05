@@ -7,7 +7,9 @@ import {
   signOut,
   sendPasswordResetEmail,
   user,
-  authState
+  authState,
+  setPersistence,
+  browserSessionPersistence
 } from '@angular/fire/auth';
 import {
   Firestore,
@@ -44,16 +46,13 @@ export class AuthService {
   private firestore = inject(Firestore);
   private functions = inject(Functions);
 
-
   user$: Observable<User | null> = user(this.auth);
 
   isAuthenticated$: Observable<boolean> = authState(this.auth).pipe(map(u => !!u));
 
-
   idTokenResult$: Observable<IdTokenResult | null> = this.user$.pipe(
     switchMap(u => (u ? from(u.getIdTokenResult()) : of(null)))
   );
-
 
   userProfile$: Observable<(User & { role?: string }) | null> = authState(this.auth).pipe(
     switchMap(u => {
@@ -69,6 +68,10 @@ export class AuthService {
   );
 
   async login(email: string, password: string): Promise<void> {
+
+    await setPersistence(this.auth, browserSessionPersistence);
+
+
     await signInWithEmailAndPassword(this.auth, email, password);
   }
 
@@ -114,6 +117,7 @@ export class AuthService {
     if (snap.empty) throw new Error('Usuario no encontrado en perfiles');
     return snap.docs[0].data() as NewUserProfile;
   }
+
 
   sendPasswordReset(email: string): Promise<void> {
     return sendPasswordResetEmail(this.auth, email);
