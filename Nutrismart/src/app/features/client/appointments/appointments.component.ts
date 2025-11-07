@@ -3,10 +3,10 @@ import { CommonModule, NgIf } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Subscription } from 'rxjs';
 import Swal from 'sweetalert2';
-import { AuthService } from '../../services/auth.service';
-import { AppointmentsService, Appointment } from '../../services/appointments.service';
-import { EmailService } from '../../services/email.service';
-import { ProfileService } from '../../services/profile.service';
+import { AuthService } from '../../../services/auth.service';
+import { AppointmentsService, Appointment } from '../../../services/appointments.service';
+import { EmailService } from '../../../services/email.service';
+import { ProfileService } from '../../../services/profile.service';
 
 @Component({
   selector: 'app-appointments',

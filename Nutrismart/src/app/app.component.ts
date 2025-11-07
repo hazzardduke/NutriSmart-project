@@ -5,7 +5,7 @@ import { Subscription, filter } from 'rxjs';
 import { AuthService } from './services/auth.service';
 import { SidebarComponent } from './core/sidebar/sidebar.component';
 import { HeaderComponent } from './core/header/header.component';
-import { VerifyEmailRequestComponent } from './verify-email-request/verify-email-request.component';
+import { VerifyEmailRequestComponent } from './core/verify-email-request/verify-email-request.component';
 import Swal from 'sweetalert2';
 
 @Component({

@@ -2,10 +2,10 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Observable, firstValueFrom } from 'rxjs';
 import Swal from 'sweetalert2';
-import { LoyaltyCardService, LoyaltyCard, RedeemEntry } from '../services/loyalty-card.service';
-import { EmailService } from '../services/email.service';
-import { ProfileService, UserProfileData } from '../services/profile.service';
-import { AuthService } from '../services/auth.service';
+import { LoyaltyCardService, LoyaltyCard, RedeemEntry } from '../../../services/loyalty-card.service';
+import { EmailService } from '../../../services/email.service';
+import { ProfileService, UserProfileData } from '../../../services/profile.service';
+import { AuthService } from '../../../services/auth.service';
 
 @Component({
   selector: 'app-loyalty-card-client',

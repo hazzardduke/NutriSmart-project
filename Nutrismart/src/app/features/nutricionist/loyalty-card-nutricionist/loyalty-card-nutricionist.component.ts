@@ -8,7 +8,7 @@ import {
   LoyaltyCardNutricionistService,
   UserSummary,
   ClientWithStamps
-} from '../services/loyalty-card-nutricionist.service';
+} from '../../../services/loyalty-card-nutricionist.service';
 
 @Component({
   selector: 'app-loyalty-card-nutricionist',

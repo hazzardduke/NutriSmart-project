@@ -7,8 +7,8 @@ import { Firestore, collection, collectionData, query, orderBy, serverTimestamp,
 import { Observable, combineLatest, Subscription } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 import { TDocumentDefinitions } from 'pdfmake/interfaces';
-import { PdfMergeService } from '../../services/pdf-merge.service';
-import { ProfileService, ClientProfile } from '../../services/profile.service';
+import { PdfMergeService } from '../../../services/pdf-merge.service';
+import { ProfileService, ClientProfile } from '../../../services/profile.service';
 
 export interface SavedPlan {
   id: string;

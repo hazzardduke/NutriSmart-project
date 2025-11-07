@@ -14,9 +14,9 @@ import { FormsModule } from '@angular/forms';
 import { Subscription, combineLatest } from 'rxjs';
 import Swal from 'sweetalert2';
 
-import { ProfileService, ClientProfile } from '../../services/profile.service';
-import { AppointmentsService, Appointment } from '../../services/appointments.service';
-import { EmailService, CitaMailData } from '../../services/email.service';
+import { ProfileService, ClientProfile } from '../../../services/profile.service';
+import { AppointmentsService, Appointment } from '../../../services/appointments.service';
+import { EmailService, CitaMailData } from '../../../services/email.service';
 
 import { FullCalendarModule } from '@fullcalendar/angular';
 import timeGridPlugin from '@fullcalendar/timegrid';

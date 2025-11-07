@@ -2,7 +2,7 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormGroup, FormControl } from '@angular/forms';
 import { Observable, Subscription } from 'rxjs';
-import { AdminUsersService, UserProfile, UserRole } from '../services/admin-users.service';
+import { AdminUsersService, UserProfile, UserRole } from '../../../services/admin-users.service';
 import Swal from 'sweetalert2';
 
 @Component({

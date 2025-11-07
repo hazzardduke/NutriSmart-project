@@ -3,8 +3,8 @@ import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Subscription, firstValueFrom } from 'rxjs';
 import Swal from 'sweetalert2';
-import { AuthService } from '../../services/auth.service';
-import { ProfileService, UserProfileData } from '../../services/profile.service';
+import { AuthService } from '../../../services/auth.service';
+import { ProfileService, UserProfileData } from '../../../services/profile.service';
 
 @Component({
   selector: 'app-account',

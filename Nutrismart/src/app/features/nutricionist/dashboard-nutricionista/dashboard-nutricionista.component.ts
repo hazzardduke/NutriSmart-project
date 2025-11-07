@@ -11,7 +11,7 @@ import {
   DashboardNutricionistaService,
   AppointmentWithClient,
   ClientSummary
-} from '../../services/dashboard-nutricionista.service';
+} from '../../../services/dashboard-nutricionista.service';
 import { Observable } from 'rxjs';
 
 @Component({

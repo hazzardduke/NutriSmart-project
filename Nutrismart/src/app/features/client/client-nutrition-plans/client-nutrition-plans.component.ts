@@ -1,10 +1,10 @@
 
 import { Component, OnInit } from '@angular/core';
 import { CommonModule, formatDate } from '@angular/common';
-import { ClientNutritionPlanService, SavedPlan } from '../../services/client-nutrition-plan.service';
+import { ClientNutritionPlanService, SavedPlan } from '../../../services/client-nutrition-plan.service';
 import { Observable, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
-import { PdfMergeService } from '../../services/pdf-merge.service';
+import { PdfMergeService } from '../../../services/pdf-merge.service';
 
 @Component({
   standalone: true,

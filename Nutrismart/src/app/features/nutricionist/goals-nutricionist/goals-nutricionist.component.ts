@@ -8,7 +8,7 @@ import {
   Goal,
   Recommendation,
   UserSummary
-} from '../../services/goals-nutricionist.service';
+} from '../../../services/goals-nutricionist.service';
 
 @Component({
   selector: 'app-goals-nutricionist',

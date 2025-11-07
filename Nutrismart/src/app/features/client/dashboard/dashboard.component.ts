@@ -13,7 +13,7 @@ import {
   Appointment,
   Recommendation,
   Goal
-} from '../../services/dashboard-client.service';
+} from '../../../services/dashboard-client.service';
 import { Observable } from 'rxjs';
 
 @Component({

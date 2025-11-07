@@ -107,6 +107,8 @@ export class LoginComponent implements OnInit, OnDestroy {
     }
   }
 
+
+
   logout(): void {
     this.auth.logout().then(() => this.router.navigateByUrl('/login'));
   }

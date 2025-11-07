@@ -3,12 +3,12 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Subscription } from 'rxjs';
 import Swal from 'sweetalert2';
-import { AuthService } from '../../services/auth.service';
+import { AuthService } from '../../../services/auth.service';
 import {
   GoalsService,
   Goal,
   Recommendation
-} from '../../services/goals.service';
+} from '../../../services/goals.service';
 
 @Component({
   selector: 'app-goals',

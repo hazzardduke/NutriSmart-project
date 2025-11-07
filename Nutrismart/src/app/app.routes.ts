@@ -4,33 +4,43 @@ import { Routes } from '@angular/router';
 import { authGuard } from './guards/auth.guard';
 import { roleGuard } from './guards/role.guard';
 import { twoFactorGuard } from './guards/two-factor.guard';
-import { LoginRedirectGuard } from './guards/login-redirect.guard'; // 👈 nuevo guard
+import { LoginRedirectGuard } from './guards/login-redirect.guard';
 
 // Core
 import { LoginComponent } from './core/login/login.component';
 import { RegisterComponent } from './core/register/register.component';
-import { ResetPasswordRequestComponent } from './reset-password-request/reset-password-request.component';
+
 import { ChangePasswordComponent } from './core/changepassword/changepassword.component';
 import { AuthVerifyComponent } from './core/auth-verify/auth-verify.component';
 
 // Cliente
-import { DashboardComponent } from './features/dashboard/dashboard.component';
-import { PersonalrecordComponent } from './core/client/personalrecord/personalrecord.component';
-import { AppointmentsComponent } from './features/appointments/appointments.component';
-import { GoalsComponent } from './features/goals/goals.component';
-import { LoyaltyCardClientComponent } from './loyalty-card-client/loyalty-card-client.component';
-import { ClientNutritionPlansComponent } from './features/client-nutrition-plans/client-nutrition-plans.component';
+
+import { PersonalrecordComponent } from './features/client/personalrecord/personalrecord.component';
+import { AppointmentsComponent } from './features/client/appointments/appointments.component';
+
+import { ClientNutritionPlansComponent } from './features/client/client-nutrition-plans/client-nutrition-plans.component';
 
 // Nutricionista
-import { DashboardNutricionistaComponent } from './features/dashboard-nutricionista/dashboard-nutricionista.component';
-import { NutriScheduleComponent } from './features/nutri-schedule/nutri-schedule.component';
-import { NutritionPlanFormComponent } from './features/nutrition-plan-form/nutrition-plan-form.component';
-import { GoalsNutricionistComponent } from './features/goals-nutricionist/goals-nutricionist.component';
-import { AccountComponent } from './features/account/account.component';
-import { LoyaltyCardNutricionistComponent } from './loyalty-card-nutricionist/loyalty-card-nutricionist.component';
+
+
+
+
+
+
 
 // Admin
-import { AdminClientsComponent } from './admin-clients/admin-clients.component';
+
+import { DashboardComponent } from './features/client/dashboard/dashboard.component';
+import { GoalsComponent } from './features/client/goals/goals.component';
+import { LoyaltyCardClientComponent } from './features/client/loyalty-card-client/loyalty-card-client.component';
+import { ResetPasswordRequestComponent } from './core/reset-password-request/reset-password-request.component';
+import { AccountComponent } from './features/nutricionist/account/account.component';
+import { DashboardNutricionistaComponent } from './features/nutricionist/dashboard-nutricionista/dashboard-nutricionista.component';
+import { GoalsNutricionistComponent } from './features/nutricionist/goals-nutricionist/goals-nutricionist.component';
+import { NutriScheduleComponent } from './features/nutricionist/nutri-schedule/nutri-schedule.component';
+import { NutritionPlanFormComponent } from './features/nutricionist/nutrition-plan-form/nutrition-plan-form.component';
+import { LoyaltyCardNutricionistComponent } from './features/nutricionist/loyalty-card-nutricionist/loyalty-card-nutricionist.component';
+import { AdminClientsComponent } from './features/admin/admin-clients/admin-clients.component';
 
 export const routes: Routes = [
 
