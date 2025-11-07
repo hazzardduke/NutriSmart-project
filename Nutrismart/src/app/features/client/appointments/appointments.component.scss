@@ -39,7 +39,7 @@
 
 .form-cita input[type='date'] {
   width: 100%;
-  padding: 0.65rem 1rem;
+  padding: 0.75rem 1rem;
   border: 1px solid #cfd6dd;
   border-radius: 10px;
   background: #fafbfd;
@@ -87,6 +87,7 @@
   justify-content: center;
   gap: 1rem;
   margin-top: 2rem;
+  flex-wrap: wrap;
 }
 
 .btn-accion {
@@ -149,6 +150,7 @@
   border: 1px solid #dce3eb;
   padding: 0.8rem 1rem;
   text-align: center;
+  font-size: 0.95rem;
 }
 
 .tabla-citas tr:nth-child(even) {
@@ -168,7 +170,6 @@
 .estado-canceled {
   color: #d01414;
   font-weight: 700;
-  
 }
 
 .btn-editar,
@@ -207,32 +208,32 @@
   align-items: center;
   flex-wrap: wrap;
   gap: 0.5rem;
+}
 
-  button {
-    background: #f1f3f6;
-    color: #2f3b44;
-    border: none;
-    padding: 0.5rem 1rem;
-    border-radius: 8px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s;
+.paginacion button {
+  background: #f1f3f6;
+  color: #2f3b44;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
 
-    &:hover:not(:disabled) {
-      background: #e7ebf0;
-    }
+.paginacion button:hover:not(:disabled) {
+  background: #e7ebf0;
+}
 
-    &:disabled {
-      background: #ccc;
-      color: #777;
-      cursor: not-allowed;
-    }
+.paginacion button:disabled {
+  background: #ccc;
+  color: #777;
+  cursor: not-allowed;
+}
 
-    &.pagina-activa {
-      background: #a1c037;
-      color: #fff;
-    }
-  }
+.paginacion .pagina-activa {
+  background: #a1c037;
+  color: #fff;
 }
 
 .no-citas {
@@ -246,7 +247,6 @@
   background: #eef8dc !important;
   border-left: 5px solid #a1c037;
   font-weight: 600;
-  transition: 0.3s ease;
 }
 
 .proxima-etiqueta {
@@ -258,16 +258,56 @@
 }
 
 @keyframes parpadeo {
-  0%, 100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.4;
-  }
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
 }
 
 .fila-pasada {
   opacity: 0.6;
   background: #f5f5f5 !important;
-  transition: 0.3s ease;
+}
+
+@media (max-width: 768px) {
+  .tabla-citas,
+  .tabla-citas thead,
+  .tabla-citas tbody,
+  .tabla-citas th,
+  .tabla-citas td,
+  .tabla-citas tr {
+    display: block;
+  }
+
+  .tabla-citas thead {
+    display: none;
+  }
+
+  .tabla-citas tr {
+    margin-bottom: 1rem;
+    background: #fafbfc;
+    border-radius: 10px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    padding: 1rem;
+  }
+
+  .tabla-citas td {
+    border: none;
+    display: flex;
+    justify-content: space-between;
+    padding: 0.4rem 0;
+    font-size: 0.95rem;
+  }
+
+  .tabla-citas td::before {
+    content: attr(data-label);
+    font-weight: 700;
+    color: #1f3a52;
+    text-align: left;
+  }
+
+  .tabla-citas td:last-child {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-top: 0.6rem;
+  }
 }

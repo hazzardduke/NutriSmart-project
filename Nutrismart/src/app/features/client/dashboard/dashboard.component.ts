@@ -29,13 +29,11 @@ export class DashboardComponent implements OnInit {
   goals$!: Observable<Goal[]>;
   recs$!: Observable<Recommendation[]>;
 
-
   paginatedGoals: Goal[] = [];
   currentGoalPage = 1;
   goalsPerPage = 4;
   totalGoalPages = 0;
   goalPagesToShow: (number | string)[] = [];
-
 
   paginatedRecs: Recommendation[] = [];
   currentRecPage = 1;
@@ -52,7 +50,8 @@ export class DashboardComponent implements OnInit {
     this.recs$ = this.svc.getRecentRecommendations();
 
     this.goals$.subscribe((goals) => {
-      this.totalGoalPages = Math.ceil(goals.length / this.goalsPerPage);
+      const filtered = goals.filter(g => g.progreso < 100);
+      this.totalGoalPages = Math.ceil(filtered.length / this.goalsPerPage);
       this.updateGoalsPagination();
     });
 
@@ -62,12 +61,12 @@ export class DashboardComponent implements OnInit {
     });
   }
 
-
   updateGoalsPagination(): void {
     this.goals$.subscribe((goals) => {
+      const filteredGoals = goals.filter(g => g.progreso < 100);
       const start = (this.currentGoalPage - 1) * this.goalsPerPage;
       const end = start + this.goalsPerPage;
-      this.paginatedGoals = goals.slice(start, end);
+      this.paginatedGoals = filteredGoals.slice(start, end);
       this.goalPagesToShow = this.generatePageRange(this.currentGoalPage, this.totalGoalPages);
     });
   }
@@ -92,7 +91,6 @@ export class DashboardComponent implements OnInit {
       this.updateGoalsPagination();
     }
   }
-
 
   updateRecsPagination(): void {
     this.recs$.subscribe((recs) => {
@@ -123,7 +121,6 @@ export class DashboardComponent implements OnInit {
       this.updateRecsPagination();
     }
   }
-
 
   private generatePageRange(current: number, total: number): (number | string)[] {
     const delta = 2;

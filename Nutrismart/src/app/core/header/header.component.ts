@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, HostListener, ElementRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, HostListener, ElementRef, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
@@ -13,6 +13,7 @@ import { ProfileService, UserProfileData } from '../../services/profile.service'
   styleUrls: ['./header.component.scss']
 })
 export class HeaderComponent implements OnInit, OnDestroy {
+  @Output() menuToggle = new EventEmitter<void>();
   isUserMenuOpen = false;
   photoURL: string | null = null;
   userName = '';

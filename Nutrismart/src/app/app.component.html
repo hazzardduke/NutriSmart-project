@@ -1,13 +1,11 @@
-
 <ng-container *ngIf="!isSimpleRoute; else simpleTpl">
-
   <ng-container *ngIf="isAuthenticated && isVerified; else authTpl">
-    <div class="wrapper">
-      <nav id="sidebar" class="sidebar">
+    <div class="wrapper" [class.sidebar-active]="sidebarActive">
+      <nav id="sidebar" class="sidebar" [class.active]="sidebarActive">
         <app-sidebar></app-sidebar>
       </nav>
       <div id="content" class="content">
-        <app-header></app-header>
+        <app-header (menuToggle)="toggleSidebar()"></app-header>
         <main class="main-content">
           <router-outlet></router-outlet>
         </main>
@@ -16,7 +14,6 @@
   </ng-container>
 </ng-container>
 
-
 <ng-template #simpleTpl>
   <router-outlet></router-outlet>
 </ng-template>
@@ -24,7 +21,6 @@
 <ng-template #authTpl>
   <router-outlet></router-outlet>
 </ng-template>
-
 
 <ng-template #verifyTpl>
   <div class="verify-notice">

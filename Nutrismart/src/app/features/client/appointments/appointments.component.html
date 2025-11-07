@@ -69,7 +69,6 @@
           <th>Acciones</th>
         </tr>
       </thead>
-
       <tbody>
         <tr
           *ngFor="let c of citasPaginadas"
@@ -78,16 +77,16 @@
             'fila-pasada': esCitaPasada(c) || c.status === 'canceled'
           }"
         >
-          <td>
+          <td data-label="Fecha">
             {{ formateaFecha(c.datetime) }}
             <div *ngIf="esProximaCita(c)" class="proxima-etiqueta">
-             Próxima cita
+              Próxima cita
             </div>
           </td>
 
-          <td>{{ formateaHora(c.datetime) }}</td>
+          <td data-label="Hora">{{ formateaHora(c.datetime) }}</td>
 
-          <td>
+          <td data-label="Estado">
             <span
               [ngClass]="{
                 'estado-confirmed': c.status === 'confirmed',
@@ -105,7 +104,7 @@
             </span>
           </td>
 
-          <td>
+          <td data-label="Acciones">
             <button
               *ngIf="c.status === 'confirmed' && puedeCancelar(c)"
               class="btn-editar"

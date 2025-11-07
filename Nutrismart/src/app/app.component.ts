@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule, NavigationEnd } from '@angular/router';
 import { Subscription, filter } from 'rxjs';
@@ -16,7 +16,7 @@ import Swal from 'sweetalert2';
     RouterModule,
     SidebarComponent,
     HeaderComponent,
-    VerifyEmailRequestComponent,
+    VerifyEmailRequestComponent
   ],
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss']
@@ -25,32 +25,54 @@ export class AppComponent implements OnInit, OnDestroy {
   isAuthenticated = false;
   isVerified = false;
   isSimpleRoute = false;
+  sidebarActive = false;
   private sub = new Subscription();
 
   constructor(private auth: AuthService, private router: Router) {}
 
   ngOnInit() {
     this.showInitialSplash();
-
     this.sub.add(this.auth.isAuthenticated$.subscribe(v => this.isAuthenticated = v));
     this.sub.add(this.auth.user$.subscribe(u => this.isVerified = !!u && u.emailVerified));
-
-
     setTimeout(() => this.updateSimpleRoute(this.router.url), 0);
-
     this.sub.add(
       this.router.events
         .pipe(filter((e): e is NavigationEnd => e instanceof NavigationEnd))
-        .subscribe(e => this.updateSimpleRoute(e.urlAfterRedirects))
+        .subscribe(e => {
+          this.updateSimpleRoute(e.urlAfterRedirects);
+          this.closeSidebarOnMobile();
+        })
     );
-
-
     window.history.pushState(null, '', window.location.href);
     window.addEventListener('popstate', () => {
       if (this.isAuthenticated) {
         window.history.pushState(null, '', window.location.href);
       }
     });
+  }
+
+  toggleSidebar() {
+    this.sidebarActive = !this.sidebarActive;
+  }
+
+  closeSidebarOnMobile() {
+    if (window.innerWidth <= 768) {
+      this.sidebarActive = false;
+    }
+  }
+
+  @HostListener('document:click', ['$event'])
+  handleClickOutside(event: Event) {
+    const sidebar = document.querySelector('.sidebar');
+    const toggleBtn = document.querySelector('.menu-toggle');
+    if (
+      this.sidebarActive &&
+      sidebar &&
+      !sidebar.contains(event.target as Node) &&
+      !toggleBtn?.contains(event.target as Node)
+    ) {
+      this.sidebarActive = false;
+    }
   }
 
   updateSimpleRoute(url: string) {
@@ -60,7 +82,7 @@ export class AppComponent implements OnInit, OnDestroy {
       '/reset-password',
       '/auth-verify',
       '/forgot-password',
-      '/two-factor',
+      '/two-factor'
     ];
     this.isSimpleRoute = simpleRoutes.some(r => url.startsWith(r));
   }
