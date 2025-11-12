@@ -29,7 +29,7 @@ export class LoyaltyCardNutricionistComponent implements OnInit, OnDestroy {
   filterControl = new FormControl('');
   private pageIndex$ = new BehaviorSubject<number>(0);
   pageIndex = 0;
-  pageSize = 10;
+  pageSize = 5;
   filteredOverview$!: Observable<ClientWithStamps[]>;
   pagedOverview$!: Observable<ClientWithStamps[]>;
   totalItems$!: Observable<number>;

@@ -13,10 +13,10 @@ export interface CitaMailData {
 export class EmailService {
   private readonly fnName = 'sendEmail';
 
-  private readonly tplCitaConfirmada  = 'd-90f1443c279a46f296072ebe02991a6f';
-  private readonly tplCitaActualizada = 'd-9e866ddfab5c4885be19bbf850049e48';
-  private readonly tplCitaCancelada   = 'd-13d5552e64f048e7bc65ffc5d3a46e3f';
-  private readonly tplCitaGratis      = 'd-19531c2b76aa4fb6b9fcf99f0f1652ae';
+  private readonly tplCitaConfirmada  = 'd-c7518e7021dc4d2f9b880a91ffcd5989';
+  private readonly tplCitaActualizada = 'd-1019be5753f7415dbb5dee730f2d895c';
+  private readonly tplCitaCancelada   = 'd-f854756ceab94a86a70dcf1d6c688de6';
+  private readonly tplCitaGratis      = 'd-41aa334c905c4ae98bab635da846ab45';
 
   constructor(private functions: Functions) {}
 

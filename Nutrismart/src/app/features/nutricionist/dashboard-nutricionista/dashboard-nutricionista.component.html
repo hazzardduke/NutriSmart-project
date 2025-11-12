@@ -17,9 +17,13 @@
             </thead>
             <tbody>
               <tr *ngFor="let a of appts">
-                <td>{{ a.datetime | date:'dd/MM/yyyy hh:mm a' }}</td>
-                <td>{{ a.clientName }}</td>
-                <td class="status status-{{ a.status }}">
+                <td data-label="Fecha">
+                  {{ a.datetime | date:'dd/MM/yyyy hh:mm a' }}
+                </td>
+                <td data-label="Cliente">
+                  {{ a.clientName }}
+                </td>
+                <td data-label="Estado" class="status status-{{ a.status }}">
                   {{ translateStatus(a.status) }}
                 </td>
               </tr>
@@ -27,6 +31,7 @@
           </table>
         </div>
       </ng-container>
+
       <ng-template #noAppts>
         <p class="no-data">No tienes citas para hoy.</p>
       </ng-template>

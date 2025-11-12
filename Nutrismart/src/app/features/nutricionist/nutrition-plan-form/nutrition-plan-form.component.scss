@@ -22,7 +22,6 @@
   font-weight: 700;
 }
 
-
 .tabs {
   display: flex;
   list-style: none;
@@ -56,28 +55,29 @@
   }
 }
 
-
 .client-select {
   margin-bottom: 1.5rem;
   position: relative;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
+  width: 100%;
 
   label {
     font-weight: 600;
     margin-bottom: 0.5rem;
     color: #205072;
+    font-size: 1rem;
   }
 
   .input {
     width: 100%;
-    max-width: 350px;
     padding: 0.6rem 0.75rem;
     border: 1px solid #ccc;
     border-radius: 8px;
     font-size: 1rem;
     transition: border-color 0.2s, box-shadow 0.2s;
+    box-sizing: border-box;
 
     &:focus {
       outline: none;
@@ -85,24 +85,20 @@
       box-shadow: 0 0 0 2px rgba(161, 192, 55, 0.2);
     }
   }
-}
 
-.dropdown-results {
-  position: absolute;
-  top: 100%;
-  left: 0;
-  width: 100%;
-  max-width: 350px;
-  background: #fff;
-  border: 1px solid #ddd;
-  border-radius: 10px;
-  margin-top: 4px;
-  list-style: none;
-  max-height: 200px;
-  overflow-y: auto;
-  z-index: 20;
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.08);
-  padding: 0;
+  .dropdown-results {
+    width: 100%;
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    margin-top: 4px;
+    list-style: none;
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 20;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.08);
+    padding: 0;
+  }
 }
 
 .dropdown-item {
@@ -128,7 +124,6 @@
   color: #666;
   margin-top: 0.5rem;
 }
-
 
 .table-wrapper {
   overflow-x: auto;
@@ -187,7 +182,6 @@
   }
 }
 
-
 .btn-submit {
   display: inline-flex;
   align-items: center;
@@ -213,7 +207,6 @@
     transform: scale(0.97);
   }
 }
-
 
 .history-tab {
   .history-table {
@@ -283,7 +276,6 @@
     font-size: 1rem;
   }
 }
-
 
 .modal-overlay {
   position: fixed;
@@ -371,18 +363,33 @@
   }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 992px) {
+  .nutrition-plan-card {
+    padding: 1.5rem;
+  }
+
+  .tabs {
+    flex-wrap: wrap;
+
+    button {
+      flex: 1 1 48%;
+      font-size: 0.9rem;
+    }
+  }
+
+  .table-wrapper {
+    overflow-x: auto;
+  }
+
   .table th,
   .table td {
     font-size: 0.85rem;
+    padding: 0.4rem;
   }
 
-  .client-select .input {
-    max-width: 100%;
-  }
-
-  .dropdown-results {
-    max-width: 100%;
+  .btn-submit {
+    width: 100%;
+    font-size: 0.95rem;
   }
 
   .pagination {
@@ -391,7 +398,102 @@
   }
 
   .modal {
-    max-width: 95%;
     padding: 1rem;
+    max-width: 95%;
+  }
+
+  .history-tab {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    .history-table {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+
+      thead {
+        display: none;
+      }
+
+      tbody {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        width: 100%;
+      }
+
+      tbody tr {
+        width: 90%;
+        max-width: 400px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        background: #fff;
+        border: 1px solid #ddd;
+        border-radius: 12px;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        box-shadow: 0 3px 8px rgba(0, 0, 0, 0.08);
+      }
+
+      tbody td {
+        border: none;
+        text-align: center;
+        width: 100%;
+        font-size: 0.9rem;
+        padding: 0.25rem 0;
+
+        &:before {
+          display: none;
+        }
+      }
+
+      tbody td.actions {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.4rem;
+
+        .btn-action {
+          width: 80%;
+          font-size: 0.85rem;
+        }
+      }
+    }
+  }
+}
+
+@media (max-width: 576px) {
+  .nutrition-plan-container {
+    padding: 1rem;
+  }
+
+  .card-title {
+    font-size: 1.3rem;
+  }
+
+  .tabs button {
+    flex: 1 1 100%;
+    font-size: 0.85rem;
+  }
+
+  .btn-submit {
+    padding: 0.7rem;
+    font-size: 0.9rem;
+  }
+
+  .pagination button {
+    flex: 1 1 40%;
+    font-size: 0.85rem;
+  }
+
+  .history-tab .history-table tbody tr {
+    width: 95%;
+  }
+
+  .history-tab .history-table tbody td.actions .btn-action {
+    width: 100%;
   }
 }
