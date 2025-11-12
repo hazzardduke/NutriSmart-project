@@ -41,15 +41,15 @@ import { NutriScheduleComponent } from './features/nutricionist/nutri-schedule/n
 import { NutritionPlanFormComponent } from './features/nutricionist/nutrition-plan-form/nutrition-plan-form.component';
 import { LoyaltyCardNutricionistComponent } from './features/nutricionist/loyalty-card-nutricionist/loyalty-card-nutricionist.component';
 import { AdminClientsComponent } from './features/admin/admin-clients/admin-clients.component';
+import { VerifyEmailRequestComponent } from './core/verify-email-request/verify-email-request.component';
 
 export const routes: Routes = [
 
   { path: 'login', component: LoginComponent, canActivate: [LoginRedirectGuard] },
   { path: 'register', component: RegisterComponent, canActivate: [LoginRedirectGuard] },
   { path: 'reset-password', component: ResetPasswordRequestComponent, canActivate: [LoginRedirectGuard] },
-
-  // Doble factor
   { path: 'auth-verify', component: AuthVerifyComponent, canActivate: [twoFactorGuard] },
+  { path: 'verify-email', component: VerifyEmailRequestComponent },
 
 
   {

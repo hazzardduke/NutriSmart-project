@@ -23,6 +23,13 @@ export class ChangePasswordComponent {
   showNew = signal(false);
   showConfirm = signal(false);
 
+  requisitos = signal({
+    mayuscula: false,
+    numero: false,
+    especial: false,
+    longitud: false
+  });
+
   form: FormGroup = this.fb.group({
     currentPassword: ['', [Validators.required, Validators.minLength(6)]],
     newPassword: ['', [Validators.required, Validators.minLength(8)]],
@@ -53,10 +60,26 @@ export class ChangePasswordComponent {
     };
   }
 
+  validarPasswordTiempoReal() {
+    const p = this.f['newPassword'].value || '';
+    this.requisitos.set({
+      mayuscula: /[A-Z]/.test(p),
+      numero: /\d/.test(p),
+      especial: /[!@#$%^&*(),.?":{}|<>]/.test(p),
+      longitud: p.length >= 8
+    });
+  }
+
   async onSubmit() {
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       Swal.fire('Campos incompletos', 'Revisá los errores del formulario.', 'warning');
+      return;
+    }
+
+    const req = this.requisitos();
+    if (!(req.mayuscula && req.numero && req.especial && req.longitud)) {
+      Swal.fire('Contraseña no válida', 'Debes cumplir todos los requisitos de seguridad.', 'error');
       return;
     }
 
@@ -113,6 +136,7 @@ export class ChangePasswordComponent {
     } finally {
       this.loading.set(false);
       this.form.reset();
+      this.requisitos.set({ mayuscula: false, numero: false, especial: false, longitud: false });
     }
   }
 

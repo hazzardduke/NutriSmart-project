@@ -25,6 +25,12 @@ export class RegisterComponent {
   };
 
   maxDate: string = '';
+  requisitos = {
+    mayuscula: false,
+    numero: false,
+    especial: false,
+    longitud: false
+  };
 
   constructor(private auth: AuthService, private router: Router) {
     const hoy = new Date();
@@ -41,7 +47,45 @@ export class RegisterComponent {
     }
   }
 
+  soloLetras(event: Event) {
+    const input = event.target as HTMLInputElement;
+    let valor = input.value.replace(/[^a-zA-ZÀ-ÿ\u00f1\u00d1\s]/g, '');
+    valor = valor
+      .toLowerCase()
+      .replace(/(^\w{1})|(\s+\w{1})/g, l => l.toUpperCase());
+    input.value = valor;
+    const name = input.getAttribute('name');
+    if (name && this.form.hasOwnProperty(name)) {
+      (this.form as any)[name] = valor;
+    }
+  }
+
+  formatoDireccion(event: Event) {
+    const input = event.target as HTMLInputElement;
+    let valor = input.value.replace(/[^a-zA-Z0-9À-ÿ\u00f1\u00d1\s#\-,.]/g, '');
+    valor = valor
+      .toLowerCase()
+      .replace(/(^\w{1})|(\s+\w{1})/g, l => l.toUpperCase());
+    input.value = valor;
+    const name = input.getAttribute('name');
+    if (name && this.form.hasOwnProperty(name)) {
+      (this.form as any)[name] = valor;
+    }
+  }
+
+  validarPasswordTiempoReal() {
+    const p = this.form.password || '';
+    this.requisitos = {
+      mayuscula: /[A-Z]/.test(p),
+      numero: /\d/.test(p),
+      especial: /[!@#$%^&*(),.?":{}|<>]/.test(p),
+      longitud: p.length >= 8
+    };
+  }
+
   registrar(registroForm: NgForm) {
+    const { mayuscula, numero, especial, longitud } = this.requisitos;
+
     if (!registroForm.valid) {
       Swal.fire({
         icon: 'warning',
@@ -52,11 +96,28 @@ export class RegisterComponent {
       return;
     }
 
+    if (!(mayuscula && numero && especial && longitud)) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Contraseña no válida',
+        html: `
+          <p>Debe cumplir con los siguientes requisitos:</p>
+          <ul style="text-align:left; margin-left:30px;">
+            <li>Al menos una mayúscula</li>
+            <li>Al menos un número</li>
+            <li>Al menos un carácter especial</li>
+            <li>Mínimo 8 caracteres</li>
+          </ul>
+        `,
+        confirmButtonColor: '#d9534f'
+      });
+      return;
+    }
+
     const profile: NewUserProfile = {
       ...this.form,
       role: 'cliente'
     };
-
 
     Swal.fire({
       title: 'Creando cuenta...',
@@ -72,14 +133,10 @@ export class RegisterComponent {
     this.auth.register(profile, this.form.password)
       .then(() => {
         Swal.close();
-
         Swal.fire({
           icon: 'success',
           title: 'Cuenta creada correctamente',
-          html: `
-            <p>Por favor verifica tu correo electrónico para activar tu cuenta.</p>
-
-          `,
+          html: `<p>Por favor verifica tu correo electrónico para activar tu cuenta.</p>`,
           confirmButtonColor: '#a1c037'
         }).then(() => {
           this.router.navigateByUrl('/verify-email');
@@ -87,48 +144,28 @@ export class RegisterComponent {
       })
       .catch(err => {
         Swal.close();
-
-        console.error('Error completo de Firebase:', err);
-        let titulo = 'Error al registrar';
         let mensaje = '';
-        let codigo = err?.code || 'desconocido';
-
-        if (codigo === 'desconocido' && err?.message?.includes('(auth/')) {
-          const match = err.message.match(/\(auth\/([^)]+)\)/);
-          if (match && match[1]) codigo = 'auth/' + match[1];
-        }
-
-        switch (codigo) {
+        switch (err?.code) {
           case 'auth/email-already-in-use':
-            mensaje = 'Este correo ya está registrado. Intenta iniciar sesión o usa otro correo.';
+            mensaje = 'Este correo ya está registrado.';
             break;
           case 'auth/invalid-email':
             mensaje = 'El formato del correo electrónico no es válido.';
             break;
           case 'auth/weak-password':
-            mensaje = 'La contraseña es demasiado débil. Usa al menos 8 caracteres.';
-            break;
-          case 'auth/missing-email':
-            mensaje = 'Debes ingresar un correo electrónico.';
+            mensaje = 'La contraseña es demasiado débil.';
             break;
           case 'auth/network-request-failed':
             mensaje = 'Error de conexión. Verifica tu red e inténtalo de nuevo.';
-            break;
-          case 'auth/internal-error':
-            mensaje = 'Error interno del servidor. Intenta nuevamente en unos minutos.';
             break;
           default:
             mensaje = err?.message || 'Ocurrió un error al crear la cuenta.';
             break;
         }
-
         Swal.fire({
           icon: 'error',
-          title: titulo,
-          html: `
-            <p style="font-weight: 500; color:#333;">${mensaje}</p>
-
-          `,
+          title: 'Error al registrar',
+          html: `<p>${mensaje}</p>`,
           confirmButtonColor: '#d9534f'
         });
       });
