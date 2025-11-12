@@ -1,0 +1,44 @@
+.action-info,
+.action-error {
+  max-width: 480px;
+  margin: 40px auto;
+  padding: 30px;
+  background: #fff;
+  border-radius: 20px;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+  text-align: center;
+  font-family: 'Roboto', sans-serif;
+
+  img {
+    width: 80px;
+    margin-bottom: 10px;
+  }
+
+  h2 {
+    font-size: 1.4rem;
+    color: #111827;
+    font-weight: 700;
+    margin-bottom: 0.6rem;
+  }
+
+  p {
+    color: #6b7280;
+    margin-bottom: 1.2rem;
+  }
+
+  .btn-primary {
+    display: inline-block;
+    background: #a1c037;
+    color: #fff;
+    padding: 12px 22px;
+    border-radius: 8px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: background 0.2s ease;
+
+    &:hover {
+      background: #b5d44d;
+    }
+  }
+}

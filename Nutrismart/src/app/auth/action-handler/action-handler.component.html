@@ -1,0 +1,20 @@
+<ng-container [ngSwitch]="mode">
+  <app-reset-password
+    *ngSwitchCase="'resetPassword'"
+    [attr.data-oobCode]="oobCode">
+  </app-reset-password>
+
+  <div *ngSwitchCase="'verifyEmail'" class="action-info">
+    <img src="assets/images/logontg.png" alt="Nutrition To Go" />
+    <h2>Verificación de correo</h2>
+    <p>Tu dirección de correo ha sido verificada exitosamente.</p>
+    <a routerLink="/login" class="btn-primary">Iniciar sesión</a>
+  </div>
+
+  <div *ngSwitchDefault class="action-error">
+    <img src="assets/images/logontg.png" alt="Nutrition To Go" />
+    <h2>Enlace inválido</h2>
+    <p>El enlace ya no es válido o expiró. Intentá nuevamente.</p>
+    <a routerLink="/forgot-password" class="btn-primary">Volver</a>
+  </div>
+</ng-container>

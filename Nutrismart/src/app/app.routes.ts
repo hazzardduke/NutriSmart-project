@@ -9,49 +9,45 @@ import { LoginRedirectGuard } from './guards/login-redirect.guard';
 // Core
 import { LoginComponent } from './core/login/login.component';
 import { RegisterComponent } from './core/register/register.component';
-
 import { ChangePasswordComponent } from './core/changepassword/changepassword.component';
 import { AuthVerifyComponent } from './core/auth-verify/auth-verify.component';
 
 // Cliente
-
+import { DashboardComponent } from './features/client/dashboard/dashboard.component';
 import { PersonalrecordComponent } from './features/client/personalrecord/personalrecord.component';
 import { AppointmentsComponent } from './features/client/appointments/appointments.component';
-
 import { ClientNutritionPlansComponent } from './features/client/client-nutrition-plans/client-nutrition-plans.component';
-
-// Nutricionista
-
-
-
-
-
-
-
-// Admin
-
-import { DashboardComponent } from './features/client/dashboard/dashboard.component';
 import { GoalsComponent } from './features/client/goals/goals.component';
 import { LoyaltyCardClientComponent } from './features/client/loyalty-card-client/loyalty-card-client.component';
-import { ResetPasswordRequestComponent } from './core/reset-password-request/reset-password-request.component';
-import { AccountComponent } from './features/nutricionist/account/account.component';
+
+// Nutricionista
 import { DashboardNutricionistaComponent } from './features/nutricionist/dashboard-nutricionista/dashboard-nutricionista.component';
-import { GoalsNutricionistComponent } from './features/nutricionist/goals-nutricionist/goals-nutricionist.component';
 import { NutriScheduleComponent } from './features/nutricionist/nutri-schedule/nutri-schedule.component';
 import { NutritionPlanFormComponent } from './features/nutricionist/nutrition-plan-form/nutrition-plan-form.component';
+import { GoalsNutricionistComponent } from './features/nutricionist/goals-nutricionist/goals-nutricionist.component';
+import { AccountComponent } from './features/nutricionist/account/account.component';
 import { LoyaltyCardNutricionistComponent } from './features/nutricionist/loyalty-card-nutricionist/loyalty-card-nutricionist.component';
+
+// Admin
 import { AdminClientsComponent } from './features/admin/admin-clients/admin-clients.component';
-import { VerifyEmailRequestComponent } from './core/verify-email-request/verify-email-request.component';
+
+// Auth
+import { VerifyEmailRequestComponent } from './auth/verify-email-request/verify-email-request.component';
+import { ForgotPasswordComponent } from './auth/forgot-password/forgot-password.component';
+import { ResetPasswordComponent } from './auth/reset-password/reset-password.component';
+import { ActionHandlerComponent } from './auth/action-handler/action-handler.component';
 
 export const routes: Routes = [
-
+  // ──────────────── PÚBLICAS ────────────────
   { path: 'login', component: LoginComponent, canActivate: [LoginRedirectGuard] },
   { path: 'register', component: RegisterComponent, canActivate: [LoginRedirectGuard] },
-  { path: 'reset-password', component: ResetPasswordRequestComponent, canActivate: [LoginRedirectGuard] },
   { path: 'auth-verify', component: AuthVerifyComponent, canActivate: [twoFactorGuard] },
   { path: 'verify-email', component: VerifyEmailRequestComponent },
+  { path: 'forgot-password', component: ForgotPasswordComponent },
+  { path: 'reset-password', component: ResetPasswordComponent },
+  { path: '__/auth/action', component: ActionHandlerComponent },
 
-
+  // ──────────────── PRIVADAS ────────────────
   {
     path: '',
     canActivate: [authGuard],
@@ -150,5 +146,6 @@ export const routes: Routes = [
     ]
   },
 
+  // ──────────────── 404 ────────────────
   { path: '**', redirectTo: 'login' }
 ];

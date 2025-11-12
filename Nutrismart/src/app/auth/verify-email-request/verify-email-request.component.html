@@ -1,0 +1,28 @@
+<div class="verify-wrapper" [class.loading]="loading()">
+  <div class="verify-card">
+    <img src="assets/images/logontg.png" alt="Nutrition To Go" class="logo" />
+
+    <h2>Verifica tu correo</h2>
+    <p *ngIf="!verified()">
+      Hemos enviado un enlace de confirmación a <strong>{{ email() }}</strong>.
+      Revisa tu bandeja de entrada y hacé clic en el enlace para activar tu cuenta.
+    </p>
+
+    <p *ngIf="verified()">Tu correo ya está verificado. Podés iniciar sesión.</p>
+
+    <button *ngIf="!verified()" class="btn-resend" (click)="resend()" [disabled]="loading()">
+      {{ loading() ? 'Enviando...' : 'Reenviar correo de verificación' }}
+    </button>
+
+    <div *ngIf="message()" class="message">{{ message() }}</div>
+    <div *ngIf="error()" class="error">{{ error() }}</div>
+
+    <div class="verify-footer">
+      <a (click)="goToLogin()" class="login-link">Volver al login</a>
+    </div>
+  </div>
+
+  <div class="overlay" *ngIf="loading()">
+    <div class="spinner"></div>
+  </div>
+</div>

@@ -1,8 +1,8 @@
 @use 'sass:color';
 
 $verde-oliva: #a1c037;
-$naranja:     #FF6600;
-$gris-texto:  #6b6b6b;
+$naranja: #ff6600;
+$gris-texto: #6b6b6b;
 
 .verify-wrapper {
   display: flex;
@@ -11,26 +11,59 @@ $gris-texto:  #6b6b6b;
   min-height: 100vh;
   background: #f4f4f4;
   padding: 1rem;
+  font-family: 'Roboto', sans-serif;
+  position: relative;
+
+  .overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(255, 255, 255, 0.6);
+    display: grid;
+    place-items: center;
+    border-radius: 12px;
+  }
+
+  .spinner {
+    width: 30px;
+    height: 30px;
+    border: 3px solid rgba(0, 0, 0, 0.1);
+    border-top-color: $verde-oliva;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
 }
 
 .verify-card {
   background: white;
   border-radius: 12px;
   padding: 2rem;
-  box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
   max-width: 400px;
   width: 100%;
+  text-align: center;
+  position: relative;
+
+  .logo {
+    width: 90px;
+    margin-bottom: 1rem;
+  }
 
   h2 {
-    margin-bottom: 1rem;
+    margin-bottom: 0.5rem;
     color: #3e372d;
-    text-align: center;
+    font-weight: 700;
   }
 
   p {
     color: $gris-texto;
-    margin-bottom: 1.5rem;
-    text-align: center;
+    margin-bottom: 1.2rem;
+    line-height: 1.4;
   }
 
   .btn-resend {
@@ -42,31 +75,39 @@ $gris-texto:  #6b6b6b;
     border: none;
     border-radius: 8px;
     cursor: pointer;
-    transition: background 0.2s ease;
-    margin-bottom: 1rem;
+    transition: background 0.2s ease, transform 0.1s ease;
 
-    &:hover {
+    &:hover:not(:disabled) {
       background: color.adjust($naranja, $lightness: -10%);
+    }
+
+    &:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    &:active {
+      transform: translateY(1px);
     }
   }
 
   .message {
     color: $verde-oliva;
     text-align: center;
-    margin-bottom: 1rem;
+    margin-top: 1rem;
     font-weight: 500;
   }
 
   .error {
     color: #d9534f;
     text-align: center;
-    margin-bottom: 1rem;
+    margin-top: 1rem;
     font-weight: bold;
   }
 
   .verify-footer {
     text-align: center;
-    margin-top: 1rem;
+    margin-top: 1.5rem;
 
     .login-link {
       color: $verde-oliva;
