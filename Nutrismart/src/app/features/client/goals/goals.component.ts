@@ -3,12 +3,15 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Subscription } from 'rxjs';
 import Swal from 'sweetalert2';
-import { AuthService } from '../../../services/auth.service';
+
 import {
   GoalsService,
   Goal,
-  Recommendation
+  Recommendation,
+  GoalStatus
 } from '../../../services/goals.service';
+
+import { AuthService } from '../../../services/auth.service';
 
 @Component({
   selector: 'app-goals',
@@ -19,13 +22,15 @@ import {
   styleUrls: ['./goals.component.scss']
 })
 export class GoalsComponent implements OnInit, OnDestroy {
+
   tab: 'definir' | 'en-progreso' | 'historico' = 'definir';
   objetivos: Goal[] = [];
+
   mesesOptions = [1, 2, 3, 4, 5, 6];
   nuevoObjetivo = { tipo: '', meta: '', meses: null as number | null };
+
   showPopup = false;
   mensajeService = '';
-
 
   itemsPerPage = 5;
 
@@ -34,12 +39,10 @@ export class GoalsComponent implements OnInit, OnDestroy {
   objetivosProgresoPaginados: Goal[] = [];
   pagesProgreso: (number | string)[] = [];
 
-
   currentPageHistorico = 1;
   totalPagesHistorico = 1;
   objetivosHistoricoPaginados: Goal[] = [];
   pagesHistorico: (number | string)[] = [];
-
 
   selectedRecs: Recommendation[] = [];
   showRecModal = false;
@@ -69,19 +72,42 @@ export class GoalsComponent implements OnInit, OnDestroy {
     this.subs.unsubscribe();
   }
 
+  private async moverVencidos(): Promise<void> {
+    const hoy = new Date().toISOString().split('T')[0];
+
+    const vencidos = this.objetivos.filter(g =>
+      g.estado === 'en progreso' && g.fecha < hoy
+    );
+
+    for (const g of vencidos) {
+      await this.goalsSvc.updateGoal(this.uid, g.id!, {
+        estado: 'completado',
+        progreso: 0
+      });
+    }
+  }
+
   private loadGoals(): void {
     this.subs.add(
-      this.goalsSvc.getGoals(this.uid).subscribe(list => {
+      this.goalsSvc.getGoals(this.uid).subscribe(async (list: Goal[]) => {
         this.objetivos = list;
+
+        await this.moverVencidos();
+
+        this.objetivos = await this.goalsSvc.getGoalsOnce(this.uid);
+
         this.updatePaginationProgreso();
         this.updatePaginationHistorico();
       })
     );
   }
 
-
   get objetivosEnProgreso(): Goal[] {
     return this.objetivos.filter(g => g.estado === 'en progreso');
+  }
+
+  get objetivosCompletados(): Goal[] {
+    return this.objetivos.filter(g => g.estado === 'completado');
   }
 
   private updatePaginationProgreso(): void {
@@ -107,15 +133,10 @@ export class GoalsComponent implements OnInit, OnDestroy {
   }
 
   goToPageProgreso(page: number | string): void {
-    if (typeof page === 'number' && page >= 1 && page <= this.totalPagesProgreso) {
+    if (typeof page === 'number') {
       this.currentPageProgreso = page;
       this.updatePaginationProgreso();
     }
-  }
-
-
-  get objetivosCompletados(): Goal[] {
-    return this.objetivos.filter(g => g.estado === 'completado');
   }
 
   private updatePaginationHistorico(): void {
@@ -141,48 +162,45 @@ export class GoalsComponent implements OnInit, OnDestroy {
   }
 
   goToPageHistorico(page: number | string): void {
-    if (typeof page === 'number' && page >= 1 && page <= this.totalPagesHistorico) {
+    if (typeof page === 'number') {
       this.currentPageHistorico = page;
       this.updatePaginationHistorico();
     }
   }
 
-
   private buildPages(current: number, total: number): (number | string)[] {
     const visible = 7;
     const range: (number | string)[] = [];
+
     if (total <= visible) {
       for (let i = 1; i <= total; i++) range.push(i);
     } else {
       const left = Math.max(2, current - 2);
       const right = Math.min(total - 1, current + 2);
+
       range.push(1);
       if (left > 2) range.push('...');
       for (let i = left; i <= right; i++) range.push(i);
       if (right < total - 1) range.push('...');
       range.push(total);
     }
+
     return range;
   }
-
 
   guardarObjetivo(): void {
     if (!this.nuevoObjetivo.tipo || !this.nuevoObjetivo.meta || this.nuevoObjetivo.meses == null) {
       return this.alert('Por favor completa todos los campos.');
     }
-    const m = this.nuevoObjetivo.meses;
-    if (isNaN(m) || m < 1 || m > 6) {
-      return this.alert('Selecciona un número válido de meses.');
-    }
 
-    const futura = this.addMonths(new Date(), m);
+    const futura = this.addMonths(new Date(), this.nuevoObjetivo.meses);
     const isoDate = futura.toISOString().split('T')[0];
-    const toSave: Omit<Goal, 'id' | 'createdAt'> = {
+
+    const toSave = {
       tipo: this.nuevoObjetivo.tipo,
       meta: this.nuevoObjetivo.meta,
       fecha: isoDate,
-      progreso: 0,
-      estado: 'en progreso'
+      estado: 'en progreso' as GoalStatus
     };
 
     this.goalsSvc.addGoal(this.uid, toSave)
@@ -205,19 +223,19 @@ export class GoalsComponent implements OnInit, OnDestroy {
           icon: 'error',
           title: 'Error',
           text: 'No se pudo crear el objetivo.',
-          background: '#fafafa',
-          confirmButtonColor: '#dc3545'
+          confirmButtonColor: '#dc3545',
+          background: '#fafafa'
         });
       });
   }
 
-
   abrirRecs(goal: Goal): void {
     this.currentGoalTipo = goal.tipo;
     this.currentGoalMeta = goal.meta;
+
     this.subs.add(
       this.goalsSvc.getRecommendations(this.uid, goal.id!)
-        .subscribe(recs => {
+        .subscribe((recs: Recommendation[]) => {
           this.selectedRecs = recs;
           this.showRecModal = true;
         })
@@ -230,13 +248,17 @@ export class GoalsComponent implements OnInit, OnDestroy {
   }
 
   closePopup(): void {
-    this.showPopup = false;
-  }
+  this.showPopup = false;
+}
+
 
   private alert(msg: string): void {
     this.mensajeService = msg;
     this.showPopup = true;
-    setTimeout(() => this.closePopup(), 4000);
+
+    setTimeout(() => {
+      this.showPopup = false;
+    }, 4000);
   }
 
   private addMonths(date: Date, months: number): Date {

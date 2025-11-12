@@ -8,7 +8,8 @@ import {
   deleteDoc,
   doc,
   query,
-  orderBy
+  orderBy,
+  getDocs
 } from '@angular/fire/firestore';
 import { Observable } from 'rxjs';
 
@@ -36,14 +37,24 @@ export interface Recommendation {
 export class GoalsService {
   private fs = inject(Firestore);
 
-
   getGoals(uid: string): Observable<Goal[]> {
     const col = collection(this.fs, `users/${uid}/goals`);
     const q = query(col, orderBy('createdAt', 'desc'));
     return collectionData(q, { idField: 'id' }) as Observable<Goal[]>;
   }
 
-  addGoal(uid: string, goal: Omit<Goal, 'id' | 'createdAt'>): Promise<void> {
+  async getGoalsOnce(uid: string): Promise<Goal[]> {
+    const snap = await getDocs(collection(this.fs, `users/${uid}/goals`));
+    return snap.docs.map(d => ({
+      id: d.id,
+      ...(d.data() as Goal)
+    }));
+  }
+
+  addGoal(
+    uid: string,
+    goal: Omit<Goal, 'id' | 'createdAt' | 'progreso'>
+  ): Promise<void> {
     const col = collection(this.fs, `users/${uid}/goals`);
     return addDoc(col, {
       ...goal,
@@ -53,14 +64,10 @@ export class GoalsService {
     }).then(() => {});
   }
 
-
   updateGoal(uid: string, id: string, data: Partial<Goal>): Promise<void> {
     const ref = doc(this.fs, `users/${uid}/goals/${id}`);
     return updateDoc(ref, data);
   }
-
-
-
 
   getRecommendations(uid: string, goalId: string): Observable<Recommendation[]> {
     const recCol = collection(

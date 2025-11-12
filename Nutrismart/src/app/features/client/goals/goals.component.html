@@ -7,9 +7,11 @@
     <button [class.active]="tab==='historico'" (click)="tab='historico'">Histórico</button>
   </div>
 
+  <!-- ========================= DEFINIR OBJETIVO ========================= -->
   <section *ngIf="tab==='definir'" class="tab-content">
     <form (ngSubmit)="guardarObjetivo()" class="form-section">
       <h2 class="section-title">Definir Objetivo Nutricional</h2>
+
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div>
           <label for="tipo">Tipo de Objetivo</label>
@@ -23,10 +25,12 @@
             <option>Otro</option>
           </select>
         </div>
+
         <div>
           <label for="meta">Meta (porcentaje o cantidad)</label>
           <input id="meta" class="input" [(ngModel)]="nuevoObjetivo.meta" name="meta" required />
         </div>
+
         <div>
           <label for="meses">Meses Estimados</label>
           <select id="meses" class="input" [(ngModel)]="nuevoObjetivo.meses" name="meses" required>
@@ -35,10 +39,12 @@
           </select>
         </div>
       </div>
+
       <div class="actions-form">
         <button type="submit" class="btn-save">Guardar Objetivo</button>
       </div>
     </form>
+
     <div class="popup" *ngIf="showPopup">
       <div class="popup-content">
         {{ mensajeService }}
@@ -47,28 +53,36 @@
     </div>
   </section>
 
+  <!-- ========================= EN PROGRESO ========================= -->
   <section *ngIf="tab==='en-progreso'" class="tab-content">
     <h2 class="section-title mb-4">Objetivos en Progreso</h2>
+
     <ng-container *ngIf="objetivosProgresoPaginados.length; else sinProgreso">
+
       <div class="objetivo-card" *ngFor="let obj of objetivosProgresoPaginados">
         <div class="card-header">
           <h4>{{ obj.tipo }}</h4>
         </div>
+
         <p class="text-sm">Meta: {{ obj.meta }}</p>
         <p class="text-sm">Límite: {{ obj.fecha | date:'dd-MM-yyyy' }}</p>
+
         <div class="progress-display">
           <div class="progress-bar-wrapper">
             <div class="indicator" [style.width.%]="obj.progreso"></div>
           </div>
           <span class="progress-text">{{ obj.progreso }}%</span>
         </div>
+
         <div class="actions">
           <button class="btn-recomendations" (click)="abrirRecs(obj)">Recomendaciones</button>
         </div>
       </div>
 
+      <!-- PAGINACIÓN -->
       <div class="pagination" *ngIf="totalPagesProgreso > 1">
         <button class="prev" (click)="prevProgreso()" [disabled]="currentPageProgreso === 1">Anterior</button>
+
         <ng-container *ngFor="let p of pagesProgreso">
           <button
             *ngIf="p !== '...'; else dotsP"
@@ -76,28 +90,47 @@
             [class.active]="currentPageProgreso === p">
             {{ p }}
           </button>
+
           <ng-template #dotsP>
             <button class="ellipsis" disabled>...</button>
           </ng-template>
         </ng-container>
+
         <button class="next" (click)="nextProgreso()" [disabled]="currentPageProgreso === totalPagesProgreso">Siguiente</button>
       </div>
+
     </ng-container>
+
     <ng-template #sinProgreso>
       <p class="text-center text-gray-mid">No hay objetivos en progreso.</p>
     </ng-template>
   </section>
 
+  <!-- ========================= HISTÓRICO ========================= -->
   <section *ngIf="tab==='historico'" class="tab-content">
     <h2 class="section-title mb-4">Histórico de Objetivos Completados</h2>
+
     <ng-container *ngIf="objetivosHistoricoPaginados.length; else sinHistorico">
+
       <div class="hist-card" *ngFor="let obj of objetivosHistoricoPaginados">
         <h4 class="hist-header">{{ obj.tipo }} (Meta: {{ obj.meta }})</h4>
-        <p class="hist-date">Fecha: {{ obj.fecha | date:'dd-MM-yyyy' }}</p>
+
+        <p class="hist-date">Fecha límite: {{ obj.fecha | date:'dd-MM-yyyy' }}</p>
+
+        <!-- ===================== ESTADO NUEVO ===================== -->
+        <p class="hist-status"
+           [class.comp]="obj.estado === 'completado'"
+           [class.venc]="obj.estado !== 'completado'">
+          Estado:
+          <strong>
+            {{ obj.estado === 'completado' ? 'Completado' : 'Vencido' }}
+          </strong>
+        </p>
       </div>
 
       <div class="pagination" *ngIf="totalPagesHistorico > 1">
         <button class="prev" (click)="prevHistorico()" [disabled]="currentPageHistorico === 1">Anterior</button>
+
         <ng-container *ngFor="let p of pagesHistorico">
           <button
             *ngIf="p !== '...'; else dotsH"
@@ -105,32 +138,40 @@
             [class.active]="currentPageHistorico === p">
             {{ p }}
           </button>
+
           <ng-template #dotsH>
             <button class="ellipsis" disabled>...</button>
           </ng-template>
         </ng-container>
+
         <button class="next" (click)="nextHistorico()" [disabled]="currentPageHistorico === totalPagesHistorico">Siguiente</button>
       </div>
+
     </ng-container>
+
     <ng-template #sinHistorico>
       <p class="text-center text-gray-mid">No tienes objetivos completados.</p>
     </ng-template>
   </section>
 </div>
 
+<!-- ================= MODAL DE RECOMENDACIONES ================= -->
 <div class="modal-bg" *ngIf="showRecModal">
   <div class="rec-modal">
     <h3 class="rec-title">Recomendaciones</h3>
     <p class="rec-subtitle">Para: {{ currentGoalTipo }} (Meta: {{ currentGoalMeta }})</p>
+
     <ng-container *ngIf="selectedRecs.length; else noRecs">
       <div class="rec-card" *ngFor="let r of selectedRecs">
         <p class="rec-date">Fecha: {{ r.fecha | date:'dd-MM-yyyy' }}</p>
         <p class="rec-text">{{ r.comentario }}</p>
       </div>
     </ng-container>
+
     <ng-template #noRecs>
       <div class="no-recs">No hay recomendaciones para este objetivo.</div>
     </ng-template>
+
     <div class="modal-actions">
       <button class="btn-close" (click)="cerrarRecs()">Cerrar</button>
     </div>

@@ -217,6 +217,8 @@ select:focus {
   }
 }
 
+
+
 .hist-card {
   border-left: 4px solid #ff6600;
 }
@@ -231,6 +233,24 @@ select:focus {
   font-size: 0.9rem;
   color: #6b7785;
 }
+
+
+
+.hist-status {
+  margin-top: 0.35rem;
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+
+.hist-status.comp {
+  color: #1c7c1c;
+}
+
+.hist-status.venc {
+  color: #b01313;
+}
+
+
 
 .modal-bg {
   position: fixed;
@@ -312,6 +332,7 @@ select:focus {
 }
 
 
+
 .pagination {
   display: flex;
   justify-content: center;
@@ -374,4 +395,3 @@ select:focus {
 @media (min-width: 768px) {
   .tab-content { padding: 1.75rem; }
 }
-
