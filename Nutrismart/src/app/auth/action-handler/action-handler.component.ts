@@ -62,7 +62,6 @@ export class ActionHandlerComponent {
     try {
       await applyActionCode(this.auth, oobCode);
 
-      // 🚀 ALERTA QUE SE MANTIENE HASTA QUE EL USUARIO HAGA CLIC
       await Swal.fire({
         icon: 'success',
         title: 'Correo verificado correctamente',

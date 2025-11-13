@@ -76,7 +76,6 @@
   <button (click)="nextPage()" [disabled]="currentPage === totalPages()">»</button>
 </div>
 
-<!-- ===================== MODAL ===================== -->
 <div class="modal-overlay" *ngIf="isModalOpen" (click)="closeModal()">
   <div class="modal-content" (click)="$event.stopPropagation()">
     <button class="modal-close" (click)="closeModal()">

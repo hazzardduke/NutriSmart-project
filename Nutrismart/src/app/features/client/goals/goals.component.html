@@ -7,7 +7,6 @@
     <button [class.active]="tab==='historico'" (click)="tab='historico'">Histórico</button>
   </div>
 
-  <!-- ========================= DEFINIR OBJETIVO ========================= -->
   <section *ngIf="tab==='definir'" class="tab-content">
     <form (ngSubmit)="guardarObjetivo()" class="form-section">
       <h2 class="section-title">Definir Objetivo Nutricional</h2>
@@ -53,7 +52,7 @@
     </div>
   </section>
 
-  <!-- ========================= EN PROGRESO ========================= -->
+
   <section *ngIf="tab==='en-progreso'" class="tab-content">
     <h2 class="section-title mb-4">Objetivos en Progreso</h2>
 
@@ -79,7 +78,6 @@
         </div>
       </div>
 
-      <!-- PAGINACIÓN -->
       <div class="pagination" *ngIf="totalPagesProgreso > 1">
         <button class="prev" (click)="prevProgreso()" [disabled]="currentPageProgreso === 1">Anterior</button>
 
@@ -106,7 +104,6 @@
     </ng-template>
   </section>
 
-  <!-- ========================= HISTÓRICO ========================= -->
   <section *ngIf="tab==='historico'" class="tab-content">
     <h2 class="section-title mb-4">Histórico de Objetivos Completados</h2>
 
@@ -117,7 +114,6 @@
 
         <p class="hist-date">Fecha límite: {{ obj.fecha | date:'dd-MM-yyyy' }}</p>
 
-        <!-- ===================== ESTADO NUEVO ===================== -->
         <p class="hist-status"
            [class.comp]="obj.estado === 'completado'"
            [class.venc]="obj.estado !== 'completado'">
@@ -155,7 +151,6 @@
   </section>
 </div>
 
-<!-- ================= MODAL DE RECOMENDACIONES ================= -->
 <div class="modal-bg" *ngIf="showRecModal">
   <div class="rec-modal">
     <h3 class="rec-title">Recomendaciones</h3>

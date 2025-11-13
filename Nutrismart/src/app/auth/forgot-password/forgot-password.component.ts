@@ -35,13 +35,13 @@ export class ForgotPasswordComponent {
     this.loading = true;
 
     try {
-      // 🔍 Verificar si el correo existe en la colección "users"
+
       const usersRef = collection(this.firestore, 'users');
       const q = query(usersRef, where('correo', '==', this.email.toLowerCase()));
       const querySnapshot = await getDocs(q);
 
       if (querySnapshot.empty) {
-        // ❌ El correo no está en la BD
+
         Swal.fire({
           icon: 'error',
           title: 'Correo no encontrado',
@@ -51,7 +51,7 @@ export class ForgotPasswordComponent {
         return;
       }
 
-      // ✅ El correo existe, enviar enlace de restablecimiento
+
       const actionCodeSettings = {
         url: 'https://www.nutritiontogocr.com/__/auth/action',
         handleCodeInApp: true
