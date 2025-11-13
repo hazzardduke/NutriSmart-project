@@ -40,7 +40,7 @@ export const sendEmail = onCall(
     const msg: any = {
       to,
       from: {
-        email: 'nutrismartcr@outlook.com',
+        email: 'no-reply@nutritiontogocr.com',
         name: 'NutriSmart'
       }
     };
